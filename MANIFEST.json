@@ -1,6 +1,6 @@
 {
-  "build_id": "DCM-0.1.5-B20260828-ACTION1",
-  "created_at": "2026-08-28T23:30:16.720494+00:00",
+  "build_id": "DCM-0.1.5-B20260828-ACTION2",
+  "created_at": "2026-08-28T23:36:30.675652+00:00",
   "hash_algorithm": "SHA-256",
   "managed_file_count": 124,
   "managed_files": [
@@ -41,8 +41,8 @@
     },
     {
       "path": "action.yml",
-      "sha256": "067c93b797df1dca674763e716d01c338c6557ca3f685ddcdce1e8e2e7bb607d",
-      "size": 2486
+      "sha256": "b8994f7c77362319b2aa7583c72b4673058540451bfbb636b02233bf0f7efd10",
+      "size": 2392
     },
     {
       "path": "BENCHMARK_REPORT.md",
@@ -56,8 +56,8 @@
     },
     {
       "path": "CHANGELOG.md",
-      "sha256": "1700726db10ba46cc97e90dbcffc261990a370996b768dd7acbd64efb33056fc",
-      "size": 6502
+      "sha256": "15142887fb8f01c12dd7243461f3c9c684b4acb59f243595a95730d8241a205d",
+      "size": 6570
     },
     {
       "path": "CODE_OF_CONDUCT.md",
@@ -216,7 +216,7 @@
     },
     {
       "path": "KNOWN_GOOD_STATE.md",
-      "sha256": "cf4f1bc3b4ee73ce829efe042a1e06f03b141cf940a1c5b36afb761ac03d5003",
+      "sha256": "8553a913f5e36a157927b095f02683050d1f4d1952ac64c32c90fcbaf3ebcd32",
       "size": 2047
     },
     {
@@ -236,13 +236,13 @@
     },
     {
       "path": "PACKAGE_METADATA.json",
-      "sha256": "13a66aac55b8b8bed5499dd4812a38b73a8f22886d68f2c983ce330e8467b28c",
+      "sha256": "5581d9424ee67b2fdf76d6275032801e4a04ef78d312b725ffbc9dec0d872234",
       "size": 1603
     },
     {
       "path": "packages/data_contract_monitor-0.1.5-py3-none-any.whl",
-      "sha256": "d9ae62dd5fc0ed9531f0b770ba2493e377a8e7c189d3c0d8429158d79f86be7c",
-      "size": 63401
+      "sha256": "e535ce802a71db6074837df1d0738a4dfb12c733efc839742aed66bf07184095",
+      "size": 63400
     },
     {
       "path": "pyproject.toml",
@@ -291,7 +291,7 @@
     },
     {
       "path": "SBOM.spdx.json",
-      "sha256": "c707b3f7480d3e6108d2a67c0ea7610b4d9345a2611e1b34735f38a66e781ad0",
+      "sha256": "e133ebb14e7547256044130a48c838955c88aea8b968d93a3b6ba0b9d274c6d4",
       "size": 42543
     },
     {
@@ -326,7 +326,7 @@
     },
     {
       "path": "src/data_contract_monitor/build_info.json",
-      "sha256": "2293f79865101c2c61ef02b1628ebe59fedcb0de590f5ade4d092f7ec1450289",
+      "sha256": "9f9e5a0b0b7f068b32b4c548bb555088398c548b166a91a9d8f5487dd0b6c881",
       "size": 74
     },
     {
@@ -516,8 +516,8 @@
     },
     {
       "path": "tests/test_github_action.py",
-      "sha256": "17efb8991b9fcb62cfed2e80fbd453b16fc9a44307ed93804655c390e92e5665",
-      "size": 1461
+      "sha256": "90753c39af2938d0543e332795a53141be5249cc0f24c360e3f5752e1b149388",
+      "size": 1680
     },
     {
       "path": "tests/test_io_and_profile.py",
@@ -576,7 +576,7 @@
     },
     {
       "path": "tools/build_release.py",
-      "sha256": "357b318057405af5a16356ec508f5b3777bbf81f2a1bc5dfa530d200ee01127e",
+      "sha256": "d57e60bf72de623a7189e6f0010d75a55c0db195036a1aa8f34f0095e368794d",
       "size": 14466
     },
     {
@@ -611,7 +611,7 @@
     },
     {
       "path": "VERIFICATION_REPORT.md",
-      "sha256": "3d8cc13e6c045e85c74baca4265881c6ded8343af8eaac2aee2f8900393a24bc",
+      "sha256": "1f96096bb28c114d3a4674946f3cb573706c5a52df9c87f8c6ec433691fcfc34",
       "size": 5150
     },
     {

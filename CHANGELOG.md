@@ -3,7 +3,7 @@
 ## 0.1.5 — 2026-08-28
 
 - Fixed invalid YAML in the reusable GitHub Action's input descriptions.
-- Made the Action's dependency cache independent of the caller's repository and installed the reviewed dependency lock before the application.
+- Removed the Action's caller-dependent cache setup and installed its reviewed dependency lock before the application. This also avoids a setup-python cache-glob failure when a local Action path contains `/./`.
 - Kept Action runtime output inside the caller's workspace.
 - Added YAML parsing regressions and a real composite-Action CI job covering passing and intentionally failing datasets from a caller without its own Python lockfile.
 

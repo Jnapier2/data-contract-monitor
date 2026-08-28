@@ -1,5 +1,5 @@
 {
-  "build_id": "DCM-0.1.5-B20260828-ACTION1",
+  "build_id": "DCM-0.1.5-B20260828-ACTION2",
   "canonical_export_directory": "exports",
   "copyright": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
   "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
@@ -22,8 +22,8 @@
   "version": "0.1.5",
   "wheel": {
     "path": "packages/data_contract_monitor-0.1.5-py3-none-any.whl",
-    "sha256": "d9ae62dd5fc0ed9531f0b770ba2493e377a8e7c189d3c0d8429158d79f86be7c",
-    "size": 63401
+    "sha256": "e535ce802a71db6074837df1d0738a4dfb12c733efc839742aed66bf07184095",
+    "size": 63400
   },
   "windows_launcher_verification": "Automated CRLF, launch-contract, local-port isolation and exact-service readiness tests; native BAT acceptance is recorded separately with the exact archive receipt"
 }

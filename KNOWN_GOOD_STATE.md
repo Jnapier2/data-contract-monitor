@@ -4,7 +4,7 @@
 
 - Product: Data Contract Monitor
 - Version: 0.1.5
-- Build: `DCM-0.1.5-B20260828-ACTION1`
+- Build: `DCM-0.1.5-B20260828-ACTION2`
 - Channel: portfolio alpha
 - Source checks: recorded in the exact-package qualification receipt; native shutdown acceptance is recorded separately.
 - Acceptance authority: the exact ZIP's checksum and separate qualification receipt, not a version label or an open browser window.

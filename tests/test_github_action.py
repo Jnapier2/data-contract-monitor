@@ -18,7 +18,11 @@ def test_composite_action_is_caller_independent():
     action = yaml.safe_load((ROOT / "action.yml").read_text(encoding="utf-8"))
     assert action["runs"]["using"] == "composite"
     setup, install, validate = action["runs"]["steps"]
-    assert setup["with"]["cache-dependency-path"] == "${{ github.action_path }}/requirements.lock"
+    # A local composite Action can expose /./ in github.action_path. The
+    # setup-python cache glob rejects it, so this portable Action does not
+    # configure a caller-dependent cache; it still installs its own lock.
+    assert "cache" not in setup["with"]
+    assert "cache-dependency-path" not in setup["with"]
     assert 'requirements.lock' in install["run"]
     assert '--no-deps' in install["run"]
     assert validate["env"]["DCM_HOME"] == "${{ github.workspace }}/.dcm/runtime"

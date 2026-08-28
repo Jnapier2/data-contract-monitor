@@ -1,6 +1,6 @@
 # Verification Report — Data Contract Monitor 0.1.5
 
-Build: `DCM-0.1.5-B20260828-ACTION1` · August 28, 2026
+Build: `DCM-0.1.5-B20260828-ACTION2` · August 28, 2026
 
 ## Verified source checks
 
