@@ -1,0 +1,39 @@
+{
+  "approved_by": "Portfolio demonstration baseline",
+  "columns": [
+    {
+      "name": "order_id",
+      "nullable_observed": false,
+      "observed_type": "string"
+    },
+    {
+      "name": "customer_id",
+      "nullable_observed": false,
+      "observed_type": "string"
+    },
+    {
+      "name": "order_date",
+      "nullable_observed": false,
+      "observed_type": "datetime"
+    },
+    {
+      "name": "total_amount",
+      "nullable_observed": false,
+      "observed_type": "number"
+    },
+    {
+      "name": "status",
+      "nullable_observed": false,
+      "observed_type": "string"
+    },
+    {
+      "name": "customer_email",
+      "nullable_observed": false,
+      "observed_type": "string"
+    }
+  ],
+  "created_at": "2026-08-28T00:00:00+00:00",
+  "dataset_name": "customer_orders",
+  "note": "Schema-only example; no source cell values are stored.",
+  "schema_version": "1.0"
+}

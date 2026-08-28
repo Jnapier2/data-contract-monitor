@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install locked dependencies
+        run: |
+          python -m pip install -r requirements.lock
+          python -m pip install -r requirements-test.lock
+          python -m pip install --no-deps -e .
+      - name: Compile Python
+        run: python -m compileall -q src tools tests
+      - name: Run tests
+        run: python -m pytest
+      - name: Run passing demonstration
+        run: data-contract-monitor demo --scenario good --output-dir reports/ci-good
+      - name: Confirm failing demonstration returns contract-failure code
+        shell: bash
+        run: |
+          set +e
+          data-contract-monitor demo --scenario bad --output-dir reports/ci-bad
+          code=$?
+          set -e
+          test "$code" -eq 2
+      - name: Build wheel
+        run: python -m pip wheel --no-deps --no-build-isolation . --wheel-dir dist
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: evidence-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: reports/
+          if-no-files-found: ignore
+
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install frontend toolchain
+        working-directory: frontend
+        run: npm ci
+      - name: Compile TypeScript
+        working-directory: frontend
+        run: npm run build
+      - name: Verify packaged dashboard is synchronized
+        run: |
+          cmp frontend/dist/app.js src/data_contract_monitor/web/app.js

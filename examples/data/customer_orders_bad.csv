@@ -1,0 +1,4 @@
+order_id,customer_id,order_date,total_amount,status,customer_email,customer_ssn
+ORD-1001,CUS-10,2024-01-01T10:00:00Z,49.95,paid,a@example.com,123-45-6789
+ORD-1001,,not-a-date,-12.00,mystery,not-email,000-12-3456
+,CUS-12,2024-01-02T10:00:00Z,unknown,pending,c@example.com,111-22-3333

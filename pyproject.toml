@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=82,<83"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-contract-monitor"
+version = "0.1.4"
+description = "Local-first data contract validation, schema drift monitoring, privacy hints, and CI-ready reports."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+authors = [
+  {name = "Gateway Information Group LLC"}
+]
+keywords = ["data-quality", "data-contracts", "schema-validation", "schema-drift", "csv", "excel", "ci"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Framework :: FastAPI",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Database",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+  "fastapi>=0.115,<1",
+  "httpx>=0.27,<1",
+  "jinja2>=3.1,<4",
+  "openpyxl>=3.1,<4",
+  "pandas>=2.2,<4",
+  "pydantic>=2.10,<3",
+  "python-multipart>=0.0.18,<1",
+  "PyYAML>=6,<7",
+  "rich>=13,<16",
+  "typer>=0.15,<1",
+  "uvicorn>=0.34,<1",
+]
+
+[project.optional-dependencies]
+parquet = ["pyarrow>=18,<25"]
+dev = [
+  "build>=1.2,<2",
+  "mypy>=1.15,<2",
+  "pytest>=8.3,<10",
+  "pytest-cov>=6,<8",
+  "ruff>=0.11,<1",
+]
+
+[project.scripts]
+data-contract-monitor = "data_contract_monitor.cli:main"
+dcm = "data_contract_monitor.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+data_contract_monitor = [
+  "web/*.html",
+  "web/*.css",
+  "web/*.js",
+  "resources/contracts/*.yml",
+  "build_info.json",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-markers"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unused_ignores = true
+plugins = ["pydantic.mypy"]
+
+[tool.coverage.run]
+source = ["data_contract_monitor"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

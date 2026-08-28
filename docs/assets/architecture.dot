@@ -1,0 +1,34 @@
+digraph DataContractMonitor {
+  graph [rankdir=LR, bgcolor="transparent", pad="0.2", nodesep="0.35", ranksep="0.6", fontname="Arial"];
+  node [shape=box, style="rounded,filled", fontname="Arial", fontsize=11, color="#8aa0bc", fillcolor="#f5f8fc", fontcolor="#172033", margin="0.16,0.10"];
+  edge [color="#58789e", penwidth=1.4, arrowsize=0.7];
+
+  Contract [label="YAML contract\nNative + ODCS subset"];
+  Data [label="Dataset\nCSV · Excel · JSON(L) · Parquet"];
+  Baseline [label="Approved\nschema baseline"];
+  Loader [label="Strict contract loader"];
+  Reader [label="Dataset readers"];
+  Profile [label="Aggregate profiler\n+ privacy hints"];
+  Drift [label="Drift comparator"];
+  Engine [label="Shared validation engine", fillcolor="#dbeafe", color="#3971b8", penwidth=2];
+  Result [label="Typed validation result", fillcolor="#e7f7ee", color="#35845b"];
+  CLI [label="CLI + exit codes"];
+  API [label="FastAPI service"];
+  UI [label="TypeScript dashboard"];
+  Reports [label="HTML · JSON\nJUnit · SARIF"];
+  History [label="Compact local history"];
+
+  Contract -> Loader;
+  Data -> Reader;
+  Reader -> Profile;
+  Baseline -> Drift;
+  Loader -> Engine;
+  Profile -> Engine;
+  Drift -> Engine;
+  Engine -> Result;
+  Result -> CLI;
+  Result -> API;
+  API -> UI;
+  Result -> Reports;
+  Result -> History;
+}

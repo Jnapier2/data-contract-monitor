@@ -1,0 +1,68 @@
+domain: commerce
+dataProduct: customer-order-events
+version: 1.0.0
+status: active
+kind: DataContract
+apiVersion: v3.1.0
+description:
+  purpose: Support reliable order operations and finance reporting.
+schema:
+  - id: customer_orders_object
+    name: customer_orders
+    physicalName: customer_orders
+    physicalType: table
+    businessName: Customer Orders
+    description: Customer order events.
+    properties:
+      - id: order_id_property
+        name: order_id
+        physicalName: order_id
+        logicalType: string
+        required: true
+        unique: true
+        primaryKey: true
+        classification: internal
+        quality:
+          - metric: nullValues
+            mustBe: 0
+            severity: critical
+      - id: customer_id_property
+        name: customer_id
+        physicalName: customer_id
+        logicalType: string
+        required: true
+        classification: restricted
+      - id: order_date_property
+        name: order_date
+        physicalName: order_date
+        logicalType: timestamp
+        required: true
+        classification: internal
+      - id: total_amount_property
+        name: total_amount
+        physicalName: total_amount
+        logicalType: number
+        required: true
+        classification: confidential
+      - id: status_property
+        name: status
+        physicalName: status
+        logicalType: string
+        required: true
+        classification: internal
+      - id: email_property
+        name: customer_email
+        physicalName: customer_email
+        logicalType: email
+        required: false
+        classification: restricted
+    quality:
+      - metric: rowCount
+        mustBeGreaterThan: 0
+        severity: error
+        description: Order feed must contain at least one record.
+team:
+  name: data-operations
+  members:
+    - username: data-operations-owner
+      role: Owner

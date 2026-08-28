@@ -1,0 +1,79 @@
+name: Data Contract Monitor
+
+description: Validate a dataset against a version-controlled YAML data contract and publish CI-ready evidence.
+
+author: Gateway Information Group LLC
+
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  contract:
+    description: Path to the YAML data contract, relative to the repository root.
+    required: true
+  data:
+    description: Path to the dataset, relative to the repository root.
+    required: true
+  baseline:
+    description: Optional path to an approved schema baseline.
+    required: false
+    default: ""
+  fail-on:
+    description: Lowest severity that fails the action: warning, error, or critical.
+    required: false
+    default: error
+  formats:
+    description: Comma-separated report formats: html,json,junit,sarif.
+    required: false
+    default: html,json,junit,sarif
+  output-dir:
+    description: Directory for generated evidence.
+    required: false
+    default: .dcm/reports/github-action
+  python-version:
+    description: Python version used by the action.
+    required: false
+    default: "3.13"
+
+outputs:
+  report-directory:
+    description: Directory containing the validation reports.
+    value: ${{ inputs.output-dir }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+
+    - name: Install Data Contract Monitor
+      shell: bash
+      run: python -m pip install "${GITHUB_ACTION_PATH}"
+
+    - name: Validate dataset
+      shell: bash
+      env:
+        DCM_CONTRACT: ${{ inputs.contract }}
+        DCM_DATA: ${{ inputs.data }}
+        DCM_BASELINE: ${{ inputs.baseline }}
+        DCM_FAIL_ON: ${{ inputs.fail-on }}
+        DCM_FORMATS: ${{ inputs.formats }}
+        DCM_OUTPUT_DIR: ${{ inputs.output-dir }}
+      run: |
+        args=(
+          validate
+          --contract "$DCM_CONTRACT"
+          --data "$DCM_DATA"
+          --fail-on "$DCM_FAIL_ON"
+          --formats "$DCM_FORMATS"
+          --output-dir "$DCM_OUTPUT_DIR"
+          --no-history
+        )
+        if [[ -n "$DCM_BASELINE" ]]; then
+          args+=(--baseline "$DCM_BASELINE")
+        fi
+        data-contract-monitor "${args[@]}"

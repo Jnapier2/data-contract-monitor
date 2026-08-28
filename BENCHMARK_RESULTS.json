@@ -1,0 +1,19 @@
+{
+  "captured_at": "2026-08-28T10:08:37.333008+00:00",
+  "columns": 6,
+  "csv_bytes": 9388957,
+  "durations_seconds": [
+    0.474686,
+    0.470189,
+    0.496843
+  ],
+  "median_seconds": 0.474686,
+  "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
+  "processor": "not reported",
+  "python": "3.13.5",
+  "rows": 100000,
+  "rows_per_second_median": 210665.54,
+  "schema_version": "1.0",
+  "scope": "CSV read, aggregate profile, privacy sample, contract checks, SHA-256 hashes, and result construction; report serialization excluded.",
+  "trials": 3
+}

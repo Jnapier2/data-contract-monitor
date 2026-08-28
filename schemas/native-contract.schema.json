@@ -1,0 +1,460 @@
+{
+  "$defs": {
+    "ColumnRule": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_values": {
+          "anyOf": [
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allowed Values"
+        },
+        "classification": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Classification"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "max_length": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Length"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum"
+        },
+        "maximum_age_hours": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum Age Hours"
+        },
+        "min_length": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Length"
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum"
+        },
+        "nullable": {
+          "default": true,
+          "title": "Nullable",
+          "type": "boolean"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "error"
+        },
+        "strict_type": {
+          "default": false,
+          "title": "Strict Type",
+          "type": "boolean"
+        },
+        "type": {
+          "default": "any",
+          "enum": [
+            "any",
+            "string",
+            "integer",
+            "number",
+            "boolean",
+            "date",
+            "datetime",
+            "email",
+            "uuid"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "unique": {
+          "default": false,
+          "title": "Unique",
+          "type": "boolean"
+        }
+      },
+      "title": "ColumnRule",
+      "type": "object"
+    },
+    "DatasetRule": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Column"
+        },
+        "columns": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Columns"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "max_ratio": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Ratio"
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maximum"
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Minimum"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "error"
+        },
+        "then_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Then Column"
+        },
+        "type": {
+          "enum": [
+            "row_count",
+            "unique_combination",
+            "null_ratio",
+            "conditional_not_null"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "when_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When Column"
+        },
+        "when_equals": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "When Equals"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "DatasetRule",
+      "type": "object"
+    },
+    "DatasetSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_extra_columns": {
+          "default": true,
+          "title": "Allow Extra Columns",
+          "type": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "extra_columns_severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "warning"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "owner": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner"
+        },
+        "required_columns": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Required Columns",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "DatasetSpec",
+      "type": "object"
+    },
+    "PrivacySpec": {
+      "additionalProperties": false,
+      "properties": {
+        "allowed_categories": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Categories",
+          "type": "array"
+        },
+        "detect_pii": {
+          "default": true,
+          "title": "Detect Pii",
+          "type": "boolean"
+        },
+        "fail_on_unapproved": {
+          "default": false,
+          "title": "Fail On Unapproved",
+          "type": "boolean"
+        },
+        "severity": {
+          "$ref": "#/$defs/Severity",
+          "default": "warning"
+        }
+      },
+      "title": "PrivacySpec",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "adapter_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Adapter Notes",
+      "type": "array"
+    },
+    "contract_version": {
+      "default": "1.0",
+      "title": "Contract Version",
+      "type": "string"
+    },
+    "dataset": {
+      "$ref": "#/$defs/DatasetSpec"
+    },
+    "dataset_rules": {
+      "items": {
+        "$ref": "#/$defs/DatasetRule"
+      },
+      "title": "Dataset Rules",
+      "type": "array"
+    },
+    "privacy": {
+      "$ref": "#/$defs/PrivacySpec"
+    },
+    "rules": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ColumnRule"
+      },
+      "title": "Rules",
+      "type": "object"
+    },
+    "source_format": {
+      "default": "native",
+      "enum": [
+        "native",
+        "odcs"
+      ],
+      "title": "Source Format",
+      "type": "string"
+    },
+    "source_standard_version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Source Standard Version"
+    }
+  },
+  "required": [
+    "dataset"
+  ],
+  "title": "Contract",
+  "type": "object"
+}

@@ -1,0 +1,1324 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "creationInfo": {
+    "created": "2026-08-28T23:13:45.402944+00:00",
+    "creators": [
+      "Organization: Gateway Information Group LLC",
+      "Tool: tools/generate_supply_chain.py"
+    ],
+    "licenseListVersion": "3.25"
+  },
+  "dataLicense": "CC0-1.0",
+  "documentDescribes": [
+    "SPDXRef-Package-DataContractMonitor"
+  ],
+  "documentNamespace": "https://spdx.org/spdxdocs/data-contract-monitor-0.1.4-DCM-0.1.4-B20260828-PUBLIC1",
+  "name": "Data Contract Monitor 0.1.4 SBOM",
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-DataContractMonitor",
+      "copyrightText": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
+      "downloadLocation": "NOASSERTION",
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "data-contract-monitor",
+      "primaryPackagePurpose": "APPLICATION",
+      "supplier": "Organization: Gateway Information Group LLC",
+      "versionInfo": "0.1.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-1",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/annotated-doc@0.0.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "annotated-doc",
+      "versionInfo": "0.0.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-2",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/annotated-types@0.7.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "annotated-types",
+      "versionInfo": "0.7.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-3",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/anyio@4.13.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "anyio",
+      "versionInfo": "4.13.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-4",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/certifi@2026.5.20",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MPL-2.0",
+      "licenseDeclared": "MPL-2.0",
+      "name": "certifi",
+      "versionInfo": "2026.5.20"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-5",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/click@8.1.8",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "click",
+      "versionInfo": "8.1.8"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-6",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/colorama@0.4.6",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "colorama",
+      "versionInfo": "0.4.6"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-7",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/coverage@7.13.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "coverage",
+      "versionInfo": "7.13.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-8",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/et-xmlfile@2.0.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "et-xmlfile",
+      "versionInfo": "2.0.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-9",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/fastapi@0.128.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "fastapi",
+      "versionInfo": "0.128.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-10",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/h11@0.16.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "h11",
+      "versionInfo": "0.16.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-11",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/httpcore@1.0.9",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "httpcore",
+      "versionInfo": "1.0.9"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-12",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/httpx@0.28.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "httpx",
+      "versionInfo": "0.28.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-13",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/idna@3.17",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "idna",
+      "versionInfo": "3.17"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-14",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/iniconfig@2.3.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "iniconfig",
+      "versionInfo": "2.3.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-15",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/jinja2@3.1.6",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "jinja2",
+      "versionInfo": "3.1.6"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-16",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/markdown-it-py@4.2.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "markdown-it-py",
+      "versionInfo": "4.2.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-17",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/markupsafe@3.0.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "markupsafe",
+      "versionInfo": "3.0.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-18",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/mdurl@0.1.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "mdurl",
+      "versionInfo": "0.1.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-19",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/numpy@2.3.5",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "numpy",
+      "versionInfo": "2.3.5"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-20",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/openpyxl@3.1.5",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "openpyxl",
+      "versionInfo": "3.1.5"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-21",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/packaging@25.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-2-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-2-Clause",
+      "name": "packaging",
+      "versionInfo": "25.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-22",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pandas@2.3.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "pandas",
+      "versionInfo": "2.3.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-23",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pluggy@1.6.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pluggy",
+      "versionInfo": "1.6.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-24",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pydantic@2.13.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic",
+      "versionInfo": "2.13.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-25",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pydantic-core@2.46.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pydantic-core",
+      "versionInfo": "2.46.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-26",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pygments@2.20.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-2-Clause",
+      "licenseDeclared": "BSD-2-Clause",
+      "name": "pygments",
+      "versionInfo": "2.20.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-27",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pytest@9.0.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pytest",
+      "versionInfo": "9.0.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-28",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: test"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pytest-cov@7.0.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pytest-cov",
+      "versionInfo": "7.0.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-29",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/python-dateutil@2.9.0.post0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0 OR BSD-3-Clause",
+      "licenseDeclared": "Apache-2.0 OR BSD-3-Clause",
+      "name": "python-dateutil",
+      "versionInfo": "2.9.0.post0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-30",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/python-multipart@0.0.29",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "python-multipart",
+      "versionInfo": "0.0.29"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-31",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pytz@2026.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pytz",
+      "versionInfo": "2026.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-32",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/pyyaml@6.0.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "pyyaml",
+      "versionInfo": "6.0.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-33",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/rich@15.0.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "rich",
+      "versionInfo": "15.0.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-34",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/setuptools@82.0.1",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "setuptools",
+      "versionInfo": "82.0.1"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-35",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/shellingham@1.5.4",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "ISC",
+      "licenseDeclared": "ISC",
+      "name": "shellingham",
+      "versionInfo": "1.5.4"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-36",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/six@1.17.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "six",
+      "versionInfo": "1.17.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-37",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/starlette@0.50.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "starlette",
+      "versionInfo": "0.50.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-38",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/typer@0.26.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "typer",
+      "versionInfo": "0.26.3"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-39",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/typing-extensions@4.16.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "PSF-2.0",
+      "licenseDeclared": "PSF-2.0",
+      "name": "typing-extensions",
+      "versionInfo": "4.16.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-40",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/typing-inspection@0.4.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "MIT",
+      "licenseDeclared": "MIT",
+      "name": "typing-inspection",
+      "versionInfo": "0.4.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-41",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/tzdata@2026.2",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "tzdata",
+      "versionInfo": "2026.2"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-42",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: runtime"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:pypi/uvicorn@0.48.0",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "BSD-3-Clause",
+      "licenseDeclared": "BSD-3-Clause",
+      "name": "uvicorn",
+      "versionInfo": "0.48.0"
+    },
+    {
+      "SPDXID": "SPDXRef-Dependency-43",
+      "annotations": [
+        {
+          "annotationDate": "2026-08-28T23:13:45.402944+00:00",
+          "annotationType": "OTHER",
+          "annotator": "Tool: Data Contract Monitor supply-chain generator",
+          "comment": "Dependency scope: frontend-build"
+        }
+      ],
+      "copyrightText": "NOASSERTION",
+      "downloadLocation": "NOASSERTION",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceLocator": "pkg:npm/typescript@5.8.3",
+          "referenceType": "purl"
+        }
+      ],
+      "filesAnalyzed": false,
+      "licenseConcluded": "Apache-2.0",
+      "licenseDeclared": "Apache-2.0",
+      "name": "typescript",
+      "versionInfo": "5.8.3"
+    }
+  ],
+  "relationships": [
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-1",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-2",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-3",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-4",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-5",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-6",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-7",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-8",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-9",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-10",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-11",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-12",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-13",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-14",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-15",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-16",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-17",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-18",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-19",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-20",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-21",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-22",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-23",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-24",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-25",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-26",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-27",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-28",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-29",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-30",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-31",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-32",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-33",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-34",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-35",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-36",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-37",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-38",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-39",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-40",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-41",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-42",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    },
+    {
+      "relatedSpdxElement": "SPDXRef-Dependency-43",
+      "relationshipType": "DEPENDS_ON",
+      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
+    }
+  ],
+  "spdxVersion": "SPDX-2.3"
+}

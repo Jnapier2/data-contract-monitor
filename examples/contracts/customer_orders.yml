@@ -1,0 +1,67 @@
+contract_version: "1.0"
+dataset:
+  name: customer_orders
+  description: Customer order events used by operations and finance reporting.
+  owner: Data Operations
+  required_columns:
+    - order_id
+    - customer_id
+    - order_date
+    - total_amount
+    - status
+    - customer_email
+  allow_extra_columns: false
+  extra_columns_severity: warning
+rules:
+  order_id:
+    type: string
+    nullable: false
+    unique: true
+    pattern: '^ORD-[0-9]{4,}$'
+    severity: critical
+    description: Stable order business key.
+  customer_id:
+    type: string
+    nullable: false
+    pattern: '^CUS-[0-9]+$'
+    severity: error
+  order_date:
+    type: datetime
+    nullable: false
+    maximum_age_hours: 48
+    severity: error
+  total_amount:
+    type: number
+    nullable: false
+    minimum: 0
+    severity: error
+  status:
+    type: string
+    nullable: false
+    allowed_values: [paid, pending, refunded]
+    severity: error
+  customer_email:
+    type: email
+    nullable: true
+    severity: error
+    classification: restricted
+dataset_rules:
+  - name: expected_volume
+    type: row_count
+    minimum: 1
+    maximum: 1000000
+    severity: error
+  - name: order_customer_key
+    type: unique_combination
+    columns: [order_id, customer_id]
+    severity: error
+  - name: customer_id_completeness
+    type: null_ratio
+    column: customer_id
+    max_ratio: 0.01
+    severity: error
+privacy:
+  detect_pii: true
+  allowed_categories: [email, account_identifier]
+  fail_on_unapproved: false
+  severity: warning

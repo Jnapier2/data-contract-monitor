@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Validate datasets against executable data contracts without uploading them to a remote service.">
+  <title>Data Contract Monitor</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <div>
+        <p class="eyebrow">Open-source data quality tool</p>
+        <h1>Data Contract Monitor</h1>
+        <p class="lede">Catch broken schemas, stale records, invalid values, and unreviewed sensitive fields before downstream users do.</p>
+      </div>
+      <div class="local-badge" aria-label="Local processing by default">
+        <span aria-hidden="true">●</span> Local by default
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="layout">
+    <section class="panel input-panel" aria-labelledby="validate-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">Step 1</p>
+          <h2 id="validate-title">Validate a dataset</h2>
+        </div>
+        <p class="privacy-copy">Files are processed locally and removed after the request. Reports omit raw cell values.</p>
+      </div>
+      <form id="validate-form">
+        <div class="form-grid">
+          <label class="file-field">
+            <span>YAML contract</span>
+            <input id="contract-file" name="contract" type="file" accept=".yml,.yaml" required>
+            <small>Native contract or supported ODCS subset</small>
+          </label>
+          <label class="file-field">
+            <span>Dataset</span>
+            <input id="data-file" name="data" type="file" accept=".csv,.xlsx,.xlsm,.json,.jsonl,.ndjson,.parquet" required>
+            <small>CSV, Excel, JSON/JSONL, or optional Parquet</small>
+          </label>
+          <label>
+            <span>Fail the run at</span>
+            <select id="fail-on" name="fail_on">
+              <option value="warning">Warning</option>
+              <option value="error" selected>Error</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">Run validation</button>
+          <button id="demo-good" class="secondary" type="button">Run passing demo</button>
+          <button id="demo-bad" class="secondary" type="button">Run failing demo</button>
+        </div>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite">Ready.</div>
+    </section>
+
+    <section id="results" class="results" hidden aria-labelledby="results-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">Step 2</p>
+          <h2 id="results-title">Review the evidence</h2>
+        </div>
+        <button id="download-json" class="secondary" type="button">Download JSON result</button>
+      </div>
+      <div id="summary-cards" class="summary-grid" aria-label="Validation summary"></div>
+
+      <section class="panel" aria-labelledby="findings-title">
+        <div class="table-heading">
+          <div>
+            <h3 id="findings-title">Findings</h3>
+            <p id="finding-count" class="muted"></p>
+          </div>
+          <label class="compact-label">Severity
+            <select id="severity-filter">
+              <option value="all">All</option>
+              <option value="critical">Critical</option>
+              <option value="error">Error</option>
+              <option value="warning">Warning</option>
+              <option value="info">Info</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Severity</th><th>Rule</th><th>Column</th><th>Finding</th><th>Sample rows</th></tr></thead>
+            <tbody id="findings-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="two-column">
+        <section class="panel" aria-labelledby="profile-title">
+          <h3 id="profile-title">Column profile</h3>
+          <div class="table-wrap compact-table">
+            <table>
+              <thead><tr><th>Column</th><th>Type</th><th>Nulls</th><th>Distinct</th></tr></thead>
+              <tbody id="profile-body"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="privacy-title">
+          <h3 id="privacy-title">Privacy-field hints</h3>
+          <p class="muted">Heuristic signals guide review; they are not proof that a field contains personal information.</p>
+          <ul id="privacy-list" class="signal-list"></ul>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="history-title">
+      <div class="section-heading">
+        <div>
+          <p class="step">Evidence trail</p>
+          <h2 id="history-title">Recent local runs</h2>
+        </div>
+        <button id="refresh-history" class="secondary" type="button">Refresh</button>
+      </div>
+      <div class="table-wrap compact-table">
+        <table>
+          <thead><tr><th>Time</th><th>Dataset</th><th>Status</th><th>Rows</th><th>Findings</th><th>Runtime</th></tr></thead>
+          <tbody id="history-body"><tr><td colspan="6">No recorded runs yet.</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Data Contract Monitor 0.1.4 · Apache-2.0 · Copyright © 2026 Gateway Information Group LLC. All rights reserved.</p>
+  </footer>
+</body>
+</html>
