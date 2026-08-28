@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.5 — 2026-08-28
+
+- Fixed invalid YAML in the reusable GitHub Action's input descriptions.
+- Made the Action's dependency cache independent of the caller's repository and installed the reviewed dependency lock before the application.
+- Kept Action runtime output inside the caller's workspace.
+- Added YAML parsing regressions and a real composite-Action CI job covering passing and intentionally failing datasets from a caller without its own Python lockfile.
+
+The local validation engine and Windows startup behavior are unchanged. Version 0.1.4 remains available with its integration limitation documented; use v0.1.5 for new automation integrations.
+
 ## 0.1.4 — 2026-08-28
 
 - Corrected the alpha security-support notice and documented a Unix launch command that does not depend on executable file permissions. The publication build is `DCM-0.1.4-B20260828-PUBLIC1`; the tested `SHUTDOWN2` package remains retained separately.

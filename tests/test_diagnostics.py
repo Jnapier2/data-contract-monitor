@@ -152,4 +152,4 @@ def test_diagnostics_import_without_third_party_dependencies(project_root: Path)
         text=True,
     )
     assert completed.returncode == 0, completed.stderr
-    assert "0.1.4 DiagnosticManager" in completed.stdout
+    assert "0.1.5 DiagnosticManager" in completed.stdout

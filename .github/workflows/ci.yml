@@ -14,6 +14,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  composite-action:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: monitor
+          persist-credentials: false
+      - name: Validate a passing dataset from a caller without a Python lockfile
+        uses: ./monitor
+        with:
+          contract: monitor/tests/fixtures/action-contract.yml
+          data: monitor/tests/fixtures/action-good.csv
+          output-dir: .dcm/passing
+      - name: Validate a deliberately failing dataset
+        id: expected-failure
+        continue-on-error: true
+        uses: ./monitor
+        with:
+          contract: monitor/tests/fixtures/action-contract.yml
+          data: monitor/tests/fixtures/action-bad.csv
+          output-dir: .dcm/failing
+      - name: Verify action outcomes and evidence
+        env:
+          FAILURE_OUTCOME: ${{ steps.expected-failure.outcome }}
+        run: |
+          python -c "import json,os; from pathlib import Path; good=json.loads(Path('.dcm/passing/data_contract_report.json').read_text()); bad=json.loads(Path('.dcm/failing/data_contract_report.json').read_text()); assert good['summary']['passed']; assert not bad['summary']['passed']; assert bad['summary']['findings_total']==1; assert os.environ['FAILURE_OUTCOME']=='failure'"
+
   python:
     timeout-minutes: 15
     strategy:

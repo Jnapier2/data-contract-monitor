@@ -186,7 +186,7 @@ The default host is loopback-only. Port `8765` is preferred and a bounded higher
 A repository using this tool can call the included composite action:
 
 ```yaml
-- uses: Jnapier2/data-contract-monitor@v0.1.4
+- uses: Jnapier2/data-contract-monitor@v0.1.5
   with:
     contract: contracts/customer_orders.yml
     data: data/customer_orders.csv

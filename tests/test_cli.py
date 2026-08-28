@@ -14,7 +14,7 @@ runner = CliRunner()
 def test_version_command() -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
-    assert "0.1.4" in result.stdout
+    assert "0.1.5" in result.stdout
 
 
 def test_validate_exit_codes(project_root: Path, tmp_path: Path) -> None:

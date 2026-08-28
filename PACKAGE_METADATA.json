@@ -1,5 +1,5 @@
 {
-  "build_id": "DCM-0.1.4-B20260828-PUBLIC1",
+  "build_id": "DCM-0.1.5-B20260828-ACTION1",
   "canonical_export_directory": "exports",
   "copyright": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
   "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
@@ -7,7 +7,7 @@
   "display_name": "Data Contract Monitor",
   "execution_qualified_environment": "win32; CPython 3.12.10",
   "license": "Apache-2.0",
-  "managed_file_count": 120,
+  "managed_file_count": 124,
   "maximum_python": "3.14",
   "minimum_python": "3.11",
   "package_name": "data-contract-monitor",
@@ -19,11 +19,11 @@
   "schema_version": "1.1",
   "stable_entrypoint": "START_DATA_CONTRACT_MONITOR.bat",
   "startup_repair_from": "0.1.1",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "wheel": {
-    "path": "packages/data_contract_monitor-0.1.4-py3-none-any.whl",
-    "sha256": "722a57e1e650104815124574f9f559bf462603b7865a45f7d9107029371bf403",
-    "size": 63399
+    "path": "packages/data_contract_monitor-0.1.5-py3-none-any.whl",
+    "sha256": "d9ae62dd5fc0ed9531f0b770ba2493e377a8e7c189d3c0d8429158d79f86be7c",
+    "size": 63401
   },
   "windows_launcher_verification": "Automated CRLF, launch-contract, local-port isolation and exact-service readiness tests; native BAT acceptance is recorded separately with the exact archive receipt"
 }

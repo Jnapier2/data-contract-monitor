@@ -1,8 +1,8 @@
-# Data Contract Monitor 0.1.4
+# Data Contract Monitor 0.1.5
 
 Catch unreliable files before they reach a report, model, or business workflow. Data Contract Monitor turns readable data expectations into actionable findings, with a local dashboard and evidence that fits automated checks.
 
-This maintenance update makes stopping a local session more dependable: the launcher closes its process, records the stopped state, and treats cancellation as a normal action. Existing contracts, demonstrations, reports, and launch commands remain compatible.
+This update fixes the reusable GitHub Action so projects can validate their data during automated checks, even without their own Python dependency file. Passing and deliberately failing datasets are now exercised through the Action itself. Existing contracts, demonstrations, reports, and local launch commands remain compatible.
 
 ## Start here
 

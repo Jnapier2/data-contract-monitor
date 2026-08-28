@@ -3,15 +3,15 @@
 ## Maintenance package
 
 - Product: Data Contract Monitor
-- Version: 0.1.4
-- Build: `DCM-0.1.4-B20260828-PUBLIC1`
+- Version: 0.1.5
+- Build: `DCM-0.1.5-B20260828-ACTION1`
 - Channel: portfolio alpha
 - Source checks: recorded in the exact-package qualification receipt; native shutdown acceptance is recorded separately.
 - Acceptance authority: the exact ZIP's checksum and separate qualification receipt, not a version label or an open browser window.
 
 ## Retained rollback
 
-Version 0.1.2 (`DCM-0.1.2-B20260828-LAUNCHISOLATION1`) remains the prior field-confirmed Windows save state. The separately reviewed v0.1.3 (`DCM-0.1.3-B20260828-SHOWCASE2`) package is also retained, including its recorded cancellation/status limitation. The v0.1.4 `SHUTDOWN2` package retains its exact Windows acceptance evidence. This `PUBLIC1` package corrects the security notice and portable shell launch instruction; earlier archives are not overwritten.
+Version 0.1.2 (`DCM-0.1.2-B20260828-LAUNCHISOLATION1`) remains the prior field-confirmed Windows save state. The separately reviewed v0.1.3 package retains its recorded cancellation/status limitation. The v0.1.4 `SHUTDOWN2` and `PUBLIC1` packages retain their exact Windows acceptance evidence. The v0.1.4 public release has a documented invalid composite-Action YAML limitation; v0.1.5 fixes that integration without changing local validation or Windows startup behavior. Earlier archives are not overwritten.
 
 ## Release invariants
 

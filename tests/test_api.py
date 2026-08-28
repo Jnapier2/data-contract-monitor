@@ -42,8 +42,8 @@ def test_api_health_and_builtin_demos(project_root: Path, monkeypatch, tmp_path:
     assert payload["local_only_default"] is True
     assert payload["service_id"] == "data-contract-monitor"
     assert payload["name"] == "Data Contract Monitor"
-    assert payload["version"] == "0.1.4"
-    assert payload["build_id"].startswith("DCM-0.1.4-")
+    assert payload["version"] == "0.1.5"
+    assert payload["build_id"].startswith("DCM-0.1.5-")
     assert payload["launch_id"] == "test-launch-identity"
     good = client.post("/api/demo/good")
     bad = client.post("/api/demo/bad")

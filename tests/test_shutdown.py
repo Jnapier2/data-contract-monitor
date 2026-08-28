@@ -17,7 +17,7 @@ import tools.bootstrap as bootstrap
 
 
 def prepare_root(root: Path) -> None:
-    (root / "VERSION.txt").write_text("0.1.4\n", encoding="utf-8")
+    (root / "VERSION.txt").write_text("0.1.5\n", encoding="utf-8")
     (root / "PACKAGE_METADATA.json").write_text(
         json.dumps({"build_id": "shutdown-test"}), encoding="utf-8"
     )

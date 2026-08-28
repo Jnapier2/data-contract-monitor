@@ -1,6 +1,6 @@
-# Verification Report — Data Contract Monitor 0.1.4
+# Verification Report — Data Contract Monitor 0.1.5
 
-Build: `DCM-0.1.4-B20260828-PUBLIC1` · August 28, 2026
+Build: `DCM-0.1.5-B20260828-ACTION1` · August 28, 2026
 
 ## Verified source checks
 
@@ -24,6 +24,7 @@ Windows BAT execution and browser interaction are checked separately from the Py
 
 ## What was fixed during review
 
+- Version 0.1.5 fixes two unquoted composite-Action descriptions that made its YAML invalid. Parsing tests now cover every GitHub YAML file, and CI exercises the real Action with both passing and failing datasets in a caller without its own Python lockfile. The Action uses its own dependency lock and keeps runtime output in the caller's workspace.
 - The security notice now describes the current alpha support policy, and the Unix launch command works without relying on an executable file permission.
 - A partial TypeScript build could hide the complete packaged dashboard.
 - An integrity-test fixture assumed Unix line endings.

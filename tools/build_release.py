@@ -194,7 +194,7 @@ def main() -> int:
     version = (root / "VERSION.txt").read_text(encoding="utf-8").strip()
     if not version:
         raise RuntimeError("VERSION.txt is empty")
-    build_id = args.build_id or f"DCM-{version}-B20260828-PUBLIC1"
+    build_id = args.build_id or f"DCM-{version}-B20260828-ACTION1"
 
     build_info = {"version": version, "build_id": build_id}
     atomic_text(
