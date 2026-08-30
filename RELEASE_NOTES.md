@@ -1,19 +1,32 @@
-# Data Contract Monitor 0.1.5
+# Data Contract Monitor 0.2.2 — Windows-Qualified Durable Foundation
 
-Catch unreliable files before they reach a report, model, or business workflow. Data Contract Monitor turns readable data expectations into actionable findings, with a local dashboard and evidence that fits automated checks.
+**Build:** `DCM-0.2.2-B20260829-WINDOWS1`  
+**Release date:** 2026-08-29
 
-This update fixes the reusable GitHub Action so projects can validate their data during automated checks, even without their own Python dependency file. Passing and deliberately failing datasets are now exercised through the Action itself. Existing contracts, demonstrations, reports, and local launch commands remain compatible.
+Version 0.2.2 combines the durable data-governance foundation with the proven public Action and Windows lifecycle safeguards from v0.1.5. The unqualified v0.2.0 and v0.2.1 artifacts were not promoted.
 
-## Start here
+## Foundation changes
 
-Extract the complete ZIP into a new folder and run `START_DATA_CONTRACT_MONITOR.bat`. Choose the passing demo, then the failing demo, to see how the same contract distinguishes usable data from records that need attention. Both use synthetic data and require no credentials.
+The release adds a transactional SQLite runtime state store, bounded validation jobs, cooperative cancellation and progress, immutable per-run evidence, atomic report publication, a compiled rule plan, declared resource budgets, and a safe aggregate-reconciliation rule. The local dashboard now submits validation jobs rather than executing long validation work directly in the request thread.
 
-Standard 64-bit Python 3.11–3.14 is required. First launch installs dependencies from the configured package index; this is not a standalone Windows executable.
+Local modifying API requests require a random per-launch HttpOnly session cookie and pass trusted-host/origin checks. Loopback remains the default service boundary. The origin parser validates the actual hostname rather than using an unsafe string-prefix comparison.
 
-## Upgrade safely
+Support and Critical Export20 ZIPs have one final destination, root `exports/`. Temporary ZIPs stage under root `temp/`, pass ZIP integrity/uniqueness/count checks, and then finalize atomically. The obsolete `diagnostics/exports` path does not return.
 
-Keep the earlier extraction as rollback. Do not mix source files, launchers, wheels, or manifests from different releases. Copy only reviewed configuration or reports you want to retain.
+## Consolidation changes
 
-See [README.md](README.md) for capabilities and [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for evidence and limitations.
+All six root BAT files are logic-free action forwarders to the sole Windows BAT backend, `tools/launch.bat`. Build/bootstrap atomic and hash helpers are centralized in `tools/tooling_common.py`; application-side atomic behavior remains centralized in `src/data_contract_monitor/atomic.py`. `tools/project_index.py` indexes every retained release file and fails release preparation if an unexpected BAT/CMD or unapproved exact duplicate appears.
+
+The only approved exact source-content duplicate is the customer-orders demo contract at the human-readable example boundary and installed-package resource boundary. It is retained deliberately so an isolated wheel can run its demo without relying on the source checkout.
+
+## Windows qualification repairs
+
+Native Windows testing identified and corrected two issues that were invisible in the Linux-generated v0.2.1 receipt: atomic status writes attempted to flush a read-only Windows descriptor, and one test assumed Linux newline byte counts. The merged pass also restored bounded child-process cancellation, legacy-console output fallback, caller-independent Action installation, and project-local test staging. The 72-test suite now exercises those behaviors directly.
+
+## Compatibility and recovery
+
+Use a fresh extraction for 0.2.2. Do not overlay it on an earlier release. Public rollback remains v0.1.5. The exact Windows-confirmed v0.1.2 package remains the deeper launcher-recovery baseline.
+
+The Windows launcher still supports standard non-free-threaded 64-bit CPython 3.11–3.14 and prefers Python 3.13. A self-contained offline Windows runtime remains a future publication enhancement; this release does not claim one.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

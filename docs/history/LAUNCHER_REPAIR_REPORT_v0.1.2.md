@@ -4,9 +4,16 @@
 **Build:** `DCM-0.1.2-B20260828-LAUNCHISOLATION1`  
 **Repair date:** August 28, 2026
 
-## Historical review
+## Evidence reviewed
 
-This note describes the v0.1.2 repair. Current verification is recorded in `VERIFICATION_REPORT.md`. Earlier Windows startup evidence showed that release identity alone could not establish which local service answered the preferred dashboard port.
+Two v0.1.1 manual support packages were reviewed:
+
+| Package timestamp | SHA-256 | Items |
+|---|---|---:|
+| 2026-08-28 15:23:07 UTC | `b43c4454c0b2f4c03517b0af422c5ae4d4b9f1e4e8f7d0f27ce31768a480089b` | 10 |
+| 2026-08-28 15:23:42 UTC | `e5cbe711211d1a3f37ad0471d36a1af6239a191c329081646a65b360ff0cd59e` | 10 |
+
+Both packages identified Data Contract Monitor v0.1.1, build `DCM-0.1.1-B20260828-STARTUPREPAIR1`, on Windows with Python 3.13.15. Release identity passed. The packages did not include `logs/launcher.log`, `logs/bootstrap.log`, `logs/python_detection.txt`, `LATEST_LAUNCH_STATUS.txt`, or a selected-endpoint record, so they could not identify the process already listening on the preferred port.
 
 ## Root causes
 
@@ -14,7 +21,7 @@ This note describes the v0.1.2 repair. Current verification is recorded in `VERI
 
 The v0.1.1 server always constructed `http://127.0.0.1:8765`, scheduled the browser to open that URL after one second, and only then attempted to bind Uvicorn to the port. It did not prove which application answered the address. When another local application already owned port 8765, the browser could display that application while Data Contract Monitor failed to bind.
 
-The fix checks the responding service identity instead of assuming that an open port belongs to this application.
+A complete source scan found no BTC, miner, CKPool, or stratum implementation in Data Contract Monitor. The observed miner page is therefore consistent with a loopback-port collision rather than miner code being launched by this project.
 
 ### 2. Duplicate export directories
 

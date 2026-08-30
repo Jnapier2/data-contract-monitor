@@ -9,7 +9,6 @@ dist/
 build/
 *.egg-info/
 node_modules/
-pnpm-store/
 logs/*
 state/*
 temp/*

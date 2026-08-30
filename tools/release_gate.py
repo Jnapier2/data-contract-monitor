@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import sys
 import traceback
 from datetime import UTC, datetime
 from pathlib import Path
 
-
-def _atomic_json(path: Path, payload: dict[str, object]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(temporary, path)
+try:
+    from tooling_common import atomic_json
+except ModuleNotFoundError:  # imported as tools.* during tests
+    from tools.tooling_common import atomic_json
 
 
 def _capsule(root: Path, errors: list[str], exc: BaseException | None = None) -> None:
@@ -29,7 +25,7 @@ def _capsule(root: Path, errors: list[str], exc: BaseException | None = None) ->
         "traceback": "".join(traceback.format_exception(exc))[-10000:] if exc else None,
         "export_result": "minimal-crash-capsule",
     }
-    _atomic_json(root / "diagnostics" / "crash_capsules" / f"identity_failure_{timestamp}.json", payload)
+    atomic_json(root / "diagnostics" / "crash_capsules" / f"identity_failure_{timestamp}.json", payload)
 
 
 def _write_receipt(root: Path, result: dict[str, object]) -> None:
@@ -43,7 +39,7 @@ def _write_receipt(root: Path, result: dict[str, object]) -> None:
         "checked_files": int(result.get("checked_files", 0) or 0),
         "errors": [str(item) for item in result.get("errors", [])],
     }
-    _atomic_json(root / "state" / "release_verification.json", payload)
+    atomic_json(root / "state" / "release_verification.json", payload)
 
 
 def main() -> int:

@@ -2,8 +2,6 @@
 
 ## Result
 
-This is the retained measurement from the original v0.1.0 validation engine, not a new benchmark of this maintenance release. The maintenance changes do not alter the validation rules, but performance should be measured again on the intended workload and computer.
-
 A repeatable synthetic run validated **100,000 rows across six columns** in a median of **0.474686 seconds**, equivalent to **210,665.54 rows per second** on the exercised environment.
 
 | Measure | Verified value |

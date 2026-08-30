@@ -19,9 +19,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-# Setup must use this package's standard-library-only helper before installation.
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from data_contract_monitor.atomic_io import atomic_write_text as atomic_text
+try:
+    from tooling_common import atomic_json, atomic_text, sha256_file
+except ModuleNotFoundError:  # imported as tools.* during tests
+    from tools.tooling_common import atomic_json, atomic_text, sha256_file
 
 SUPPORTED_MIN = (3, 11)
 SUPPORTED_MAX = (3, 14)
@@ -41,10 +42,6 @@ RUNTIME_DIRS = (
     "reports",
     "downloads",
 )
-
-
-def atomic_json(path: Path, payload: dict[str, Any]) -> None:
-    atomic_text(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
 
 
 def redact(value: str) -> str:
@@ -141,14 +138,6 @@ def read_build_id(root: Path) -> str | None:
         except (OSError, UnicodeError, json.JSONDecodeError):
             continue
     return None
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        while chunk := handle.read(1024 * 1024):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def signature(paths: list[Path], *, interpreter: Path) -> str:

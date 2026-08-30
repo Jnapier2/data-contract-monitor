@@ -2,93 +2,60 @@
 
 ## Design goals
 
-Data Contract Monitor is designed around five constraints:
-
-1. One rule engine must serve every interface.
-2. A data-quality failure must be distinguishable from a program failure.
-3. Reports must be useful without reproducing raw dataset values.
-4. The source ZIP must launch from any extracted path, including paths containing spaces.
-5. Release identity must fail closed before normal release startup when managed files disagree.
+Data Contract Monitor uses one validation engine and one typed result model across CLI, API, dashboard, package, and CI integration. Data-quality failures remain distinct from execution failures. Release-mode startup fails closed when managed identity disagrees, reports avoid raw cell values, and all persistent/runtime paths are derived from the project or application root rather than the current working directory.
 
 ## Component map
 
 ```mermaid
 flowchart LR
     Contract[YAML contract] --> Loader[Contract loader]
-    Data[CSV / Excel / JSONL / JSON / Parquet] --> Reader[Dataset readers]
-    Baseline[Approved schema baseline] --> Drift[Drift comparator]
-    Loader --> Engine[Shared validation engine]
+    Loader --> Plan[Compiled rule plan]
+    Data[CSV / Excel / JSONL / JSON / optional Parquet] --> Reader[Dataset readers]
     Reader --> Profile[Aggregate profiler and privacy hints]
+    Plan --> Engine[Shared validation engine]
     Profile --> Engine
-    Drift --> Engine
+    Baseline[Approved schema baseline] --> Engine
     Engine --> Result[Typed validation result]
-    Result --> CLI[CLI and CI exit codes]
-    Result --> API[FastAPI service]
-    API --> UI[TypeScript reviewer dashboard]
-    Result --> Reports[HTML / JSON / JUnit / SARIF]
-    Result --> History[Compact local history]
+    Result --> Store[(SQLite state)]
+    Result --> Artifacts[Atomic per-run artifacts]
+    API[FastAPI local service] --> Jobs[Bounded job manager]
+    Jobs --> Engine
+    Store --> API
+    Artifacts --> API
+    API --> UI[TypeScript dashboard]
+    Engine --> CLI[CLI / CI exit codes]
 ```
 
-The rendered diagram is available at [assets/architecture.svg](assets/architecture.svg).
+## Validation execution
 
-## Data flow
+The contract is parsed and normalized into a compiled execution plan before dataset evaluation. The plan resolves required/referenced columns and stable rule identifiers and rejects conflicting dataset-rule names. Input byte and table-shape budgets are checked before expensive rule work. Runtime budget checks are cooperative checkpoints between stages rather than a hard process-kill guarantee.
 
-1. The contract loader parses native YAML or adapts the supported ODCS v3.1 subset into the same internal contract model.
-2. The reader loads one tabular file into a pandas `DataFrame`.
-3. The profiler calculates counts, observed logical types, cardinality, numeric aggregates, and heuristic privacy signals.
-4. The optional drift comparator compares the current profile to a reviewed baseline.
-5. The engine evaluates column and dataset rules and emits deterministic finding identifiers.
-6. The summary applies the configured `fail_on` threshold.
-7. Reporters serialize the same result model into human-readable and machine-readable formats.
-8. History records only compact operational evidence: hashes, counts, status, runtime, and run ID.
+The dashboard submits work to a bounded job manager with one active validation worker and a bounded queue. Job progress, terminal state, and cancellation are persisted in SQLite. The CLI remains synchronous for straightforward CI behavior.
 
-## Boundaries
+## Durable state and artifacts
 
-### Trusted application code
+SQLite is the authoritative runtime history store under `state/dcm_state.sqlite3`. Schema migrations are versioned; an existing database is backed up with SQLite's backup API, integrity-checked, and SHA-256 receipted before a migration is applied.
 
-- Contract parsing and validation
-- Dataset readers
-- Rule evaluation
-- Report generation
-- Local history and diagnostics
+Every completed validation has a stable run ID. HTML, JSON, JUnit, and SARIF evidence is first written under root `temp/`, hashed and verified, then atomically moved to `reports/runs/<run_id>/`. Only after successful publication is `state/latest_completed_run.json` atomically updated. This avoids half-written “latest” evidence.
 
-### Untrusted inputs
+## Security boundaries
 
-- Uploaded contracts
-- Uploaded datasets
-- Excel sheet names
-- ODCS object selector
+Contracts and datasets are untrusted inputs. Unknown contract keys fail closed, accepted file types are bounded, contract/dataset byte limits and row/column limits are declared, and reconciliation expressions use a restricted AST evaluator supporting numeric names and arithmetic only—no calls, attributes, subscripts, imports, or arbitrary `eval`.
 
-Unknown contract keys fail closed. Dataset file extensions are allow-listed. The service bounds request sizes and uses request-scoped temporary directories.
+The dashboard is a trusted-local workstation surface rather than a multi-user web service. Trusted-host middleware accepts loopback/test hosts, modifying API requests require a random per-launch HttpOnly session cookie, and supplied Origin headers must resolve to an allowed loopback hostname.
 
-## Failure model
+## Windows execution map
 
-| Failure class | Behavior |
-|---|---|
-| Contract violations | Structured findings; exit code `2` when threshold is met |
-| Invalid contract or unreadable input | Clear configuration error; exit code `3` |
-| Release identity mismatch | Startup denied in release mode; exit code `4`; read-only support export remains available |
-| Uncaught terminal failure | Atomic minimal crash capsule, then one bounded redacted full export when budgets permit |
-| Normal cancellation | Exit code `130`; no automatic Critical export |
+All user-facing BAT files are logic-free action forwarders. `tools/launch.bat` is the only BAT implementation backend. It derives the root from its own location, clears inherited Python path/home overrides, selects a supported standard 64-bit interpreter, verifies release identity before normal release startup, and routes to bootstrap/doctor/demo/test/repair/export actions. See `docs/PROJECT_STRUCTURE.md`.
 
-## Storage model
+## Runtime folders
 
-A source or Windows ZIP uses root-relative folders derived from the launcher location:
+`config/ logs/ state/ temp/ cache/ exports/ diagnostics/ reports/ downloads/ backups/`
 
-```text
-config/ logs/ state/ temp/ cache/ exports/ diagnostics/ reports/ downloads/ backups/
-```
+Support and Critical ZIPs finalize only in root `exports/`. Diagnostic capsules stay under `diagnostics/`; temporary export ZIPs stage under root `temp/`. Runtime files are excluded from the managed release manifest.
 
-The root `exports/` directory is the only destination for support and Critical diagnostic ZIPs. `diagnostics/` stores capsules, suppression counts, and transient exporter state, but never a second export directory.
+## Extension boundary
 
-An installed Python package uses `DCM_HOME` when set. Otherwise it uses the operating system's user-local application state directory. It never derives persistent storage from the current working directory, Desktop, or Downloads.
+The current reader is file-oriented and pandas-backed. Future streaming readers can implement inspect/iterate semantics without changing the result/report contract. Exact uniqueness or referential-integrity work that exceeds memory should use a disk-backed strategy rather than silently changing to approximate behavior.
 
-## Extension points
-
-New rule types should implement three things together:
-
-1. A strictly validated contract model field or dataset-rule variant.
-2. A rule evaluator that emits the common `Finding` model.
-3. Tests covering pass, fail, null, malformed configuration, and report serialization.
-
-Connectors to warehouses or catalog systems are intentionally outside the first release. They can later produce a `DataFrame` or an intermediate profile without changing report semantics.
+Copyright © 2026 Gateway Information Group LLC. All rights reserved.

@@ -108,3 +108,5 @@ jobs:
       - name: Verify packaged dashboard is synchronized
         run: |
           cmp frontend/dist/app.js src/data_contract_monitor/web/app.js
+          cmp frontend/dist/index.html src/data_contract_monitor/web/index.html
+          cmp frontend/dist/styles.css src/data_contract_monitor/web/styles.css

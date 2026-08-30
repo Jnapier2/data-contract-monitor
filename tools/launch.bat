@@ -18,8 +18,13 @@ for %%D in (logs state temp cache exports diagnostics reports downloads config) 
   if not exist "%ROOT%\%%D" mkdir "%ROOT%\%%D" >nul 2>&1
 )
 
-rem The bootstrap owns the atomic status file during normal actions.
-rem Do not reopen it for redundant CMD writes after Python has finalized it.
+>"%STATUS_FILE%" (
+  echo Data Contract Monitor startup status
+  echo Project root: %ROOT%
+  echo Action: %ACTION%
+  echo Started: %DATE% %TIME%
+  echo State: locating-compatible-python
+)
 
 >>"%LAUNCH_LOG%" echo.
 >>"%LAUNCH_LOG%" echo ============================================================
@@ -83,7 +88,7 @@ set "RC=4"
 >>"%STATUS_FILE%" echo Recovery: install standard 64-bit Python 3.13 or 3.14, then run this BAT again.
 echo.
 echo [ERROR] A compatible standard 64-bit Python runtime was not found.
-echo Data Contract Monitor supports Python 3.11 through 3.14.
+echo Data Contract Monitor supports standard 64-bit Python 3.11 through 3.14.
 echo Install standard 64-bit Python 3.13 or 3.14, then run this file again.
 echo Detection details: "%ROOT%\logs\python_detection.txt"
 goto :show_failure
@@ -94,17 +99,27 @@ echo.
 echo [ERROR] The project files are incomplete or this BAT was launched from inside the ZIP.
 echo Extract the entire ZIP to a normal folder before launching it.
 echo.
-exit /b %RC%
+goto :show_failure
 
 :finish
 if "%RC%"=="0" (
+  >>"%STATUS_FILE%" echo State: completed
+  >>"%STATUS_FILE%" echo Exit code: 0
+  >>"%STATUS_FILE%" echo Finished: %DATE% %TIME%
   >>"%LAUNCH_LOG%" echo Action completed successfully.
+  if /I not "%DCM_NO_PAUSE%"=="1" if /I not "%ACTION%"=="serve" pause
   exit /b 0
 )
 if "%RC%"=="130" (
+  >>"%STATUS_FILE%" echo State: stopped-by-user
+  >>"%STATUS_FILE%" echo Exit code: 130
+  >>"%STATUS_FILE%" echo Finished: %DATE% %TIME%
   >>"%LAUNCH_LOG%" echo Action stopped by user.
   exit /b 130
 )
+>>"%STATUS_FILE%" echo State: failed
+>>"%STATUS_FILE%" echo Exit code: %RC%
+>>"%STATUS_FILE%" echo Finished: %DATE% %TIME%
 >>"%LAUNCH_LOG%" echo Action failed with exit code %RC%.
 
 :show_failure
@@ -112,6 +127,7 @@ echo.
 echo Startup status: "%STATUS_FILE%"
 echo Bootstrap log: "%ROOT%\logs\bootstrap.log"
 echo Launcher log: "%LAUNCH_LOG%"
+if /I not "%DCM_NO_PAUSE%"=="1" pause
 exit /b %RC%
 
 :select_python

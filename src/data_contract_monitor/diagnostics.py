@@ -17,6 +17,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import Any
 
+from .atomic import atomic_write_json
 from .runtime import ensure_runtime_directories, runtime_root
 
 
@@ -104,13 +105,6 @@ def configure_logging(root: Path | None = None) -> logging.Logger:
         logger.addHandler(file_handler)
         _CONFIGURED_ROOTS.add(normalized)
     return logger
-
-
-def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    os.replace(temporary, path)
 
 
 def _fingerprint(trigger: str, exc: BaseException | None) -> str:
@@ -206,7 +200,7 @@ class DiagnosticManager:
                 "runtime_identity": _cached_runtime_identity(self.root),
                 "export_result": "capsule-written",
             }
-            _atomic_json(capsule_path, payload)
+            atomic_write_json(capsule_path, payload)
             export_path, reason = self._full_export(
                 context_path=capsule_path,
                 fingerprint=fingerprint,
@@ -217,7 +211,7 @@ class DiagnosticManager:
             payload["export_result"] = "completed" if export_path else "capsule-only"
             payload["export_path"] = export_path.name if export_path else None
             payload["export_failure_reason"] = reason
-            _atomic_json(capsule_path, payload)
+            atomic_write_json(capsule_path, payload)
             self._retention()
             return export_path or capsule_path
         except Exception as export_exc:
@@ -236,7 +230,7 @@ class DiagnosticManager:
         fingerprint = _fingerprint("manual-support-export", None)
         context_path = self.root / "diagnostics" / f".support_context_{timestamp}.tmp.json"
         try:
-            _atomic_json(
+            atomic_write_json(
                 context_path,
                 {
                     "schema_version": "1.0",
@@ -275,7 +269,7 @@ class DiagnosticManager:
         item = payload.setdefault(fingerprint, {"count": 0})
         item["count"] = int(item.get("count", 0)) + 1
         item["last_suppressed_at"] = datetime.now(UTC).isoformat()
-        _atomic_json(path, payload)
+        atomic_write_json(path, payload)
 
     def _full_export(
         self,
@@ -300,8 +294,10 @@ class DiagnosticManager:
         try:
             timestamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
             final_path = export_dir / f"Data_Contract_Monitor_{label}_{timestamp}_{fingerprint}.zip"
-            temporary = export_dir / f".{final_path.name}.tmp"
-            _atomic_json(
+            staging_dir = self.root / "temp"
+            staging_dir.mkdir(parents=True, exist_ok=True)
+            temporary = staging_dir / f".{final_path.name}.{self.run_id}.tmp"
+            atomic_write_json(
                 environment_path,
                 {
                     "schema_version": "1.0",
@@ -320,6 +316,19 @@ class DiagnosticManager:
             if capsule_candidates:
                 latest_capsule = max(capsule_candidates, key=lambda item: item.stat().st_mtime)
 
+            latest_pointer = self.root / "state" / "latest_completed_run.json"
+            latest_result = None
+            try:
+                pointer = json.loads(latest_pointer.read_text(encoding="utf-8"))
+                artifact_dir = pointer.get("artifact_dir") if isinstance(pointer, dict) else None
+                if isinstance(artifact_dir, str):
+                    candidate = (self.root / artifact_dir / "result.json").resolve()
+                    runs_root = (self.root / "reports" / "runs").resolve()
+                    if candidate.is_relative_to(runs_root) and candidate.is_file():
+                        latest_result = candidate
+            except (OSError, UnicodeError, json.JSONDecodeError, ValueError):
+                latest_result = None
+
             candidates: list[tuple[Path, str]] = [
                 (context_path, "json"),
                 (self.root / "LATEST_LAUNCH_STATUS.txt", "text"),
@@ -331,17 +340,19 @@ class DiagnosticManager:
                 (self.root / "logs" / "data_contract_monitor.log", "text"),
                 (self.root / "state" / "runtime_environment.json", "json"),
                 (self.root / "state" / "release_verification.json", "json"),
-                (self.root / "reports" / "latest_result.json", "latest-result"),
+                (self.root / "state" / "latest_completed_run.json", "json"),
                 (self.root / "VERSION.txt", "raw"),
                 (self.root / "PACKAGE_METADATA.json", "raw"),
                 (self.root / "MANIFEST.json", "raw"),
                 (self.root / "MANIFEST.sha256", "raw"),
-                (self.root / "KNOWN_GOOD_STATE.md", "raw"),
+                (self.root / "docs" / "RELEASE_RECOVERY.md", "raw"),
                 (self.root / "CHANGELOG.md", "raw"),
                 (environment_path, "json"),
             ]
             if latest_capsule is not None:
                 candidates.insert(10, (latest_capsule, "json"))
+            if latest_result is not None:
+                candidates.insert(11, (latest_result, "latest-result"))
 
             added = 0
             total = 0

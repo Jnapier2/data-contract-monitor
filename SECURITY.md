@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes are applied to the latest published release. Data Contract Monitor is alpha software and does not have a long-term support commitment. Review the release notes and verification evidence before using it with important data.
+Security fixes are applied to the latest published release. Version `0.2.2` is an alpha release and has not yet established a long-term support window.
 
 ## Reporting a vulnerability
 

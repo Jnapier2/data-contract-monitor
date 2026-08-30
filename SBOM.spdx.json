@@ -1,7 +1,7 @@
 {
   "SPDXID": "SPDXRef-DOCUMENT",
   "creationInfo": {
-    "created": "2026-08-28T23:36:03.246282+00:00",
+    "created": "2026-08-30T00:12:15.091691+00:00",
     "creators": [
       "Organization: Gateway Information Group LLC",
       "Tool: tools/generate_supply_chain.py"
@@ -12,8 +12,8 @@
   "documentDescribes": [
     "SPDXRef-Package-DataContractMonitor"
   ],
-  "documentNamespace": "https://spdx.org/spdxdocs/data-contract-monitor-0.1.5-DCM-0.1.5-B20260828-ACTION2",
-  "name": "Data Contract Monitor 0.1.5 SBOM",
+  "documentNamespace": "https://spdx.org/spdxdocs/data-contract-monitor-0.2.2-DCM-0.2.2-B20260829-WINDOWS1",
+  "name": "Data Contract Monitor 0.2.2 SBOM",
   "packages": [
     {
       "SPDXID": "SPDXRef-Package-DataContractMonitor",
@@ -25,13 +25,13 @@
       "name": "data-contract-monitor",
       "primaryPackagePurpose": "APPLICATION",
       "supplier": "Organization: Gateway Information Group LLC",
-      "versionInfo": "0.1.5"
+      "versionInfo": "0.2.2"
     },
     {
       "SPDXID": "SPDXRef-Dependency-1",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -56,7 +56,7 @@
       "SPDXID": "SPDXRef-Dependency-2",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -81,7 +81,7 @@
       "SPDXID": "SPDXRef-Dependency-3",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -106,7 +106,7 @@
       "SPDXID": "SPDXRef-Dependency-4",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -131,7 +131,7 @@
       "SPDXID": "SPDXRef-Dependency-5",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -156,32 +156,7 @@
       "SPDXID": "SPDXRef-Dependency-6",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
-          "annotationType": "OTHER",
-          "annotator": "Tool: Data Contract Monitor supply-chain generator",
-          "comment": "Dependency scope: runtime"
-        }
-      ],
-      "copyrightText": "NOASSERTION",
-      "downloadLocation": "NOASSERTION",
-      "externalRefs": [
-        {
-          "referenceCategory": "PACKAGE-MANAGER",
-          "referenceLocator": "pkg:pypi/colorama@0.4.6",
-          "referenceType": "purl"
-        }
-      ],
-      "filesAnalyzed": false,
-      "licenseConcluded": "BSD-3-Clause",
-      "licenseDeclared": "BSD-3-Clause",
-      "name": "colorama",
-      "versionInfo": "0.4.6"
-    },
-    {
-      "SPDXID": "SPDXRef-Dependency-7",
-      "annotations": [
-        {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -203,10 +178,10 @@
       "versionInfo": "7.13.3"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-8",
+      "SPDXID": "SPDXRef-Dependency-7",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -228,10 +203,10 @@
       "versionInfo": "2.0.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-9",
+      "SPDXID": "SPDXRef-Dependency-8",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -253,10 +228,10 @@
       "versionInfo": "0.128.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-10",
+      "SPDXID": "SPDXRef-Dependency-9",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -278,10 +253,10 @@
       "versionInfo": "0.16.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-11",
+      "SPDXID": "SPDXRef-Dependency-10",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -303,10 +278,10 @@
       "versionInfo": "1.0.9"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-12",
+      "SPDXID": "SPDXRef-Dependency-11",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -328,10 +303,10 @@
       "versionInfo": "0.28.1"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-13",
+      "SPDXID": "SPDXRef-Dependency-12",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -353,10 +328,10 @@
       "versionInfo": "3.17"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-14",
+      "SPDXID": "SPDXRef-Dependency-13",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -378,10 +353,10 @@
       "versionInfo": "2.3.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-15",
+      "SPDXID": "SPDXRef-Dependency-14",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -403,10 +378,10 @@
       "versionInfo": "3.1.6"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-16",
+      "SPDXID": "SPDXRef-Dependency-15",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -428,10 +403,10 @@
       "versionInfo": "4.2.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-17",
+      "SPDXID": "SPDXRef-Dependency-16",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -453,10 +428,10 @@
       "versionInfo": "3.0.3"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-18",
+      "SPDXID": "SPDXRef-Dependency-17",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -478,10 +453,10 @@
       "versionInfo": "0.1.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-19",
+      "SPDXID": "SPDXRef-Dependency-18",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -503,10 +478,10 @@
       "versionInfo": "2.3.5"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-20",
+      "SPDXID": "SPDXRef-Dependency-19",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -528,10 +503,10 @@
       "versionInfo": "3.1.5"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-21",
+      "SPDXID": "SPDXRef-Dependency-20",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -553,10 +528,10 @@
       "versionInfo": "25.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-22",
+      "SPDXID": "SPDXRef-Dependency-21",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -578,10 +553,10 @@
       "versionInfo": "2.3.3"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-23",
+      "SPDXID": "SPDXRef-Dependency-22",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -603,10 +578,10 @@
       "versionInfo": "1.6.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-24",
+      "SPDXID": "SPDXRef-Dependency-23",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -628,10 +603,10 @@
       "versionInfo": "2.13.4"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-25",
+      "SPDXID": "SPDXRef-Dependency-24",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -653,10 +628,10 @@
       "versionInfo": "2.46.4"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-26",
+      "SPDXID": "SPDXRef-Dependency-25",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -678,10 +653,10 @@
       "versionInfo": "2.20.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-27",
+      "SPDXID": "SPDXRef-Dependency-26",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -703,10 +678,10 @@
       "versionInfo": "9.0.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-28",
+      "SPDXID": "SPDXRef-Dependency-27",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: test"
@@ -728,10 +703,10 @@
       "versionInfo": "7.0.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-29",
+      "SPDXID": "SPDXRef-Dependency-28",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -753,10 +728,10 @@
       "versionInfo": "2.9.0.post0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-30",
+      "SPDXID": "SPDXRef-Dependency-29",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -778,10 +753,10 @@
       "versionInfo": "0.0.29"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-31",
+      "SPDXID": "SPDXRef-Dependency-30",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -803,10 +778,10 @@
       "versionInfo": "2026.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-32",
+      "SPDXID": "SPDXRef-Dependency-31",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -828,10 +803,10 @@
       "versionInfo": "6.0.3"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-33",
+      "SPDXID": "SPDXRef-Dependency-32",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -853,10 +828,10 @@
       "versionInfo": "15.0.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-34",
+      "SPDXID": "SPDXRef-Dependency-33",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -878,10 +853,10 @@
       "versionInfo": "82.0.1"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-35",
+      "SPDXID": "SPDXRef-Dependency-34",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -903,10 +878,10 @@
       "versionInfo": "1.5.4"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-36",
+      "SPDXID": "SPDXRef-Dependency-35",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -928,10 +903,10 @@
       "versionInfo": "1.17.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-37",
+      "SPDXID": "SPDXRef-Dependency-36",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -953,10 +928,10 @@
       "versionInfo": "0.50.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-38",
+      "SPDXID": "SPDXRef-Dependency-37",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -978,10 +953,10 @@
       "versionInfo": "0.26.3"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-39",
+      "SPDXID": "SPDXRef-Dependency-38",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -1003,10 +978,10 @@
       "versionInfo": "4.16.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-40",
+      "SPDXID": "SPDXRef-Dependency-39",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -1028,10 +1003,10 @@
       "versionInfo": "0.4.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-41",
+      "SPDXID": "SPDXRef-Dependency-40",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -1053,10 +1028,10 @@
       "versionInfo": "2026.2"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-42",
+      "SPDXID": "SPDXRef-Dependency-41",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: runtime"
@@ -1078,10 +1053,10 @@
       "versionInfo": "0.48.0"
     },
     {
-      "SPDXID": "SPDXRef-Dependency-43",
+      "SPDXID": "SPDXRef-Dependency-42",
       "annotations": [
         {
-          "annotationDate": "2026-08-28T23:36:03.246282+00:00",
+          "annotationDate": "2026-08-30T00:12:15.091691+00:00",
           "annotationType": "OTHER",
           "annotator": "Tool: Data Contract Monitor supply-chain generator",
           "comment": "Dependency scope: frontend-build"
@@ -1311,11 +1286,6 @@
     },
     {
       "relatedSpdxElement": "SPDXRef-Dependency-42",
-      "relationshipType": "DEPENDS_ON",
-      "spdxElementId": "SPDXRef-Package-DataContractMonitor"
-    },
-    {
-      "relatedSpdxElement": "SPDXRef-Dependency-43",
       "relationshipType": "DEPENDS_ON",
       "spdxElementId": "SPDXRef-Package-DataContractMonitor"
     }

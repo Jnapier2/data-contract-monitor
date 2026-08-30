@@ -196,6 +196,18 @@
           "default": null,
           "title": "Description"
         },
+        "left_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Left Column"
+        },
         "max_ratio": {
           "anyOf": [
             {
@@ -246,6 +258,18 @@
           "default": null,
           "title": "Name"
         },
+        "right_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Right Expression"
+        },
         "severity": {
           "$ref": "#/$defs/Severity",
           "default": "error"
@@ -262,12 +286,19 @@
           "default": null,
           "title": "Then Column"
         },
+        "tolerance": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Tolerance",
+          "type": "number"
+        },
         "type": {
           "enum": [
             "row_count",
             "unique_combination",
             "null_ratio",
-            "conditional_not_null"
+            "conditional_not_null",
+            "aggregate_reconciliation"
           ],
           "title": "Type",
           "type": "string"

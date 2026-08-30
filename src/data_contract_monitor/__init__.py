@@ -23,11 +23,11 @@ def _load_build_info() -> dict[str, Any]:
             return payload
     except (OSError, UnicodeError, json.JSONDecodeError):
         pass
-    return {"version": "0.1.5", "build_id": "UNPACKAGED"}
+    return {"version": "0.2.2", "build_id": "UNPACKAGED"}
 
 
 _BUILD_INFO = _load_build_info()
-__version__ = str(_BUILD_INFO.get("version") or "0.1.5")
+__version__ = str(_BUILD_INFO.get("version") or "0.2.2")
 __build_id__ = str(_BUILD_INFO.get("build_id") or "UNPACKAGED")
 
 

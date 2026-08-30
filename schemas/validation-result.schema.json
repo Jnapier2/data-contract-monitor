@@ -423,6 +423,15 @@
       "title": "Completed At",
       "type": "string"
     },
+    "completeness": {
+      "default": "complete",
+      "enum": [
+        "complete",
+        "partial"
+      ],
+      "title": "Completeness",
+      "type": "string"
+    },
     "contract_label": {
       "title": "Contract Label",
       "type": "string"
@@ -457,6 +466,25 @@
       "title": "Findings",
       "type": "array"
     },
+    "findings_truncated": {
+      "default": false,
+      "title": "Findings Truncated",
+      "type": "boolean"
+    },
+    "limits_applied": {
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "integer"
+          },
+          {
+            "type": "number"
+          }
+        ]
+      },
+      "title": "Limits Applied",
+      "type": "object"
+    },
     "privacy_note": {
       "default": "Reports contain aggregate statistics and row numbers, not raw cell values.",
       "title": "Privacy Note",
@@ -470,7 +498,7 @@
       "type": "string"
     },
     "schema_version": {
-      "default": "1.0",
+      "default": "1.1",
       "title": "Schema Version",
       "type": "string"
     },

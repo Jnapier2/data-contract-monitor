@@ -16,7 +16,7 @@ def test_current_interpreter_is_accepted() -> None:
 def test_resolve_release_wheel_checks_metadata_hash(tmp_path: Path) -> None:
     packages = tmp_path / "packages"
     packages.mkdir()
-    wheel = packages / "data_contract_monitor-0.1.2-py3-none-any.whl"
+    wheel = packages / "data_contract_monitor-0.2.2-py3-none-any.whl"
     wheel.write_bytes(b"synthetic-wheel")
     digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
     (tmp_path / "PACKAGE_METADATA.json").write_text(
@@ -34,10 +34,10 @@ def test_resolve_release_wheel_checks_metadata_hash(tmp_path: Path) -> None:
 
 
 def test_status_and_startup_capsule_are_project_local_and_redacted(tmp_path: Path) -> None:
-    (tmp_path / "VERSION.txt").write_text("0.1.2\n", encoding="utf-8")
+    (tmp_path / "VERSION.txt").write_text("0.2.2\n", encoding="utf-8")
     (tmp_path / "src" / "data_contract_monitor").mkdir(parents=True)
     (tmp_path / "src" / "data_contract_monitor" / "build_info.json").write_text(
-        json.dumps({"version": "0.1.2", "build_id": "DCM-0.1.2-B20260828-LAUNCHISOLATION1"}), encoding="utf-8"
+        json.dumps({"version": "0.2.2", "build_id": "DCM-0.2.2-B20260829-WINDOWS1"}), encoding="utf-8"
     )
     bootstrap.write_status(tmp_path, state="test", action="doctor", details={"token": "secret-value"})
     status = (tmp_path / "LATEST_LAUNCH_STATUS.txt").read_text(encoding="utf-8")

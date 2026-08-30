@@ -11,7 +11,6 @@ License identifiers are a compact inventory, not a substitute for the license fi
 | `anyio` | `4.13.0` | PyPI | runtime | `MIT` |
 | `certifi` | `2026.5.20` | PyPI | runtime | `MPL-2.0` |
 | `click` | `8.1.8` | PyPI | runtime | `BSD-3-Clause` |
-| `colorama` | `0.4.6` | PyPI | runtime | `BSD-3-Clause` |
 | `coverage` | `7.13.3` | PyPI | test | `Apache-2.0` |
 | `et-xmlfile` | `2.0.0` | PyPI | runtime | `MIT` |
 | `fastapi` | `0.128.2` | PyPI | runtime | `MIT` |

@@ -1,29 +1,91 @@
 {
-  "build_id": "DCM-0.1.5-B20260828-ACTION2",
+  "action_map": {
+    "CREATE_SUPPORT_EXPORT.bat": {
+      "action": "export",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "CREATE_SUPPORT_EXPORT.bat"
+    },
+    "REPAIR_INSTALLATION.bat": {
+      "action": "repair",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "REPAIR_INSTALLATION.bat"
+    },
+    "RUN_DEMO.bat": {
+      "action": "demo",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "RUN_DEMO.bat"
+    },
+    "RUN_TESTS.bat": {
+      "action": "test",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "RUN_TESTS.bat"
+    },
+    "START_DATA_CONTRACT_MONITOR.bat": {
+      "action": "serve",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "START_DATA_CONTRACT_MONITOR.bat"
+    },
+    "VERIFY_RELEASE.bat": {
+      "action": "doctor",
+      "bat_backend": "tools/launch.bat",
+      "forwarder": "VERIFY_RELEASE.bat"
+    }
+  },
+  "approved_exact_duplicate_exceptions": [
+    {
+      "paths": [
+        "examples/contracts/customer_orders.yml",
+        "src/data_contract_monitor/resources/contracts/customer_orders.yml"
+      ],
+      "reason": "human-readable source example plus isolated installed-wheel resource"
+    }
+  ],
+  "build_id": "DCM-0.2.2-B20260829-WINDOWS1",
   "canonical_export_directory": "exports",
   "copyright": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
   "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
   "dependency_install_policy": "locked binary wheels only for Windows bootstrap",
   "display_name": "Data Contract Monitor",
+  "execution_namespace": "DataContractMonitor",
   "execution_qualified_environment": "win32; CPython 3.12.10",
   "license": "Apache-2.0",
-  "managed_file_count": 124,
+  "lineage": {
+    "blocked_intermediate": "v0.2.0 and v0.2.1 artifacts were not promoted; v0.2.2 repairs the Windows qualification failures",
+    "rollback_release_sha256": "1bc3294daca89911a5029c2bb0a49a1764463fe5d20c572d7261830115a2b1ee",
+    "source_authority": "v0.2.1 durable foundation merged with v0.1.5 public Action and Windows lifecycle safeguards"
+  },
+  "managed_file_count": 132,
   "maximum_python": "3.14",
   "minimum_python": "3.11",
+  "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",
   "package_name": "data-contract-monitor",
   "project": "Professional Portfolio \u2014 Data Contract Monitor",
   "publisher": "Gateway Information Group LLC",
   "python_runtime_policy": "standard non-free-threaded 64-bit CPython; 3.13 preferred on Windows",
   "release_channel": "portfolio-alpha",
-  "release_date": "2026-08-28",
-  "schema_version": "1.1",
+  "release_date": "2026-08-29",
+  "runtime_output_roots": [
+    "config",
+    "logs",
+    "state",
+    "temp",
+    "cache",
+    "exports",
+    "diagnostics",
+    "reports",
+    "downloads",
+    "backups"
+  ],
+  "schema_version": "1.2",
+  "source_defaults_sha256": "63BDA0B5F61BA44F18F55C5B75512085ED3A2FE67C575E3406A5877ECD5F4566",
+  "source_defaults_version": "2.17.13",
   "stable_entrypoint": "START_DATA_CONTRACT_MONITOR.bat",
-  "startup_repair_from": "0.1.1",
-  "version": "0.1.5",
+  "tested_windows_computers": [],
+  "version": "0.2.2",
   "wheel": {
-    "path": "packages/data_contract_monitor-0.1.5-py3-none-any.whl",
-    "sha256": "e535ce802a71db6074837df1d0738a4dfb12c733efc839742aed66bf07184095",
-    "size": 63400
+    "path": "packages/data_contract_monitor-0.2.2-py3-none-any.whl",
+    "sha256": "66e81c663462798db97189a0a31c4f831c20bdec70f3026de9117bb38543dc05",
+    "size": 75313
   },
-  "windows_launcher_verification": "Automated CRLF, launch-contract, local-port isolation and exact-service readiness tests; native BAT acceptance is recorded separately with the exact archive receipt"
+  "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending"
 }

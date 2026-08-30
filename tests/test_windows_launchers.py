@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tools.build_release import collect_files
-
 
 ROOT_WRAPPERS = {
     "START_DATA_CONTRACT_MONITOR.bat": "serve",
@@ -22,21 +20,22 @@ def _assert_crlf(path: Path) -> None:
     assert b"\x00" not in payload
 
 
-def test_root_batch_entrypoints_are_crlf_and_forward_once(project_root: Path) -> None:
+def test_root_batch_entrypoints_are_logic_free_forwarders(project_root: Path) -> None:
     for name, action in ROOT_WRAPPERS.items():
         path = project_root / name
         assert path.is_file(), name
         _assert_crlf(path)
         text = path.read_text(encoding="ascii")
-        assert 'set "ROOT=%~dp0"' in text
-        assert 'tools\\launch.bat' in text
-        assert f'call "%LAUNCHER%" {action}' in text
-        assert ':not_extracted' in text
-        assert 'launching directly inside the downloaded ZIP' in text
-        assert 'pause' in text.lower()
-        assert '%CD%' not in text
-        assert 'Desktop' not in text
-        assert 'Downloads' not in text
+        assert text.splitlines() == [
+            "@echo off",
+            f'call "%~dp0tools\\launch.bat" {action}',
+            "exit /b %ERRORLEVEL%",
+        ]
+        assert "%CD%" not in text
+        assert "Desktop" not in text
+        assert "Downloads" not in text
+        assert "bootstrap.py" not in text
+        assert "release_gate.py" not in text
 
 
 def test_shared_windows_launcher_contract(project_root: Path) -> None:
@@ -60,18 +59,21 @@ def test_shared_windows_launcher_contract(project_root: Path) -> None:
         assert f'py -{version}' in text
     assert "Py_GIL_DISABLED" in text
     assert "struct.calcsize('P') == 8" in text
-    assert '%CD%' not in text
-    assert 'Desktop' not in text
-    assert 'Downloads' not in text
-    assert 'echo State: locating-compatible-python' not in text
-    assert 'echo State: completed' not in text
+    assert 'if /I not "%DCM_NO_PAUSE%"=="1" pause' in text
+    assert "%CD%" not in text
+    assert "Desktop" not in text
+    assert "Downloads" not in text
 
 
-def test_batch_files_have_no_duplicate_implementations(project_root: Path) -> None:
-    batch_files = [path for path in collect_files(project_root) if path.suffix == '.bat']
-    assert {path.name for path in batch_files} == {*ROOT_WRAPPERS, 'launch.bat'}
+def test_batch_files_have_one_backend_and_one_filename_per_action(project_root: Path) -> None:
+    excluded_roots = {".git", ".venv", "cache", "temp", "node_modules", "pnpm-store"}
+    batch_files = sorted(
+        path for path in project_root.rglob("*.bat")
+        if not excluded_roots.intersection(path.relative_to(project_root).parts)
+    )
+    assert {path.name for path in batch_files} == {*ROOT_WRAPPERS, "launch.bat"}
+    assert len(batch_files) == len(ROOT_WRAPPERS) + 1
     for path in batch_files:
-        if path.name != 'launch.bat':
-            text = path.read_text(encoding='ascii')
-            assert 'bootstrap.py' not in text
-            assert 'release_gate.py' not in text
+        if path.name != "launch.bat":
+            text = path.read_text(encoding="ascii")
+            assert text.count("call ") == 1

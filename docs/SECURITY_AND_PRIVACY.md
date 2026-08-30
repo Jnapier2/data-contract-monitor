@@ -2,53 +2,34 @@
 
 ## Default posture
 
-- The web service binds to `127.0.0.1` by default. The launcher reserves the socket before startup and opens a browser only after the exact service/version/build health identity is confirmed.
-- No application feature uploads datasets to an external service.
-- Temporary API uploads are deleted at the end of each request.
-- Reports contain filenames, file hashes, aggregate measurements, finding messages, and bounded row numbers—not raw cell values.
-- Manual and automatic diagnostic exports redact common credentials, the user-home path, IP addresses, and uploaded filenames in the latest result.
-- Release mode verifies every managed file against `MANIFEST.json` before normal startup.
-- The release ZIP and manifest are hash-verified but not digitally signed; the sidecar hash detects accidental change only when obtained through a trusted channel and cannot authenticate a coordinated replacement of the ZIP and its sidecars.
+The service binds to loopback by default. The Windows launcher reserves a socket before server startup and opens a browser only after the exact Data Contract Monitor service/version/build/per-launch identity responds. Modifying API requests require a random per-launch HttpOnly SameSite-strict session cookie, and supplied Origin headers are parsed and restricted to loopback hostnames.
 
-## Threat model
+No application feature uploads datasets to an external service. Temporary uploaded files are project-local and removed after job completion/cancellation. Reports contain filenames, hashes, aggregates, rule messages, and bounded row numbers rather than raw cell values.
 
-The first release is intended for a trusted local workstation, CI runner, or isolated internal service. It does not provide multi-tenant authentication, authorization, network isolation, malware scanning, content-disarm, secrets management, or regulated-data certification.
+## Input controls
 
-Treat contracts and datasets as untrusted input. The application limits file types and request sizes, rejects unknown contract fields, and avoids evaluating expressions from the contract. Regular expressions are compiled but are not sandboxed; reviewers should avoid pathological patterns supplied by unknown parties.
+Contracts and datasets are untrusted. File types and upload sizes are allow-listed/bounded; contract models reject unknown keys. Aggregate-reconciliation expressions use a restricted AST evaluator that allows numeric column names/constants and basic arithmetic only. Function calls, imports, attributes, subscripts, and arbitrary evaluation are rejected.
 
-## Privacy detector boundary
+Regular expressions are still user-supplied Python regular expressions and are not sandboxed. Untrusted pathological expressions can consume excessive CPU; this remains a known limitation.
 
-Privacy-field detection is a review aid. False positives and false negatives are expected. It does not inspect every value in a large column: sampling is intentionally bounded to protect performance and minimize processing. Do not use a signal alone to determine legal classification, retention, disclosure, or deletion.
+## State and evidence
 
-## Service exposure
+SQLite stores durable run/job history locally. Report sets are staged under project `temp/`, hashed and verified, and atomically finalized into immutable per-run folders. The latest-run pointer updates only after successful publication.
 
-Do not bind to `0.0.0.0` or expose the FastAPI service through a public reverse proxy without adding, at minimum:
+Automatic diagnostics are reserved for terminal Critical conditions. A minimal capsule is written first, then one bounded Export20 may be attempted. Export20 performs no network call, repair, recursive export, project rescan, or managed-file rehash. Temporary ZIPs stage under root `temp/`; only integrity-tested final ZIPs appear under root `exports/`. Unknown/user ZIP files are not deleted by retention.
 
-- authentication and authorization;
-- TLS termination;
-- request and concurrency limits;
-- trusted-origin and proxy configuration;
-- malware/content scanning appropriate to the environment;
-- centralized audit logging and retention rules;
-- a reviewed deployment threat model.
+Diagnostic text redacts common credential assignments, the user-home path, IP addresses, and latest-result filenames. Redaction is best-effort and is not a substitute for reviewing a support package before public sharing.
 
-## Dependency installation
+## Release integrity
 
-The application itself does not transmit datasets. The first Windows launch installs locked Python packages using the configured `pip` package index, which is a network action unless packages are already cached or supplied by an internal mirror. Organizations should use a trusted package index and their normal dependency-review process.
+Normal release startup is blocked unless `VERSION.txt`, `PACKAGE_METADATA.json`, `MANIFEST.json`, `MANIFEST.sha256`, the managed-file hashes, and installed package identity agree. Support export remains read-only recovery evidence after an identity failure.
 
-## Diagnostics
+SHA-256 sidecars detect change only when obtained through a trusted channel; they do not provide publisher authentication. Authenticode signing is not claimed for 0.2.2.
 
-Automatic collection is reserved for terminal Critical events such as an uncaught fatal exception or runtime identity failure. Normal validation failures, handled warnings, cancellation, and transient request errors do not trigger an automatic package.
+## Deployment boundary
 
-The collector:
+This release is intended for a trusted local workstation or controlled CI runner. Do not bind it publicly or place it behind a public reverse proxy without adding a deployment-specific authentication, authorization, TLS, rate/concurrency controls, proxy/origin configuration, audit policy, and threat model.
 
-- writes an atomic minimal capsule first;
-- attempts one full export only when time and storage budgets permit;
-- adds no more than 20 items and 5 MB of source material;
-- uses a same-computer exporter lock;
-- performs no network calls, repair, project rescan, or managed-file rehash;
-- retains only its own bounded diagnostic ZIPs in the canonical project-local `exports/` directory.
+The first Windows environment build can contact the configured Python package index. Organizations should use a trusted index/mirror and their normal dependency-review controls.
 
-## Reporting a vulnerability
-
-Follow [SECURITY.md](../SECURITY.md). Do not include private datasets, credentials, or unredacted diagnostics in a public issue.
+Copyright © 2026 Gateway Information Group LLC. All rights reserved.

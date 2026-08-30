@@ -13,7 +13,6 @@ LICENSES = {
     "certifi": "MPL-2.0",
     "coverage": "Apache-2.0",
     "click": "BSD-3-Clause",
-    "colorama": "BSD-3-Clause",
     "et-xmlfile": "MIT",
     "fastapi": "MIT",
     "h11": "MIT",

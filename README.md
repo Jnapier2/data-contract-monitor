@@ -1,83 +1,80 @@
 # Data Contract Monitor
 
-**Executable data contracts for files, pipelines, and review workflows.**
+**Executable data contracts with durable evidence for files, local review, and CI.**
 
-Data Contract Monitor validates CSV, Excel, JSON, JSON Lines, and optional Parquet datasets against readable YAML contracts. It produces evidence that people can review and automation can enforce: an accessible HTML report, structured JSON, JUnit XML, SARIF, schema-drift history, and privacy-field hints.
+Data Contract Monitor validates CSV, Excel, JSON, JSON Lines, and optional Parquet datasets against readable YAML contracts. It produces accessible HTML plus JSON, JUnit XML, and SARIF evidence, records durable run history, detects schema drift and privacy-field signals, and gives CI a clear distinction between “the data failed its contract” and “the program failed.”
 
-The project is local-first. Uploaded datasets are processed by the local FastAPI service, removed after each request, and never embedded as raw cell values in reports.
+The project is local-first and includes generated passing/failing demonstrations that require no credentials or private data.
 
 ![Data Contract Monitor dashboard](docs/assets/dashboard.png)
 
-## Why this project exists
+## Windows quick start
 
-A broken dataset often remains technically readable. A column can disappear, a business key can duplicate, yesterday's feed can become eight days old, or an unapproved sensitive field can arrive without causing a parser error. Data Contract Monitor turns those expectations into version-controlled rules and makes failures visible before unreliable data reaches a report, model, or operational workflow.
-
-### Demonstrated outcome
-
-The included failing customer-order scenario contains twelve distinct findings across schema, completeness, uniqueness, validity, freshness, and privacy review. The same engine returns zero findings for the passing scenario. Both scenarios require no credentials or private data.
-
-## Try the included demos
-
-On Windows, choose **Extract All** for the release ZIP, open the extracted folder, and double-click:
+Extract the complete ZIP first; do not run a BAT from Windows compressed-folder preview. Open the extracted `Data_Contract_Monitor_v0.2.2` folder and double-click:
 
 ```text
 START_DATA_CONTRACT_MONITOR.bat
 ```
 
-You need standard 64-bit Python 3.11–3.14. The first launch installs dependencies inside the extracted folder and opens a local dashboard; internet access is needed for that installation. If another app is using the preferred port, the launcher selects an available one. In the dashboard:
+All six root BAT files are stable, logic-free action forwarders. `tools\launch.bat` is the single Windows BAT implementation backend. It derives the project root from its own location, clears inherited Python path/home overrides, verifies release identity before normal release startup, selects a standard non-free-threaded 64-bit CPython 3.11–3.14 runtime (3.13 preferred), and starts the loopback dashboard.
 
-1. Select **Run passing demo** to see a clean contract result.
-2. Select **Run failing demo** to see actionable findings and privacy hints.
-3. Filter by severity, inspect the aggregate profile, and download the JSON evidence.
+Port `8765` is preferred. If another local service already owns it, the launcher reserves another port rather than opening the unrelated service. The browser opens only after the responding health endpoint proves the exact Data Contract Monitor service, version, build, and per-launch identity.
 
-For a command-line demonstration:
+Other Windows actions are `VERIFY_RELEASE.bat`, `RUN_DEMO.bat`, `RUN_TESTS.bat`, `REPAIR_INSTALLATION.bat`, and `CREATE_SUPPORT_EXPORT.bat`.
 
-```text
-RUN_DEMO.bat
-```
-
-Linux and macOS:
+Linux/macOS source launch:
 
 ```bash
-sh tools/start.sh
+./tools/start.sh
 ```
 
-Detailed reviewer steps are in [docs/RECRUITER_REVIEW.md](docs/RECRUITER_REVIEW.md). Windows startup recovery is documented in [docs/WINDOWS_STARTUP_TROUBLESHOOTING.md](docs/WINDOWS_STARTUP_TROUBLESHOOTING.md).
+## What 0.2.2 adds
 
-## Runtime folders
+Version 0.2.2 adds a versioned SQLite state store, bounded background validation jobs, progress and cooperative cancellation, immutable per-run report sets, atomic report publication, a compiled rule plan, declared input/resource budgets, and safe aggregate reconciliation. It also hardens Windows atomic writes, cancellation, legacy-console output, and composite Action portability. Modifying dashboard API requests use a random per-launch local session cookie and loopback Origin/Host checks.
 
-Support ZIPs and validation evidence stay inside the project:
+A completed run publishes to:
 
-- `exports/` — manual support ZIPs and automatic Critical Export20 ZIPs.
-- `diagnostics/crash_capsules/` — small local crash records used as evidence when startup or runtime fails.
-- `logs/`, `state/`, and `reports/` — readable operating evidence and validation results.
+```text
+reports/runs/<run_id>/
+```
 
-Earlier release folders are left untouched during an upgrade.
+Only after the complete report set is hashed and verified does the application atomically update:
 
-## Core capabilities
+```text
+state/latest_completed_run.json
+```
 
-| Capability | Evidence |
+SQLite is authoritative runtime history at `state/dcm_state.sqlite3`. Legacy JSONL history remains readable only for explicit compatibility workflows; new project-root runs use SQLite.
+
+## One export destination
+
+Support and automatic Critical diagnostic ZIPs finalize only under:
+
+```text
+exports/
+```
+
+Temporary ZIP staging occurs under project `temp/`; crash capsules stay under `diagnostics/crash_capsules/`. The obsolete `diagnostics/exports/` path is not created or used.
+
+## Contract capabilities
+
+| Area | Implemented controls |
 |---|---|
-| Executable YAML contracts | Required columns, types, nullability, uniqueness, ranges, length, patterns, approved values, and freshness |
-| Dataset-level rules | Row-count ranges, composite uniqueness, null-ratio limits, and conditional completeness |
-| Schema-drift monitoring | Approved baselines with added, removed, type, and observed-nullability changes |
-| Privacy-field review | Heuristic name and sampled-pattern signals; reports contain counts, never raw values |
-| Multiple interfaces | Shared engine behind CLI, Python package, FastAPI service, TypeScript dashboard, and GitHub Action |
-| CI evidence | Exit codes, JUnit XML, and SARIF 2.1.0 |
-| Reviewer safety | Passing and failing generated demos; no credentials required |
-| Release integrity | Version, package metadata, manifest, and managed-file SHA-256 agreement in release mode |
-| Failure diagnostics | Bounded redacted Critical crash capsule and Export20 support package in the single project-local `exports/` directory |
+| Schema | Required/unexpected columns, logical types, observed nullability, approved baselines and drift |
+| Column quality | Nullability, uniqueness, range, length, pattern, approved values, freshness |
+| Dataset quality | Row-count bounds, composite uniqueness, null-ratio limits, conditional completeness |
+| Reconciliation | Safe arithmetic aggregate reconciliation with numeric tolerance |
+| Privacy review | Heuristic field-name and bounded sampled-pattern signals; no raw cell values in normal reports |
+| Interfaces | Shared Python engine behind CLI, FastAPI, TypeScript dashboard, Python package, and composite GitHub Action |
+| CI evidence | Exit codes, JSON, JUnit XML, and SARIF 2.1.0 |
+| Reliability | SQLite state, bounded jobs, atomic artifacts, release identity, project-local diagnostics |
 
-## Contract example
+## Example contract
 
 ```yaml
 dataset:
   name: customer_orders
-  required_columns:
-    - order_id
-    - customer_id
-    - order_date
-    - total_amount
+  required_columns: [order_id, customer_id, order_date, total_amount]
   allow_extra_columns: false
 
 rules:
@@ -101,17 +98,17 @@ privacy:
   fail_on_unapproved: false
 ```
 
-The complete example is [examples/contracts/customer_orders.yml](examples/contracts/customer_orders.yml). A documented subset of the Open Data Contract Standard v3.1 format is also supported; see [examples/contracts/customer_orders.odcs.yaml](examples/contracts/customer_orders.odcs.yaml).
+The complete native example is `examples/contracts/customer_orders.yml`. A documented subset of Open Data Contract Standard v3.1 is also supported.
 
-## Command line
+## CLI
 
-Install from the repository:
+Install from source:
 
 ```bash
 python -m pip install .
 ```
 
-Validate a dataset:
+Validate:
 
 ```bash
 data-contract-monitor validate \
@@ -121,72 +118,26 @@ data-contract-monitor validate \
   --fail-on error
 ```
 
-Useful commands:
+Useful commands include `demo`, `profile`, `baseline create`, `baseline compare`, `doctor`, and `export-support`.
 
-```bash
-data-contract-monitor demo --scenario good
-data-contract-monitor demo --scenario bad
-data-contract-monitor profile --data path/to/data.csv
-data-contract-monitor baseline create --contract contract.yml --data approved.csv --output baseline.json
-data-contract-monitor baseline compare --data new.csv --baseline baseline.json
-data-contract-monitor doctor
-data-contract-monitor export-support
-```
+Exit codes are `0` pass, `2` contract/data-quality failure at the selected threshold, `3` input/configuration failure, `4` internal/startup/release-integrity failure, and `130` cancellation.
 
-A reproducible drift example is included:
-
-```bash
-data-contract-monitor baseline compare \
-  --data examples/data/customer_orders_schema_drift.csv \
-  --baseline examples/baselines/customer_orders.schema.json
-```
-
-It reports the added `sales_channel` column as a warning and the removed `status` column as an error.
-
-### Exit codes
-
-| Code | Meaning |
-|---:|---|
-| `0` | Contract passed at the selected threshold |
-| `2` | Data-quality findings met or exceeded the selected failure threshold |
-| `3` | Contract, input, or report configuration prevented validation |
-| `4` | Internal, startup, or release-integrity failure |
-| `130` | User cancellation |
-
-A data-quality failure is deliberately different from an execution failure. CI can therefore distinguish “the tool broke” from “the data broke its contract.”
-
-## Python API
-
-```python
-from pathlib import Path
-
-from data_contract_monitor.engine import validate_files
-
-result = validate_files(
-    contract_path=Path("contract.yml"),
-    data_path=Path("dataset.csv"),
-    record_history=False,
-)
-
-print(result.summary.status)
-for finding in result.findings:
-    print(finding.severity, finding.rule_id, finding.message)
-```
-
-## FastAPI service
+## Local API and dashboard
 
 ```bash
 data-contract-monitor serve --host 127.0.0.1 --port 8765
 ```
 
-The default host is loopback-only. Port `8765` is preferred and a bounded higher-port fallback is used when it is occupied; pass `--port-search-limit 0` to require the exact requested port. The browser is identity-gated and cannot open an unrelated service merely because it owns the preferred port. API documentation is available locally at `/docs`. Upload limits are 1 MB for a contract and 50 MB for a dataset. Temporary uploads are deleted when the request ends.
+The dashboard submits validation to a bounded job queue instead of performing the entire validation inside the HTTP request. Job state and progress are queryable, cancellation is cooperative, and completed results are durable. The service is designed for a trusted local workstation; it is not a public multi-user service.
+
+Default resource budgets include a 1 MB contract limit, 50 MB dataset limit, 2,000,000 rows, 1,000 columns, 10,000 retained findings, and a cooperative 300-second validation budget checked between stages. These are safety budgets rather than throughput promises.
 
 ## GitHub Action
 
-A repository using this tool can call the included composite action:
+After publishing a real repository, a consumer can use the included composite action, for example:
 
 ```yaml
-- uses: Jnapier2/data-contract-monitor@v0.1.5
+- uses: Jnapier2/data-contract-monitor@v0.2.2
   with:
     contract: contracts/customer_orders.yml
     data: data/customer_orders.csv
@@ -194,54 +145,24 @@ A repository using this tool can call the included composite action:
     formats: json,junit,sarif
 ```
 
-The action definition is [action.yml](action.yml). For production automation, pin the action to a reviewed commit rather than a moving branch.
+The Action installs the repository's pinned dependency set and remains independent of the calling repository's cache layout.
 
-## Architecture
+## Release integrity and project organization
 
-![Architecture diagram](docs/assets/architecture.svg)
+Release mode fails closed when `VERSION.txt`, `PACKAGE_METADATA.json`, `MANIFEST.json`, `MANIFEST.sha256`, managed-file SHA-256 values, and installed application identity disagree. Read-only support export remains available after an integrity failure.
 
-All interfaces call one validation engine and one Pydantic result model. This prevents the dashboard, CLI, API, and CI integrations from developing different rule semantics. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+`tools/project_index.py` inventories retained files and rejects an unexpected BAT/CMD or unapproved exact duplicate during release preparation. The active implementation map and the one intentional demo-resource boundary duplicate are documented in `docs/PROJECT_STRUCTURE.md`.
 
-## Testing and verification
+Version 0.2.2 merges the durable-foundation work with the proven public Action and Windows cancellation safeguards from v0.1.5. The unqualified v0.2.0 and v0.2.1 artifacts were never promoted. v0.1.5 remains the public rollback release; do not combine managed files from releases.
 
-The automated suite covers native and ODCS contracts, rule families, file readers, privacy-safe profiling, drift, history, report formats, API endpoints, CLI exit codes, release integrity, diagnostics, port collisions, browser readiness, dashboard assets, and preservation of user files.
+## Verification and limits
 
-```bash
-RUN_TESTS.bat
-```
+The source suite contains 72 tests spanning data rules, APIs, persistence, diagnostics, release identity, the composite Action, and Windows lifecycle behavior. The release pipeline also performs Python compilation, TypeScript compilation/equivalence, schema/SBOM regeneration, launcher/consolidation checks, wheel build/version checks, manifest verification, and ZIP integrity/path checks. The external verification receipt distributed beside the final ZIP records exact artifact hashes and counts.
 
-or:
-
-```bash
-python -m pytest
-```
-
-Check [VERIFICATION_REPORT.md](VERIFICATION_REPORT.md) for the tested artifact, environment, and remaining limitations. A historical synthetic measurement is documented separately in [BENCHMARK_REPORT.md](BENCHMARK_REPORT.md); it is not a claim about performance on every computer or workload.
-
-## Security and privacy
-
-Data Contract Monitor is a validator, not a data-loss-prevention product. Privacy detection is heuristic and requires human review. The project does not send datasets over the network, but first-run dependency installation can contact the configured Python package index. The Windows bootstrap requests binary wheels only and does not compile dependencies locally. Reports intentionally include filenames, hashes, aggregate statistics, rule messages, and bounded row numbers—not raw cell values.
-
-Read [SECURITY.md](SECURITY.md) and [docs/SECURITY_AND_PRIVACY.md](docs/SECURITY_AND_PRIVACY.md) before exposing the service beyond `127.0.0.1` or processing regulated data.
+The v0.2.2 release is built and regression-tested on Windows with CPython 3.12. Exact native launcher, integrity, demo, and extracted-package results are recorded in the release receipt. Norton, SmartScreen reputation, and Authenticode are reported separately and are never inferred from application tests. See `VERIFICATION_REPORT.md`, `docs/KNOWN_LIMITATIONS.md`, and `docs/RELEASE_CHECKLIST.md`.
 
 ## Documentation
 
-- [Contract reference](docs/CONTRACT_REFERENCE.md)
-- [Architecture and data flow](docs/ARCHITECTURE.md)
-- [Security and privacy](docs/SECURITY_AND_PRIVACY.md)
-- [Accessibility review](docs/ACCESSIBILITY.md)
-- [Case study and measured outcome](docs/CASE_STUDY.md)
-- [Benchmark report](BENCHMARK_REPORT.md)
-- [Verification report](VERIFICATION_REPORT.md)
-- [Release notes](RELEASE_NOTES.md)
-- [Known limitations](docs/KNOWN_LIMITATIONS.md)
-- [Demonstration script](docs/DEMO_SCRIPT.md)
-- [Release checklist](docs/RELEASE_CHECKLIST.md)
-- [Windows startup troubleshooting](docs/WINDOWS_STARTUP_TROUBLESHOOTING.md)
-- [Contributing](CONTRIBUTING.md)
-
-## License
-
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+Architecture: `docs/ARCHITECTURE.md` · project structure: `docs/PROJECT_STRUCTURE.md` · contract reference: `docs/CONTRACT_REFERENCE.md` · reviewer guide: `docs/RECRUITER_REVIEW.md` · release recovery: `docs/RELEASE_RECOVERY.md` · security/privacy: `docs/SECURITY_AND_PRIVACY.md` · Windows troubleshooting: `docs/WINDOWS_STARTUP_TROUBLESHOOTING.md`.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

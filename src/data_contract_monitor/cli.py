@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import secrets
-import signal
 import sys
 import tempfile
 import threading
@@ -17,6 +16,7 @@ from . import __build_id__, __version__
 from rich.console import Console
 from rich.table import Table
 
+from .artifacts import publish_run_artifacts
 from .contract_loader import ContractLoadError, load_contract
 from .demo import write_demo_dataset
 from .diagnostics import DiagnosticManager, install_exception_hooks
@@ -36,6 +36,7 @@ from .models import SEVERITY_ORDER, Severity
 from .profiler import profile_dataset
 from .reporters import ReportFormatError, write_reports
 from .runtime import bundled_demo_contract, ensure_runtime_directories, runtime_root
+from .state_store import StateStore
 
 app = typer.Typer(
     name="data-contract-monitor",
@@ -96,6 +97,10 @@ def validate_command(
     """Validate one dataset and emit CI-friendly reports."""
     try:
         sheet_value: str | int = int(sheet) if sheet.isdigit() else sheet
+        root = find_project_root()
+        history_path = None
+        if root and not no_history:
+            history_path = ensure_runtime_directories(root) / "state" / "dcm_state.sqlite3"
         result = validate_files(
             contract_path=contract.resolve(),
             data_path=data.resolve(),
@@ -104,18 +109,18 @@ def validate_command(
             object_name=object_name,
             sheet_name=sheet_value,
             record_history=not no_history,
+            history_path=history_path,
         )
-        destination = (output_dir or _default_output_dir(contract.resolve(), result.run_id)).resolve()
-        report_paths = write_reports(result, destination, formats.split(","))
+        if root and output_dir is None:
+            destination = publish_run_artifacts(result, root=root, formats=formats.split(","))
+            report_paths = sorted(path for path in destination.iterdir() if path.is_file())
+        else:
+            destination = (output_dir or _default_output_dir(contract.resolve(), result.run_id)).resolve()
+            report_paths = write_reports(result, destination, formats.split(","))
         _print_summary(result)
         console.print("Reports:")
         for path in report_paths:
             console.print(f"  {path}")
-        root = find_project_root()
-        if root:
-            latest = root / "reports" / "latest_result.json"
-            latest.parent.mkdir(parents=True, exist_ok=True)
-            latest.write_text(result.model_dump_json(indent=2) + "\n", encoding="utf-8")
         raise typer.Exit(code=0 if result.summary.passed else 2)
     except (ContractLoadError, DataReadError, ReportFormatError, ValidationExecutionError) as exc:
         console.print(f"[red]Validation could not run:[/red] {exc}")
@@ -208,10 +213,14 @@ def demo_command(
         result = validate_files(
             contract_path=bundled_demo_contract(),
             data_path=data_path,
-            history_path=root / "state" / "history.jsonl",
+            history_path=root / "state" / "dcm_state.sqlite3",
         )
-        destination = output_dir or root / "reports" / f"demo_{scenario}"
-        report_paths = write_reports(result, destination, ["html", "json", "junit", "sarif"])
+        if output_dir:
+            destination = output_dir.resolve()
+            report_paths = write_reports(result, destination, ["html", "json", "junit", "sarif"])
+        else:
+            destination = publish_run_artifacts(result, root=root)
+            report_paths = sorted(path for path in destination.iterdir() if path.is_file())
         _print_summary(result)
         for path in report_paths:
             console.print(f"  {path.resolve()}")
@@ -250,6 +259,7 @@ def serve_command(
 
     launch_id = secrets.token_hex(16)
     os.environ["DCM_LAUNCH_ID"] = launch_id
+    os.environ["DCM_API_TOKEN"] = secrets.token_hex(32)
     note = None
     if endpoint.fallback_used:
         note = (
@@ -275,7 +285,6 @@ def serve_command(
         note=note,
     )
     shutdown_event = threading.Event()
-    endpoint_status_lock = threading.Lock()
 
     def browser_readiness_worker() -> None:
         opened = open_browser_when_ready(
@@ -283,25 +292,30 @@ def serve_command(
             expected_version=__version__,
             expected_build_id=__build_id__,
             expected_launch_id=launch_id,
-            cancelled=shutdown_event.is_set,
         )
-        with endpoint_status_lock:
-            if shutdown_event.is_set():
-                return
-            record_endpoint(
-                root,
-                endpoint,
-                version=__version__,
-                build_id=__build_id__,
-                state="running",
-                launch_id=launch_id,
-                browser_status=(
-                    "opened-after-verified-identity"
-                    if opened
-                    else "not-opened-health-or-browser-timeout"
-                ),
-                note=note,
-            )
+        if shutdown_event.is_set():
+            return
+        record_endpoint(
+            root,
+            endpoint,
+            version=__version__,
+            build_id=__build_id__,
+            state="running",
+            launch_id=launch_id,
+            browser_status=(
+                "opened-after-verified-identity"
+                if opened
+                else "not-opened-health-or-browser-timeout"
+            ),
+            note=note,
+        )
+
+    if open_browser and loopback_browser_allowed:
+        threading.Thread(
+            target=browser_readiness_worker,
+            name="dcm-browser-readiness",
+            daemon=True,
+        ).start()
 
     console.print(f"Data Contract Monitor is starting at {endpoint.url}")
     console.print("The browser opens only after this exact process passes its health identity check.")
@@ -311,7 +325,6 @@ def serve_command(
         port=endpoint.port,
         log_level="info",
         workers=1,
-        timeout_graceful_shutdown=3,
     )
     server = uvicorn.Server(config)
     record_endpoint(
@@ -324,18 +337,7 @@ def serve_command(
         browser_status=browser_status,
         note=note,
     )
-    previous_break_handler = None
-    if hasattr(signal, "SIGBREAK") and threading.current_thread() is threading.main_thread():
-        # Uvicorn re-raises the stop signal after its own cleanup. Translate
-        # Windows Ctrl+Break into normal cancellation so our finally block runs.
-        previous_break_handler = signal.signal(signal.SIGBREAK, signal.default_int_handler)
     try:
-        if open_browser and loopback_browser_allowed:
-            threading.Thread(
-                target=browser_readiness_worker,
-                name="dcm-browser-readiness",
-                daemon=True,
-            ).start()
         server.run(sockets=[endpoint.socket])
     finally:
         shutdown_event.set()
@@ -343,21 +345,16 @@ def serve_command(
             endpoint.socket.close()
         except OSError:
             pass
-        try:
-            with endpoint_status_lock:
-                record_endpoint(
-                    root,
-                    endpoint,
-                    version=__version__,
-                    build_id=__build_id__,
-                    state="stopped",
-                    launch_id=launch_id,
-                    browser_status="closed",
-                    note=note,
-                )
-        finally:
-            if previous_break_handler is not None:
-                signal.signal(signal.SIGBREAK, previous_break_handler)
+        record_endpoint(
+            root,
+            endpoint,
+            version=__version__,
+            build_id=__build_id__,
+            state="stopped",
+            launch_id=launch_id,
+            browser_status="closed",
+            note=note,
+        )
 
 
 @app.command("doctor")
@@ -381,6 +378,8 @@ def doctor_command(json_output: bool = typer.Option(False, "--json")) -> None:
             passed = False
             detail = str(exc)
         checks.append({"name": f"writable_{relative}", "passed": passed, "detail": detail})
+    state_health = StateStore(root / "state" / "dcm_state.sqlite3").health_check()
+    checks.append({"name": "state_database", "passed": bool(state_health.get("passed")), "detail": state_health})
     try:
         with tempfile.TemporaryDirectory(prefix="dcm_doctor_", dir=root / "temp") as directory:
             data_path = write_demo_dataset(Path(directory) / "good.csv", valid=True)

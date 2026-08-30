@@ -13,11 +13,12 @@ import pytest
 
 import data_contract_monitor.cli as cli
 import data_contract_monitor.local_server as local_server
+from data_contract_monitor.atomic import atomic_write_text as runtime_atomic_text
 import tools.bootstrap as bootstrap
 
 
 def prepare_root(root: Path) -> None:
-    (root / "VERSION.txt").write_text("0.1.5\n", encoding="utf-8")
+    (root / "VERSION.txt").write_text("0.2.2\n", encoding="utf-8")
     (root / "PACKAGE_METADATA.json").write_text(
         json.dumps({"build_id": "shutdown-test"}), encoding="utf-8"
     )
@@ -177,8 +178,13 @@ def test_idle_output_does_not_delay_main_thread_cancellation(tmp_path: Path, mon
     assert "Shutdown complete." in (tmp_path / "test.log").read_text()
 
 
-def test_bootstrap_and_runtime_share_the_atomic_writer() -> None:
-    assert bootstrap.atomic_text is local_server._atomic_text
+def test_bootstrap_and_runtime_atomic_writers_are_windows_safe(tmp_path: Path) -> None:
+    tooling_path = tmp_path / "tooling.txt"
+    runtime_path = tmp_path / "runtime.txt"
+    bootstrap.atomic_text(tooling_path, "tooling\n")
+    runtime_atomic_text(runtime_path, "runtime\n")
+    assert tooling_path.read_bytes() == b"tooling\n"
+    assert runtime_path.read_bytes() == b"runtime\n"
 
 
 @pytest.mark.parametrize("cancel_after_health", [False, True])

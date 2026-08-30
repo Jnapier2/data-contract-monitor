@@ -1,17 +1,18 @@
 # Known Limitations
 
-1. **File-oriented first release.** The engine validates files loaded into memory. Direct warehouse, object-storage, and streaming connectors are not included.
-2. **Memory bound.** pandas must materialize the dataset. The FastAPI upload limit is 50 MB by default, but memory use can exceed file size.
-3. **Heuristic observed types.** Mixed object columns may be classified as strings even when some values are numeric or datetime-like.
-4. **Freshness is wall-clock relative.** Replaying old fixtures can fail a freshness rule unless the data is regenerated or the rule is adjusted.
-5. **Privacy detection is advisory.** It samples up to 200 values per column and can miss or misclassify fields.
-6. **ODCS support is partial.** One schema object and selected quality fields are adapted. Unmapped fields are documented, not silently enforced.
-7. **No multi-user security.** The local dashboard has no authentication, authorization, tenancy, or public-service hardening.
-8. **No automatic remediation.** The tool identifies failures but never edits source data, changes a contract, or approves drift.
-9. **No distributed execution.** Validation runs in one process and does not partition large files across workers.
-10. **Windows launcher requires Python and first-run package access.** The ZIP is not a standalone native executable. It accepts standard non-free-threaded 64-bit CPython 3.11–3.14 and requests binary wheels only; a blocked package index can prevent the first environment build.
-11. **Parquet is optional.** It requires the `parquet` extra and a compatible `pyarrow` installation.
-12. **Accessibility review is internal.** No formal third-party WCAG certification has been completed.
-13. **Release artifacts are unsigned.** SHA-256 receipts support integrity checking but do not replace code signing or a trusted publication channel.
+1. The execution engine is still file-oriented and pandas-backed; CSV/JSONL streaming and disk-backed global rules are architecture targets, not claimed capabilities in 0.2.2.
+2. The default dataset budget is 50 MB and pandas can use substantially more memory than the compressed/on-disk file size.
+3. Runtime timeout checks are cooperative between validation phases; they do not forcibly interrupt a single long-running pandas operation.
+4. Observed logical types are heuristic for mixed object columns.
+5. Freshness rules are wall-clock relative, so old fixtures may require regeneration.
+6. Privacy detection is advisory and sample-based. It can miss or misclassify fields and is not a legal classification or DLP system.
+7. ODCS support is a documented subset, not complete ODCS implementation coverage.
+8. The loopback dashboard uses a per-launch local session token but is not a multi-user authentication/authorization/tenancy system and should not be exposed publicly as-is.
+9. Validation cancellation is cooperative. A future isolated worker-process profile would provide a harder execution boundary for hostile or very large workloads.
+10. The Windows ZIP still requires a supported Python runtime and can require first-run access to the configured package index. A self-contained offline runtime is not yet shipped.
+11. Parquet support is optional and depends on a compatible `pyarrow` installation.
+12. Accessibility review is internal; no third-party WCAG certification is claimed.
+13. Release artifacts use SHA-256 integrity evidence but are not Authenticode-signed in this build.
+14. Windows `cmd.exe`, Norton, SmartScreen, and signing are exact-artifact qualification steps that must be performed on Windows; the Linux build environment cannot substitute for them.
 
-These limits are intentionally explicit so a reviewer can distinguish implemented behavior from a roadmap claim.
+Copyright © 2026 Gateway Information Group LLC. All rights reserved.

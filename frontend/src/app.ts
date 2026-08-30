@@ -48,6 +48,22 @@ interface ValidationResult {
   };
 }
 
+interface JobSubmission {
+  job_id: string;
+  state: string;
+}
+
+interface JobRecord {
+  job_id: string;
+  state: string;
+  progress: number;
+  message: string;
+  run_id?: string | null;
+  result?: ValidationResult;
+  artifact_dir?: string | null;
+  error?: string | null;
+}
+
 interface HistoryEntry {
   started_at: string;
   dataset_name: string;
@@ -77,6 +93,8 @@ const findingCount = byId<HTMLParagraphElement>("finding-count");
 const severityFilter = byId<HTMLSelectElement>("severity-filter");
 const historyBody = byId<HTMLTableSectionElement>("history-body");
 let latestResult: ValidationResult | null = null;
+let activeJobId: string | null = null;
+const cancelJobButton = byId<HTMLButtonElement>("cancel-job");
 
 const textCell = (text: string): HTMLTableCellElement => {
   const cell = document.createElement("td");
@@ -88,8 +106,9 @@ const setBusy = (message: string, busy: boolean): void => {
   statusNode.textContent = message;
   statusNode.classList.remove("error");
   for (const button of document.querySelectorAll<HTMLButtonElement>("button")) {
-    button.disabled = busy;
+    button.disabled = busy && button !== cancelJobButton;
   }
+  cancelJobButton.hidden = !busy || activeJobId === null;
 };
 
 const setError = (message: string): void => {
@@ -222,21 +241,54 @@ const parseResponse = async (response: Response): Promise<ValidationResult> => {
   return payload as ValidationResult;
 };
 
+const sleep = (milliseconds: number): Promise<void> => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
+const parseJobSubmission = async (response: Response): Promise<JobSubmission> => {
+  const payload = await response.json() as JobSubmission | { detail?: string };
+  if (!response.ok) {
+    const detail = "detail" in payload && payload.detail ? payload.detail : `Request failed with status ${response.status}`;
+    throw new Error(detail);
+  }
+  return payload as JobSubmission;
+};
+
+const waitForJob = async (jobId: string): Promise<ValidationResult> => {
+  const deadline = Date.now() + 5 * 60 * 1000;
+  while (Date.now() < deadline) {
+    const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Job status failed with status ${response.status}`);
+    const job = await response.json() as JobRecord;
+    statusNode.textContent = `${job.progress}% · ${job.message}`;
+    if (job.state === "completed" && job.result) return job.result;
+    if (job.state === "failed") throw new Error(job.error ?? "Validation job failed.");
+    if (job.state === "cancelled") throw new Error("Validation job was cancelled.");
+    await sleep(250);
+  }
+  throw new Error("Validation job exceeded the dashboard wait limit.");
+};
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!contractFile.files?.[0] || !dataFile.files?.[0]) {
     setError("Choose both a YAML contract and a dataset.");
     return;
   }
-  setBusy("Validating locally…", true);
   const body = new FormData();
   body.append("contract", contractFile.files[0]);
   body.append("data", dataFile.files[0]);
   try {
-    const response = await fetch(`/api/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
-    renderResult(await parseResponse(response));
+    const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
+    const submission = await parseJobSubmission(response);
+    activeJobId = submission.job_id;
+    setBusy("Queued locally…", true);
+    const result = await waitForJob(submission.job_id);
+    activeJobId = null;
+    renderResult(result);
+    cancelJobButton.hidden = true;
     await loadHistory();
   } catch (error) {
+    activeJobId = null;
+    cancelJobButton.hidden = true;
     setError(error instanceof Error ? error.message : "Validation failed.");
   }
 });
@@ -251,6 +303,17 @@ const runDemo = async (scenario: "good" | "bad"): Promise<void> => {
     setError(error instanceof Error ? error.message : "Demo failed.");
   }
 };
+
+cancelJobButton.addEventListener("click", async () => {
+  if (!activeJobId) return;
+  cancelJobButton.disabled = true;
+  try {
+    await fetch(`/api/jobs/${encodeURIComponent(activeJobId)}`, { method: "DELETE" });
+    statusNode.textContent = "Cancellation requested…";
+  } finally {
+    cancelJobButton.disabled = false;
+  }
+});
 
 byId<HTMLButtonElement>("demo-good").addEventListener("click", () => void runDemo("good"));
 byId<HTMLButtonElement>("demo-bad").addEventListener("click", () => void runDemo("bad"));

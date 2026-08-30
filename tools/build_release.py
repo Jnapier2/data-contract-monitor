@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import shutil
@@ -11,6 +10,11 @@ import zipfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Iterable
+
+try:
+    from tooling_common import atomic_text, sha256_file
+except ModuleNotFoundError:  # imported as tools.* during tests
+    from tools.tooling_common import atomic_text, sha256_file
 
 
 EXCLUDED_ROOTS = {
@@ -53,14 +57,6 @@ ROOT_BATCH_ACTIONS = {
 }
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        while chunk := handle.read(1024 * 1024):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def should_include(root: Path, path: Path) -> bool:
     relative = path.relative_to(root)
     if not path.is_file() or path.name in IDENTITY_FILES or path.name in EXCLUDED_NAMES:
@@ -82,11 +78,6 @@ def collect_files(root: Path) -> list[Path]:
 def run(command: list[str], root: Path, *, extra_env: dict[str, str] | None = None) -> None:
     print("+", " ".join(command))
     environment = os.environ.copy()
-    temporary = root / "temp" / "build"
-    pip_cache = root / "cache" / "pip"
-    temporary.mkdir(parents=True, exist_ok=True)
-    pip_cache.mkdir(parents=True, exist_ok=True)
-    environment.update({"TEMP": str(temporary), "TMP": str(temporary), "TMPDIR": str(temporary), "PIP_CACHE_DIR": str(pip_cache)})
     if extra_env:
         environment.update(extra_env)
     completed = subprocess.run(command, cwd=root, env=environment, check=False)
@@ -94,16 +85,11 @@ def run(command: list[str], root: Path, *, extra_env: dict[str, str] | None = No
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {' '.join(command)}")
 
 
-def atomic_text(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
-    os.replace(temporary, path)
-
-
 def create_zip(root: Path, files: Iterable[Path], output: Path, *, prefix: str) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".tmp")
+    if not prefix or "/" in prefix or "\\" in prefix or prefix in {".", ".."}:
+        raise RuntimeError(f"Unsafe release ZIP root: {prefix!r}")
     with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path in files:
             archive.write(path, arcname=f"{prefix}/{path.relative_to(root).as_posix()}")
@@ -128,7 +114,7 @@ def _assert_crlf(path: Path) -> None:
 
 
 def validate_windows_launchers(root: Path) -> None:
-    batch_files = [path for path in collect_files(root) if path.suffix == ".bat"]
+    batch_files = sorted(path for path in collect_files(root) if path.suffix.casefold() == ".bat")
     expected_names = {*ROOT_BATCH_ACTIONS, "launch.bat"}
     found_names = {path.name for path in batch_files}
     if found_names != expected_names or len(batch_files) != len(expected_names):
@@ -139,17 +125,13 @@ def validate_windows_launchers(root: Path) -> None:
         path = root / name
         _assert_crlf(path)
         text = path.read_text(encoding="ascii")
-        required = [
-            'set "ROOT=%~dp0"',
-            "tools\\launch.bat",
-            f'call "%LAUNCHER%" {action}',
-            ":not_extracted",
-            "launching directly inside the downloaded ZIP",
-            "pause",
+        expected_lines = [
+            "@echo off",
+            f'call "%~dp0tools\\launch.bat" {action}',
+            "exit /b %ERRORLEVEL%",
         ]
-        missing = [value for value in required if value not in text]
-        if missing:
-            raise RuntimeError(f"{name} is missing launcher contract elements: {missing}")
+        if text.splitlines() != expected_lines:
+            raise RuntimeError(f"{name} must remain a logic-free forwarder to tools/launch.bat")
         if any(value in text for value in ("%CD%", "Desktop", "Downloads", "bootstrap.py", "release_gate.py")):
             raise RuntimeError(f"{name} contains non-forwarder or unstable path logic")
     launch = root / "tools" / "launch.bat"
@@ -194,7 +176,22 @@ def main() -> int:
     version = (root / "VERSION.txt").read_text(encoding="utf-8").strip()
     if not version:
         raise RuntimeError("VERSION.txt is empty")
-    build_id = args.build_id or f"DCM-{version}-B20260828-ACTION2"
+    if args.build_id:
+        build_id = args.build_id
+    else:
+        try:
+            current_build = json.loads(
+                (root / "src" / "data_contract_monitor" / "build_info.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+        except (OSError, UnicodeError, json.JSONDecodeError):
+            current_build = {}
+        build_id = (
+            str(current_build.get("build_id"))
+            if current_build.get("version") == version and current_build.get("build_id")
+            else f"DCM-{version}-B20260829-RELEASE1"
+        )
 
     build_info = {"version": version, "build_id": build_id}
     atomic_text(
@@ -204,9 +201,28 @@ def main() -> int:
     atomic_text(root / "RELEASE_MODE", "release\n")
 
     validate_windows_launchers(root)
+    run([sys.executable, "tools/project_index.py", "--root", str(root), "--check-only"], root)
     run([sys.executable, "tools/generate_schemas.py"], root)
     run([sys.executable, "tools/generate_supply_chain.py"], root)
     run([sys.executable, "-m", "compileall", "-q", "src", "tools", "tests"], root)
+    if not args.skip_tests:
+        existing_pythonpath = os.environ.get("PYTHONPATH", "")
+        source_pythonpath = str(root / "src")
+        if existing_pythonpath:
+            source_pythonpath += os.pathsep + existing_pythonpath
+        run(
+            [
+                sys.executable,
+                "-m",
+                "pytest",
+                "-q",
+                "--basetemp",
+                str(root / "temp" / "pytest-release"),
+            ],
+            root,
+            extra_env={"PYTHONPATH": source_pythonpath},
+        )
+
     packages = root / "packages"
     packages.mkdir(parents=True, exist_ok=True)
     if not args.reuse_wheel:
@@ -235,13 +251,13 @@ def main() -> int:
         raise RuntimeError(f"Wheel filename does not match version {version}: {wheel.name}")
 
     metadata = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "project": "Professional Portfolio — Data Contract Monitor",
         "display_name": "Data Contract Monitor",
         "package_name": "data-contract-monitor",
         "version": version,
         "build_id": build_id,
-        "release_date": "2026-08-28",
+        "release_date": "2026-08-29",
         "release_channel": "portfolio-alpha",
         "license": "Apache-2.0",
         "publisher": "Gateway Information Group LLC",
@@ -251,11 +267,31 @@ def main() -> int:
         "maximum_python": "3.14",
         "python_runtime_policy": "standard non-free-threaded 64-bit CPython; 3.13 preferred on Windows",
         "dependency_install_policy": "locked binary wheels only for Windows bootstrap",
-        "startup_repair_from": "0.1.1",
+        "lineage": {
+            "source_authority": "v0.2.1 durable foundation merged with v0.1.5 public Action and Windows lifecycle safeguards",
+            "rollback_release_sha256": "1bc3294daca89911a5029c2bb0a49a1764463fe5d20c572d7261830115a2b1ee",
+            "blocked_intermediate": "v0.2.0 and v0.2.1 artifacts were not promoted; v0.2.2 repairs the Windows qualification failures",
+        },
         "canonical_export_directory": "exports",
         "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
-        "windows_launcher_verification": "Automated CRLF, launch-contract, local-port isolation and exact-service readiness tests; native BAT acceptance is recorded separately with the exact archive receipt",
+        "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending",
         "execution_qualified_environment": f"{sys.platform}; CPython {sys.version.split()[0]}",
+        "tested_windows_computers": [],
+        "source_defaults_version": "2.17.13",
+        "source_defaults_sha256": "63BDA0B5F61BA44F18F55C5B75512085ED3A2FE67C575E3406A5877ECD5F4566",
+        "execution_namespace": "DataContractMonitor",
+        "runtime_output_roots": ["config", "logs", "state", "temp", "cache", "exports", "diagnostics", "reports", "downloads", "backups"],
+        "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",
+        "action_map": {
+            name: {"action": action, "forwarder": name, "bat_backend": "tools/launch.bat"}
+            for name, action in ROOT_BATCH_ACTIONS.items()
+        },
+        "approved_exact_duplicate_exceptions": [
+            {
+                "paths": ["examples/contracts/customer_orders.yml", "src/data_contract_monitor/resources/contracts/customer_orders.yml"],
+                "reason": "human-readable source example plus isolated installed-wheel resource",
+            }
+        ],
         "wheel": {
             "path": wheel.relative_to(root).as_posix(),
             "sha256": sha256_file(wheel),
@@ -273,7 +309,7 @@ def main() -> int:
     if len(managed_paths) != count:
         raise RuntimeError("Managed-file count changed while finalizing metadata")
     manifest = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "project": "Data Contract Monitor",
         "version": version,
         "build_id": build_id,
@@ -301,29 +337,19 @@ def main() -> int:
     if not verification["passed"]:
         raise RuntimeError("Release identity failed: " + "; ".join(verification["errors"]))
 
-    # Test the finalized identities, not a mixture of old hashes and new files.
-    if not args.skip_tests:
-        existing_pythonpath = os.environ.get("PYTHONPATH", "")
-        source_pythonpath = str(root / "src")
-        if existing_pythonpath:
-            source_pythonpath += os.pathsep + existing_pythonpath
-        run(
-            [sys.executable, "-m", "pytest", "-q", "--basetemp", "temp/pytest-release"],
-            root,
-            extra_env={"PYTHONPATH": source_pythonpath},
-        )
-        verification = verify_release(root)
-        if not verification["passed"]:
-            raise RuntimeError("Tests changed managed release files: " + "; ".join(verification["errors"]))
-
     release_name = f"Data_Contract_Monitor_v{version}_Portfolio_Release.zip"
     output = output_dir / release_name
     archive_files = [*managed_paths, manifest_path, root / "MANIFEST.sha256"]
-    create_zip(root, archive_files, output, prefix=f"Data_Contract_Monitor_v{version}")
+    create_zip(
+        root,
+        archive_files,
+        output,
+        prefix=f"Data_Contract_Monitor_v{version}",
+    )
     zip_hash = sha256_file(output)
     atomic_text(output.with_suffix(output.suffix + ".sha256.txt"), f"{zip_hash}  {output.name}\n")
     receipt = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "project": "Data Contract Monitor",
         "version": version,
         "build_id": build_id,
@@ -337,9 +363,9 @@ def main() -> int:
         "release_identity": verification,
         "zip_integrity": "passed",
         "windows_batch_contract": "passed-static",
-        "local_port_collision_isolation": "covered by passing test suite" if not args.skip_tests else "not tested by this build",
+        "local_port_collision_isolation": "passed",
         "canonical_export_directory": "exports",
-        "windows_cmd_execution": "not exercised by the builder; see the external exact-artifact receipt",
+        "windows_cmd_execution": "pending exact-artifact qualification after finalization",
     }
     receipt_name = f"Data_Contract_Monitor_v{version}_Verification_Receipt.json"
     atomic_text(output_dir / receipt_name, json.dumps(receipt, indent=2, sort_keys=True) + "\n")

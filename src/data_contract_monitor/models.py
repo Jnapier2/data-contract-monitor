@@ -72,7 +72,13 @@ class DatasetRule(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str | None = None
-    type: Literal["row_count", "unique_combination", "null_ratio", "conditional_not_null"]
+    type: Literal[
+        "row_count",
+        "unique_combination",
+        "null_ratio",
+        "conditional_not_null",
+        "aggregate_reconciliation",
+    ]
     severity: Severity = Severity.ERROR
     description: str | None = None
     columns: list[str] | None = None
@@ -83,6 +89,9 @@ class DatasetRule(BaseModel):
     when_column: str | None = None
     when_equals: Any | None = None
     then_column: str | None = None
+    left_column: str | None = None
+    right_expression: str | None = None
+    tolerance: float = Field(default=0.0, ge=0)
 
     @model_validator(mode="after")
     def validate_rule_shape(self) -> DatasetRule:
@@ -97,6 +106,12 @@ class DatasetRule(BaseModel):
         ):
             raise ValueError(
                 "conditional_not_null requires when_column, when_equals, and then_column"
+            )
+        if self.type == "aggregate_reconciliation" and (
+            not self.left_column or not self.right_expression
+        ):
+            raise ValueError(
+                "aggregate_reconciliation requires left_column and right_expression"
             )
         return self
 
@@ -220,7 +235,7 @@ class ValidationSummary(BaseModel):
 class ValidationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
     tool_version: str
     run_id: str
     dataset_name: str
@@ -237,6 +252,9 @@ class ValidationResult(BaseModel):
     findings: list[Finding]
     profile: DatasetProfile
     drift: DriftSummary
+    completeness: Literal["complete", "partial"] = "complete"
+    findings_truncated: bool = False
+    limits_applied: dict[str, int | float] = Field(default_factory=dict)
     privacy_note: str = (
         "Reports contain aggregate statistics and row numbers, not raw cell values."
     )

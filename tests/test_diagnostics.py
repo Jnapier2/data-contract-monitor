@@ -14,7 +14,7 @@ def _prepare_root(root: Path) -> None:
     (root / "logs").mkdir(parents=True, exist_ok=True)
     (root / "reports").mkdir(parents=True, exist_ok=True)
     (root / "state").mkdir(parents=True, exist_ok=True)
-    (root / "VERSION.txt").write_text("0.1.2\n", encoding="utf-8")
+    (root / "VERSION.txt").write_text("0.2.2\n", encoding="utf-8")
     (root / "CHANGELOG.md").write_text("test\n", encoding="utf-8")
     (root / "LATEST_LAUNCH_STATUS.txt").write_text(
         f"Project root: {Path.home()}\nDashboard URL: http://192.168.1.9:8765\n",
@@ -35,11 +35,17 @@ def _prepare_root(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "state" / "runtime_environment.json").write_text(
-        json.dumps({"python_version": "3.13.15", "application_version": "0.1.2"}),
+        json.dumps({"python_version": "3.13.15", "application_version": "0.2.2"}),
         encoding="utf-8",
     )
-    (root / "reports" / "latest_result.json").write_text(
+    run_dir = root / "reports" / "runs" / "test-run"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    (run_dir / "result.json").write_text(
         json.dumps({"contract_label": "private.yml", "data_label": "secret.csv", "summary": {"passed": False}}),
+        encoding="utf-8",
+    )
+    (root / "state" / "latest_completed_run.json").write_text(
+        json.dumps({"run_id": "test-run", "artifact_dir": "reports/runs/test-run"}),
         encoding="utf-8",
     )
 
@@ -152,4 +158,4 @@ def test_diagnostics_import_without_third_party_dependencies(project_root: Path)
         text=True,
     )
     assert completed.returncode == 0, completed.stderr
-    assert "0.1.5 DiagnosticManager" in completed.stdout
+    assert "0.2.2 DiagnosticManager" in completed.stdout

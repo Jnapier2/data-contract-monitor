@@ -5,16 +5,20 @@ import re
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from time import monotonic
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
 
 from . import __version__
 from .contract_loader import load_contract
+from .contract_plan import compile_contract
 from .drift import compare_profile, load_baseline
+from .expression import evaluate_numeric_expression, referenced_names
 from .history import append_history, default_history_path
 from .io import read_dataset, sha256_file
+from .limits import ResourceLimitError, ResourceLimits
 from .models import (
     Contract,
     DatasetProfile,
@@ -31,6 +35,29 @@ from .profiler import profile_dataset
 
 class ValidationExecutionError(RuntimeError):
     """Raised for execution failures that are not data-quality findings."""
+
+
+class ValidationCancelled(ValidationExecutionError):
+    """Raised when a bounded validation job is cancelled cooperatively."""
+
+
+def _checkpoint(
+    stage: str,
+    percent: int,
+    *,
+    started_monotonic: float,
+    limits: ResourceLimits,
+    progress: Callable[[str, int], None] | None,
+    cancelled: Callable[[], bool] | None,
+) -> None:
+    if cancelled is not None and cancelled():
+        raise ValidationCancelled(f"Validation cancelled during {stage}.")
+    if monotonic() - started_monotonic > limits.max_runtime_seconds:
+        raise ValidationExecutionError(
+            f"Validation exceeded the {limits.max_runtime_seconds:g}-second execution budget."
+        )
+    if progress is not None:
+        progress(stage, percent)
 
 
 def _finding_id(rule_id: str, column: str | None, message: str) -> str:
@@ -440,6 +467,40 @@ def _validate_dataset_rules(frame: pd.DataFrame, rules: list[DatasetRule]) -> li
                         sample_rows=_sample_rows(mask),
                     )
                 )
+        elif rule.type == "aggregate_reconciliation":
+            if not rule.left_column or not rule.right_expression:
+                continue
+            expression_columns = referenced_names(rule.right_expression)
+            required = {rule.left_column, *expression_columns}
+            if not required.issubset(frame.columns):
+                continue
+            left = pd.to_numeric(frame[rule.left_column], errors="coerce")
+            right = evaluate_numeric_expression(
+                rule.right_expression,
+                {name: frame[name] for name in expression_columns},
+            )
+            comparable = left.notna() & right.notna() & np.isfinite(left) & np.isfinite(right)
+            mask = comparable & ((left - right).abs() > rule.tolerance)
+            count = int(mask.sum())
+            if count:
+                findings.append(
+                    _finding(
+                        rule_id=f"dataset.aggregate_reconciliation.{rule_name}",
+                        severity=rule.severity,
+                        category="reconciliation",
+                        title="Aggregate reconciliation does not balance",
+                        message=(
+                            f"{count} row(s) differ between '{rule.left_column}' and the approved "
+                            f"expression by more than tolerance {rule.tolerance}."
+                        ),
+                        column=rule.left_column,
+                        affected_rows=count,
+                        sample_rows=_sample_rows(mask),
+                        expected=f"abs({rule.left_column} - ({rule.right_expression})) <= {rule.tolerance}",
+                        observed=f"{count} rows outside tolerance",
+                        remediation="Correct component values or approve a contract change to the reconciliation formula.",
+                    )
+                )
     return findings
 
 
@@ -514,27 +575,87 @@ def validate_files(
     sheet_name: str | int = 0,
     record_history: bool = True,
     history_path: Path | None = None,
+    limits: ResourceLimits | None = None,
+    progress: Callable[[str, int], None] | None = None,
+    cancelled: Callable[[], bool] | None = None,
 ) -> ValidationResult:
     started = datetime.now(UTC)
+    started_monotonic = monotonic()
     run_id = uuid.uuid4().hex
+    effective_limits = limits or ResourceLimits()
+    try:
+        effective_limits.check_file_sizes(contract_path, data_path)
+    except (OSError, ResourceLimitError) as exc:
+        raise ValidationExecutionError(str(exc)) from exc
+
+    _checkpoint(
+        "loading_contract", 10, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
     contract = load_contract(contract_path, object_name=object_name)
+    plan = compile_contract(contract)
+
+    _checkpoint(
+        "reading_dataset", 25, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
     frame = read_dataset(data_path, sheet_name=sheet_name)
-    profile = profile_dataset(frame, include_pii=contract.privacy.detect_pii)
+    try:
+        effective_limits.check_shape(len(frame), len(frame.columns))
+    except ResourceLimitError as exc:
+        raise ValidationExecutionError(str(exc)) from exc
+
+    _checkpoint(
+        "profiling", 45, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
+    profile = profile_dataset(frame, include_pii=plan.contract.privacy.detect_pii)
     drift = DriftSummary()
     if baseline_path:
         drift = compare_profile(profile, load_baseline(baseline_path), baseline_path)
+
+    _checkpoint(
+        "validating", 65, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
     findings = [
-        *_validate_columns(frame, contract),
-        *_validate_dataset_rules(frame, contract.dataset_rules),
-        *_privacy_findings(contract, profile),
+        *_validate_columns(frame, plan.contract),
+        *_validate_dataset_rules(frame, plan.contract.dataset_rules),
+        *_privacy_findings(plan.contract, profile),
         *_drift_findings(drift),
     ]
     findings.sort(key=lambda item: (-SEVERITY_ORDER[item.severity], item.category, item.rule_id, item.column or ""))
+    findings_truncated = False
+    completeness = "complete"
+    if len(findings) > effective_limits.max_findings:
+        findings_truncated = True
+        completeness = "partial"
+        original_count = len(findings)
+        findings = findings[: max(0, effective_limits.max_findings - 1)]
+        findings.append(
+            _finding(
+                rule_id="runtime.finding_limit",
+                severity=Severity.CRITICAL,
+                category="runtime",
+                title="Finding evidence limit reached",
+                message=(
+                    f"Validation produced {original_count} findings; evidence was capped at "
+                    f"{effective_limits.max_findings}. The result is partial."
+                ),
+                expected=f"<= {effective_limits.max_findings} findings",
+                observed=f"{original_count} findings",
+            )
+        )
+
+    _checkpoint(
+        "finalizing", 80, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
     completed = datetime.now(UTC)
     result = ValidationResult(
         tool_version=__version__,
         run_id=run_id,
-        dataset_name=contract.dataset.name,
+        dataset_name=plan.contract.dataset.name,
         contract_label=contract_path.name,
         data_label=data_path.name,
         started_at=started,
@@ -542,13 +663,20 @@ def validate_files(
         duration_ms=max(0, int((completed - started).total_seconds() * 1000)),
         contract_sha256=sha256_file(contract_path),
         data_sha256=sha256_file(data_path),
-        source_format=contract.source_format,
-        source_standard_version=contract.source_standard_version,
+        source_format=plan.contract.source_format,
+        source_standard_version=plan.contract.source_standard_version,
         summary=_summary(findings, fail_on),
         findings=findings,
         profile=profile,
         drift=drift,
+        completeness=completeness,
+        findings_truncated=findings_truncated,
+        limits_applied=effective_limits.public_dict(),
     )
     if record_history:
         append_history(history_path or default_history_path(contract_path), result)
+    _checkpoint(
+        "completed", 85, started_monotonic=started_monotonic, limits=effective_limits,
+        progress=progress, cancelled=cancelled,
+    )
     return result

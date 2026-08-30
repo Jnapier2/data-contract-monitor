@@ -1,21 +1,15 @@
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 
 import pandas as pd
+
+from .atomic import sha256_file
 
 
 class DataReadError(ValueError):
     """Raised when a dataset cannot be loaded."""
 
-
-def sha256_file(path: Path, chunk_size: int = 1024 * 1024) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        while chunk := handle.read(chunk_size):
-            digest.update(chunk)
-    return digest.hexdigest()
 
 
 def read_dataset(path: Path, *, sheet_name: str | int = 0) -> pd.DataFrame:

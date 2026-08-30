@@ -27,10 +27,11 @@ def test_release_mode_checks_every_managed_hash(tmp_path: Path) -> None:
         json.dumps({"version": "0.1.0", "build_id": build_id}), encoding="utf-8"
     )
     managed_hash = hashlib.sha256((tmp_path / "managed.txt").read_bytes()).hexdigest()
+    managed_size = (tmp_path / "managed.txt").stat().st_size
     manifest = {
         "version": "0.1.0",
         "build_id": build_id,
-        "managed_files": [{"path": "managed.txt", "sha256": managed_hash, "size": (tmp_path / "managed.txt").stat().st_size}],
+        "managed_files": [{"path": "managed.txt", "sha256": managed_hash, "size": managed_size}],
     }
     (tmp_path / "MANIFEST.json").write_text(json.dumps(manifest), encoding="utf-8")
     manifest_hash = hashlib.sha256((tmp_path / "MANIFEST.json").read_bytes()).hexdigest()

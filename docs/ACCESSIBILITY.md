@@ -16,21 +16,13 @@ The dashboard and generated HTML report were designed for keyboard, screen-magni
 - No information encoded only in an icon
 - Plain-language error states
 
-## Original release review
-
-The following is retained evidence from the original release, not a new cross-device accessibility certification for every maintenance build.
+## Review performed
 
 - Full dashboard flow completed with keyboard controls
 - Chromium accessibility tree inspected for named buttons, inputs, headings, and tables
-- Responsive layout reviewed visually; the later maintenance review found and corrected grid overflow from wide tables
+- 320-pixel responsive layout reviewed visually
 - Dark color scheme reviewed visually
 - Generated report opened independently without application CSS or JavaScript
-
-## Version 0.1.3 review
-
-The current dashboard was checked at 320-, 390-, 768-, and 1920-pixel browser widths. The page stayed within the available viewport while wide tables scrolled inside their own panels. The desktop and mobile screenshots were refreshed from the running application. Dark-theme status labels and the skip link retain readable foreground colors.
-
-This is a focused layout and interaction check, not a formal accessibility conformance audit.
 
 ## Known gaps
 

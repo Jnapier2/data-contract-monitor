@@ -20,7 +20,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from .atomic_io import atomic_write_text as _atomic_text
+from .atomic import atomic_write_json, atomic_write_text
 
 SERVICE_ID = "data-contract-monitor"
 DEFAULT_HOST = "127.0.0.1"
@@ -211,9 +211,6 @@ def open_browser_when_ready(
     return False
 
 
-def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
-    _atomic_text(path, json.dumps(payload, indent=2, sort_keys=True) + "\n")
-
 
 def record_endpoint(
     root: Path,
@@ -248,7 +245,7 @@ def record_endpoint(
     if note:
         payload["note"] = note
     destination = root / "state" / "dashboard_endpoint.json"
-    _atomic_json(destination, payload)
+    atomic_write_json(destination, payload)
 
     status_path = root / "LATEST_LAUNCH_STATUS.txt"
     try:
@@ -277,5 +274,5 @@ def record_endpoint(
     )
     if note:
         retained.append(f"Dashboard note: {note}")
-    _atomic_text(status_path, "\n".join(retained) + "\n")
+    atomic_write_text(status_path, "\n".join(retained) + "\n")
     return destination

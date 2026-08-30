@@ -30,7 +30,7 @@
           <p class="step">Step 1</p>
           <h2 id="validate-title">Validate a dataset</h2>
         </div>
-        <p class="privacy-copy">Files are processed locally and removed after the request. Reports omit raw cell values.</p>
+        <p class="privacy-copy">Files are processed by the local FastAPI service and removed after the request. Reports omit raw cell values.</p>
       </div>
       <form id="validate-form">
         <div class="form-grid">
@@ -57,6 +57,7 @@
           <button class="primary" type="submit">Run validation</button>
           <button id="demo-good" class="secondary" type="button">Run passing demo</button>
           <button id="demo-bad" class="secondary" type="button">Run failing demo</button>
+          <button id="cancel-job" class="secondary" type="button" hidden>Cancel active job</button>
         </div>
       </form>
       <div id="status" class="status" role="status" aria-live="polite">Ready.</div>
@@ -132,7 +133,7 @@
   </main>
 
   <footer>
-    <p>Data Contract Monitor 0.1.5 · Apache-2.0 · Copyright © 2026 Gateway Information Group LLC. All rights reserved.</p>
+    <p>Data Contract Monitor 0.2.2 · Apache-2.0 · Copyright © 2026 Gateway Information Group LLC. All rights reserved.</p>
   </footer>
 </body>
 </html>

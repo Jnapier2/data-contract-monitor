@@ -1,47 +1,27 @@
 # Changelog
 
-## 0.1.5 — 2026-08-28
-
-- Fixed invalid YAML in the reusable GitHub Action's input descriptions.
-- Removed the Action's caller-dependent cache setup and installed its reviewed dependency lock before the application. This also avoids a setup-python cache-glob failure when a local Action path contains `/./`.
-- Kept Action runtime output inside the caller's workspace.
-- Added YAML parsing regressions and a real composite-Action CI job covering passing and intentionally failing datasets from a caller without its own Python lockfile.
-
-The local validation engine and Windows startup behavior are unchanged. Version 0.1.4 remains available with its integration limitation documented; use v0.1.5 for new automation integrations.
-
-## 0.1.4 — 2026-08-28
-
-- Corrected the alpha security-support notice and documented a Unix launch command that does not depend on executable file permissions. The publication build is `DCM-0.1.4-B20260828-PUBLIC1`; the tested `SHUTDOWN2` package remains retained separately.
-
-- Windows cancellation stops the launched process within a bounded cleanup budget and records stopped status instead of leaving the dashboard marked running.
-- Delayed browser-readiness checks cannot overwrite stopped status; cancelled checks do not open a browser.
-- Setup and runtime share one standard-library-only atomic status writer, including bounded handling of brief Windows file locks.
-- Normal cancellation does not trigger critical crash exports. CLI error and cancellation exits no longer produce an unhandled wrapper exception.
-- Added regression coverage for cancellation, bounded cleanup, ownership checks, late readiness, shared file writes, and CLI exit handling.
-
-Native and exact-package results are recorded in the separate acceptance receipts. The prior v0.1.3 package remains available for comparison and rollback.
-
 All notable changes are documented here. The project follows semantic versioning after the first public release.
 
-## 0.1.3 — 2026-08-28
+## 0.2.2 — 2026-08-29
 
-### Fixed
+- Repaired Windows atomic status writes and made temporary-file replacement resilient to brief antivirus and file-indexing locks.
+- Restored bounded Ctrl+C handling so cancellation stops only the launched child process, records a clean stopped state, and does not create a Critical export.
+- Restored legacy Windows console fallback so Unicode progress output remains visible without corrupting UTF-8 logs.
+- Restored the caller-independent composite Action installation path and pinned the setup action by commit.
+- Corrected cross-platform newline accounting and release-inventory exclusions discovered during native Windows qualification.
+- Expanded the merged regression suite from 49 to 72 tests, including public Action, shutdown, launcher, and release-inventory safeguards.
 
-- Prevented legacy Windows terminal encodings from interrupting successful verification or demo commands.
-- Removed redundant Windows wrapper writes to the status file already finalized by the bootstrap.
-- Made dashboard status replacement resilient to brief Windows file locks, with bounded retries and independent temporary files; persistent failures keep the prior complete status.
-- Kept wide results tables inside independently scrollable panels on narrow screens.
-- Improved dark-theme status and skip-link readability.
-- Pinned GitHub Actions dependencies to immutable commits and retained read-only workflow permissions.
-- Corrected release finalization so generated schemas, dependency evidence, metadata, and the wheel are covered by the exact manifest before tests run.
-- Corrected CI checks to compare only the JavaScript that the TypeScript build produces.
-- Kept the dashboard available when a local TypeScript build contains JavaScript but no HTML or stylesheet.
-- Made the integrity fixture portable across Windows and Unix line endings and excluded virtual-environment activation scripts from the first-party launcher inventory.
-- Pinned the Windows terminal dependency and excluded dependency stores from release packaging.
-- Kept build temporary files and caches within the project folder.
-- Preserved the v0.1.2 rollback archive, Apache-2.0 license, stable Windows entrypoints, and synthetic demonstrations.
+## 0.2.1 — 2026-08-29
 
-See `VERIFICATION_REPORT.md` for checks and platform limitations.
+- Rebased the durable-foundation work on the exact v0.1.2 Windows-confirmed rollback authority; the blocked v0.2.0 delivery is not used as a release baseline.
+- Added transactional SQLite run/job state, versioned migration backup, immutable per-run artifacts, bounded background validation jobs, progress/cancellation, resource budgets, compiled rule planning, and aggregate reconciliation.
+- Added per-launch local API session protection and strict loopback Origin parsing for modifying requests.
+- Consolidated six root BATs into logic-free action forwarders backed by one active `tools/launch.bat` implementation.
+- Consolidated application atomic/hash helpers and pre-install tooling helpers within their required execution boundaries.
+- Added full retained-file indexing and release-time rejection of unexpected BAT/CMD files or unapproved exact duplicates.
+- Moved Export20 temporary ZIP staging to project `temp/` while preserving root `exports/` as the only final ZIP destination.
+- Removed stale runtime residue, empty package placeholders, and the stale v0.1.2 wheel from source preparation.
+- Updated release identity metadata to Gateway shared defaults v2.17.13.
 
 ## 0.1.2 — 2026-08-28
 

@@ -19,6 +19,8 @@ const findingCount = byId("finding-count");
 const severityFilter = byId("severity-filter");
 const historyBody = byId("history-body");
 let latestResult = null;
+let activeJobId = null;
+const cancelJobButton = byId("cancel-job");
 const textCell = (text) => {
     const cell = document.createElement("td");
     cell.textContent = text;
@@ -28,8 +30,9 @@ const setBusy = (message, busy) => {
     statusNode.textContent = message;
     statusNode.classList.remove("error");
     for (const button of document.querySelectorAll("button")) {
-        button.disabled = busy;
+        button.disabled = busy && button !== cancelJobButton;
     }
+    cancelJobButton.hidden = !busy || activeJobId === null;
 };
 const setError = (message) => {
     statusNode.textContent = message;
@@ -136,22 +139,56 @@ const parseResponse = async (response) => {
     }
     return payload;
 };
+const sleep = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+const parseJobSubmission = async (response) => {
+    const payload = await response.json();
+    if (!response.ok) {
+        const detail = "detail" in payload && payload.detail ? payload.detail : `Request failed with status ${response.status}`;
+        throw new Error(detail);
+    }
+    return payload;
+};
+const waitForJob = async (jobId) => {
+    const deadline = Date.now() + 5 * 60 * 1000;
+    while (Date.now() < deadline) {
+        const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`, { cache: "no-store" });
+        if (!response.ok)
+            throw new Error(`Job status failed with status ${response.status}`);
+        const job = await response.json();
+        statusNode.textContent = `${job.progress}% · ${job.message}`;
+        if (job.state === "completed" && job.result)
+            return job.result;
+        if (job.state === "failed")
+            throw new Error(job.error ?? "Validation job failed.");
+        if (job.state === "cancelled")
+            throw new Error("Validation job was cancelled.");
+        await sleep(250);
+    }
+    throw new Error("Validation job exceeded the dashboard wait limit.");
+};
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!contractFile.files?.[0] || !dataFile.files?.[0]) {
         setError("Choose both a YAML contract and a dataset.");
         return;
     }
-    setBusy("Validating locally…", true);
     const body = new FormData();
     body.append("contract", contractFile.files[0]);
     body.append("data", dataFile.files[0]);
     try {
-        const response = await fetch(`/api/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
-        renderResult(await parseResponse(response));
+        const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
+        const submission = await parseJobSubmission(response);
+        activeJobId = submission.job_id;
+        setBusy("Queued locally…", true);
+        const result = await waitForJob(submission.job_id);
+        activeJobId = null;
+        renderResult(result);
+        cancelJobButton.hidden = true;
         await loadHistory();
     }
     catch (error) {
+        activeJobId = null;
+        cancelJobButton.hidden = true;
         setError(error instanceof Error ? error.message : "Validation failed.");
     }
 });
@@ -166,6 +203,18 @@ const runDemo = async (scenario) => {
         setError(error instanceof Error ? error.message : "Demo failed.");
     }
 };
+cancelJobButton.addEventListener("click", async () => {
+    if (!activeJobId)
+        return;
+    cancelJobButton.disabled = true;
+    try {
+        await fetch(`/api/jobs/${encodeURIComponent(activeJobId)}`, { method: "DELETE" });
+        statusNode.textContent = "Cancellation requested…";
+    }
+    finally {
+        cancelJobButton.disabled = false;
+    }
+});
 byId("demo-good").addEventListener("click", () => void runDemo("good"));
 byId("demo-bad").addEventListener("click", () => void runDemo("bad"));
 severityFilter.addEventListener("change", renderFindings);
