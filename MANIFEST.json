@@ -1,6 +1,6 @@
 {
   "build_id": "DCM-0.2.2-B20260829-WINDOWS1",
-  "created_at": "2026-08-30T00:12:44.282007+00:00",
+  "created_at": "2026-08-30T00:21:10.971770+00:00",
   "hash_algorithm": "SHA-256",
   "managed_file_count": 132,
   "managed_files": [
@@ -26,12 +26,12 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "sha256": "924ea3b9a1f8c3cca509edc532096d4dce82bae5130dfea1af066cb929728ae1",
-      "size": 4130
+      "sha256": "cfce469fd1044217e7069cdd82b14fd692696ea969bfee69a2c4ad1802be2b5e",
+      "size": 3970
     },
     {
       "path": ".github/workflows/release.yml",
-      "sha256": "bf12897d05fce94c129d08883dade7b2ba25f38024000d0ee6cfe5969f04ebfb",
+      "sha256": "013681b8016b0e9aaa24ff869d654682959088cb5b2a0211fda15abca803bf1e",
       "size": 1040
     },
     {
@@ -241,12 +241,12 @@
     },
     {
       "path": "PACKAGE_METADATA.json",
-      "sha256": "08366d1f304cab1f68c1272258016416fbf71bedc029519be23e1a97d4cbe911",
+      "sha256": "96a24cdc87e603f4843d763bb41e5fa78cde3ee1c6a62e30c9191460cb5a377b",
       "size": 3651
     },
     {
       "path": "packages/data_contract_monitor-0.2.2-py3-none-any.whl",
-      "sha256": "66e81c663462798db97189a0a31c4f831c20bdec70f3026de9117bb38543dc05",
+      "sha256": "5c9950a32634d620f9f7a80e63eb2ba69c7aa8d6fb1ec04cfea278dddf2f6bc4",
       "size": 75313
     },
     {
@@ -296,7 +296,7 @@
     },
     {
       "path": "SBOM.spdx.json",
-      "sha256": "123f181b95030fc934c40b463d601143f26ced9152c17490c43a60d642582777",
+      "sha256": "f0af9542b2065b32446077d4744f49bad8e4497556c84e0689f9ad8161999b54",
       "size": 41573
     },
     {

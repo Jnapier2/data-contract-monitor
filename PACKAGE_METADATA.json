@@ -84,7 +84,7 @@
   "version": "0.2.2",
   "wheel": {
     "path": "packages/data_contract_monitor-0.2.2-py3-none-any.whl",
-    "sha256": "66e81c663462798db97189a0a31c4f831c20bdec70f3026de9117bb38543dc05",
+    "sha256": "5c9950a32634d620f9f7a80e63eb2ba69c7aa8d6fb1ec04cfea278dddf2f6bc4",
     "size": 75313
   },
   "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending"
