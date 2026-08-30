@@ -252,7 +252,7 @@ def main() -> int:
 
     metadata = {
         "schema_version": "1.2",
-        "project": "Professional Portfolio — Data Contract Monitor",
+        "project": "Data Contract Monitor",
         "display_name": "Data Contract Monitor",
         "package_name": "data-contract-monitor",
         "version": version,
@@ -277,8 +277,6 @@ def main() -> int:
         "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending",
         "execution_qualified_environment": f"{sys.platform}; CPython {sys.version.split()[0]}",
         "tested_windows_computers": [],
-        "source_defaults_version": "2.17.13",
-        "source_defaults_sha256": "63BDA0B5F61BA44F18F55C5B75512085ED3A2FE67C575E3406A5877ECD5F4566",
         "execution_namespace": "DataContractMonitor",
         "runtime_output_roots": ["config", "logs", "state", "temp", "cache", "exports", "diagnostics", "reports", "downloads", "backups"],
         "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",

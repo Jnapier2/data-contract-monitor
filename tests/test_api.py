@@ -39,6 +39,14 @@ def test_api_health_and_builtin_demos(project_root: Path, monkeypatch) -> None:
         bad = client.post("/api/demo/bad")
         assert good.status_code == 200 and good.json()["summary"]["passed"] is True
         assert bad.status_code == 200 and bad.json()["summary"]["passed"] is False
+        run_id = good.json()["run_id"]
+        artifact = client.get(f"/api/runs/{run_id}/artifacts/artifact_manifest.json")
+        assert artifact.status_code == 200
+        assert client.get("/api/runs/not-a-run").status_code == 404
+        invalid_artifact = client.get(
+            f"/api/runs/{run_id}/artifacts/not-an-artifact.txt"
+        )
+        assert invalid_artifact.status_code == 404
 
 
 def test_api_modifying_requests_require_local_session(project_root: Path, monkeypatch) -> None:

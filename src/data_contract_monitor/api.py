@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import os
+import re
 import secrets
 import shutil
 import tempfile
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from urllib.parse import urlparse
 from typing import Annotated
+from urllib.parse import urlparse
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
@@ -29,6 +31,14 @@ from .state_store import StateStore
 SESSION_COOKIE = "dcm_session"
 MODIFYING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 SAFE_ORIGIN_HOSTS = {"127.0.0.1", "localhost", "::1"}
+RUN_ID_PATTERN = re.compile(r"^[0-9a-f]{32}$")
+ARTIFACT_FILENAMES = {
+    "data_contract_report.json": "data_contract_report.json",
+    "data_contract_report.html": "data_contract_report.html",
+    "data_contract_report.xml": "data_contract_report.xml",
+    "data_contract_report.sarif": "data_contract_report.sarif",
+    "artifact_manifest.json": "artifact_manifest.json",
+}
 
 
 def _safe_local_origin(value: str) -> bool:
@@ -49,6 +59,39 @@ def _web_root() -> Path:
     if (release_web / "index.html").is_file():
         return release_web
     return Path(__file__).resolve().parent / "web"
+
+
+def _run_artifact_path(root: Path, run_id: str, name: str) -> Path | None:
+    """Resolve a published artifact without using request data in a path expression."""
+    artifact_name = ARTIFACT_FILENAMES.get(name)
+    if artifact_name is None or RUN_ID_PATTERN.fullmatch(run_id) is None:
+        return None
+
+    runs_root = (root / "reports" / "runs").resolve()
+    if not runs_root.is_dir():
+        return None
+
+    try:
+        entries = os.scandir(runs_root)
+    except OSError:
+        return None
+    with entries:
+        for entry in entries:
+            if entry.name != run_id or entry.is_symlink():
+                continue
+            try:
+                if not entry.is_dir(follow_symlinks=False):
+                    return None
+                run_directory = Path(entry.path).resolve(strict=True)
+            except OSError:
+                return None
+            if run_directory.parent != runs_root:
+                return None
+            path = run_directory / artifact_name
+            if path.is_symlink() or not path.is_file():
+                return None
+            return path
+    return None
 
 
 async def _save_upload(upload: UploadFile, destination: Path, maximum: int) -> None:
@@ -80,7 +123,7 @@ def create_app() -> FastAPI:
     api_token = os.environ.get("DCM_API_TOKEN") or secrets.token_hex(32)
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI):
+    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         yield
         manager.shutdown()
 
@@ -99,7 +142,9 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def local_write_guard(request: Request, call_next):
+    async def local_write_guard(
+        request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
         if request.method in MODIFYING_METHODS and request.url.path.startswith("/api/"):
             origin = request.headers.get("origin")
             if origin and not _safe_local_origin(origin):
@@ -226,6 +271,8 @@ def create_app() -> FastAPI:
 
     @app.get("/api/runs/{run_id}")
     def run_result(run_id: str) -> dict[str, object]:
+        if RUN_ID_PATTERN.fullmatch(run_id) is None:
+            raise HTTPException(status_code=404, detail="Run not found")
         result = store.get_result(run_id)
         if result is None:
             raise HTTPException(status_code=404, detail="Run not found")
@@ -233,17 +280,8 @@ def create_app() -> FastAPI:
 
     @app.get("/api/runs/{run_id}/artifacts/{name}")
     def run_artifact(run_id: str, name: str) -> FileResponse:
-        allowed = {
-            "data_contract_report.json",
-            "data_contract_report.html",
-            "data_contract_report.xml",
-            "data_contract_report.sarif",
-            "artifact_manifest.json",
-        }
-        if name not in allowed:
-            raise HTTPException(status_code=404, detail="Artifact not found")
-        path = root / "reports" / "runs" / run_id / name
-        if not path.is_file():
+        path = _run_artifact_path(root, run_id, name)
+        if path is None:
             raise HTTPException(status_code=404, detail="Artifact not found")
         return FileResponse(path)
 

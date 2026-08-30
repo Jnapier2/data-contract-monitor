@@ -4,8 +4,6 @@ from pathlib import Path
 
 import pandas as pd
 
-from .atomic import sha256_file
-
 
 class DataReadError(ValueError):
     """Raised when a dataset cannot be loaded."""

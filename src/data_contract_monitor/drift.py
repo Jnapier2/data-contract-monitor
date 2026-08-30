@@ -4,7 +4,7 @@ import json
 import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .models import DatasetProfile, DriftChange, DriftSummary, Severity
 
@@ -38,12 +38,12 @@ def write_baseline(path: Path, snapshot: dict[str, Any]) -> None:
 
 def load_baseline(path: Path) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload: Any = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
         raise BaselineError(f"Unable to read baseline: {exc}") from exc
-    if not isinstance(payload.get("columns"), list):
+    if not isinstance(payload, dict) or not isinstance(payload.get("columns"), list):
         raise BaselineError("Baseline must contain a columns list")
-    return payload
+    return cast(dict[str, Any], payload)
 
 
 def compare_profile(profile: DatasetProfile, baseline: dict[str, Any], path: Path) -> DriftSummary:

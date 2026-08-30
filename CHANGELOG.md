@@ -2,6 +2,13 @@
 
 All notable changes are documented here. The project follows semantic versioning after the first public release.
 
+## Unreleased maintenance
+
+- Constrain dashboard artifact retrieval to verified run directories and approved report names.
+- Keep database exception details out of the public health response while preserving a clear degraded status.
+- Make the strict source type check reproducible and clean across all 26 source files.
+- Generate supply-chain records atomically with deterministic line endings.
+
 ## 0.2.2 — 2026-08-29
 
 - Repaired Windows atomic status writes and made temporary-file replacement resilient to brief antivirus and file-indexing locks.

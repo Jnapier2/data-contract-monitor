@@ -6,16 +6,15 @@ import secrets
 import sys
 import tempfile
 import threading
-from datetime import UTC, datetime
+from contextlib import suppress
 from pathlib import Path
 
 import typer
 import uvicorn
-
-from . import __build_id__, __version__
 from rich.console import Console
 from rich.table import Table
 
+from . import __build_id__, __version__
 from .artifacts import publish_run_artifacts
 from .contract_loader import ContractLoadError, load_contract
 from .demo import write_demo_dataset
@@ -32,7 +31,7 @@ from .local_server import (
     record_endpoint,
     reserve_endpoint,
 )
-from .models import SEVERITY_ORDER, Severity
+from .models import SEVERITY_ORDER, Severity, ValidationResult
 from .profiler import profile_dataset
 from .reporters import ReportFormatError, write_reports
 from .runtime import bundled_demo_contract, ensure_runtime_directories, runtime_root
@@ -53,7 +52,7 @@ def _default_output_dir(contract_path: Path, run_id: str) -> Path:
     return contract_path.parent / ".dcm" / "reports" / run_id
 
 
-def _print_summary(result: object) -> None:
+def _print_summary(result: ValidationResult) -> None:
     summary = result.summary
     table = Table(title=f"Data Contract Monitor — {result.dataset_name}")
     table.add_column("Status")
@@ -341,10 +340,8 @@ def serve_command(
         server.run(sockets=[endpoint.socket])
     finally:
         shutdown_event.set()
-        try:
+        with suppress(OSError):
             endpoint.socket.close()
-        except OSError:
-            pass
         record_endpoint(
             root,
             endpoint,

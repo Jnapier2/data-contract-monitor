@@ -3,29 +3,31 @@ from __future__ import annotations
 import hashlib
 import re
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from time import monotonic
-from typing import Any, Callable
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from . import __version__
+from .atomic import sha256_file
 from .contract_loader import load_contract
 from .contract_plan import compile_contract
 from .drift import compare_profile, load_baseline
 from .expression import evaluate_numeric_expression, referenced_names
 from .history import append_history, default_history_path
-from .io import read_dataset, sha256_file
+from .io import read_dataset
 from .limits import ResourceLimitError, ResourceLimits
 from .models import (
+    SEVERITY_ORDER,
     Contract,
     DatasetProfile,
     DatasetRule,
     DriftSummary,
     Finding,
-    SEVERITY_ORDER,
     Severity,
     ValidationResult,
     ValidationSummary,
@@ -125,7 +127,7 @@ def _invalid_type_mask(series: pd.Series, expected: str, strict: bool) -> pd.Ser
             invalid = invalid | (valid_numeric & ((numeric % 1).abs() > 1e-12))
         return invalid
     if expected == "boolean":
-        accepted = {True, False, 0, 1, "0", "1", "true", "false", "yes", "no", "y", "n"}
+        accepted = {True, False, "0", "1", "true", "false", "yes", "no", "y", "n"}
         invalid.loc[non_null] = ~series.loc[non_null].map(
             lambda value: value if isinstance(value, bool) else str(value).strip().lower()
         ).isin(accepted)

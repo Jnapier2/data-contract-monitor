@@ -15,10 +15,11 @@ import time
 import urllib.error
 import urllib.request
 import webbrowser
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from .atomic import atomic_write_json, atomic_write_text
 
@@ -117,8 +118,10 @@ def reserve_endpoint(
     try:
         sock = _bind(host, 0)
     except OSError as exc:
-        detail = last_error or exc
-        raise PortReservationError(f"No local dashboard port could be reserved: {detail}") from exc
+        error_detail = last_error or exc
+        raise PortReservationError(
+            f"No local dashboard port could be reserved: {error_detail}"
+        ) from exc
     selected = int(sock.getsockname()[1])
     return ReservedEndpoint(host=host, preferred_port=preferred_port, port=selected, socket=sock)
 

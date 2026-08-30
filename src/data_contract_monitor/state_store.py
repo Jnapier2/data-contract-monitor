@@ -262,5 +262,10 @@ class StateStore:
                 version = int(connection.execute("PRAGMA user_version").fetchone()[0])
                 runs = int(connection.execute("SELECT COUNT(*) FROM validation_runs").fetchone()[0])
             return {"passed": integrity == "ok" and version == SCHEMA_VERSION, "integrity": integrity, "schema_version": version, "runs": runs}
-        except sqlite3.Error as exc:
-            return {"passed": False, "error": str(exc), "schema_version": None, "runs": None}
+        except sqlite3.Error:
+            return {
+                "passed": False,
+                "error": "state_database_unavailable",
+                "schema_version": None,
+                "runs": None,
+            }
