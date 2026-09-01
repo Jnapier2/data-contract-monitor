@@ -342,18 +342,32 @@ def create_app() -> FastAPI:
     @app.get("/api/runs/{run_id}/artifacts/{name}")
     def run_artifact(run_id: str, name: str) -> FileResponse:
         allowed = {
-            "data_contract_report.json",
-            "data_contract_report.html",
-            "data_contract_report.xml",
-            "data_contract_report.sarif",
-            "artifact_manifest.json",
+            "data_contract_report.json": Path("data_contract_report.json"),
+            "data_contract_report.html": Path("data_contract_report.html"),
+            "data_contract_report.xml": Path("data_contract_report.xml"),
+            "data_contract_report.sarif": Path("data_contract_report.sarif"),
+            "artifact_manifest.json": Path("artifact_manifest.json"),
         }
-        if name not in allowed or len(run_id) != 32 or any(
+        artifact_name = allowed.get(name)
+        if artifact_name is None or len(run_id) != 32 or any(
             character not in "0123456789abcdef" for character in run_id
         ):
             raise HTTPException(status_code=404, detail="Artifact not found")
         runs_root = (root / "reports" / "runs").resolve()
-        path = (runs_root / run_id / name).resolve()
+        try:
+            run_path = next(
+                (
+                    candidate
+                    for candidate in runs_root.iterdir()
+                    if candidate.is_dir() and candidate.name == run_id
+                ),
+                None,
+            )
+        except OSError:
+            run_path = None
+        if run_path is None:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+        path = (run_path / artifact_name).resolve()
         try:
             path.relative_to(runs_root)
         except ValueError:

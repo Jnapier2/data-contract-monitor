@@ -114,8 +114,8 @@
   "version": "0.3.4",
   "wheel": {
     "path": "packages/data_contract_monitor-0.3.4-py3-none-any.whl",
-    "sha256": "0b9a93c63dd911d9ffc820bc64cae47ec5163cc99e2c67e460b67abe4a9d5e6b",
-    "size": 96644
+    "sha256": "b8370402573ec765eca6aace3c0410bc6ec974a15f6d61879c156a8027b644c2",
+    "size": 96756
   },
   "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; v0.3.4 preserves that startup path while hardening artifact and health-response boundaries",
   "windows_offline_dependency_policy": "bootstrap uses a hash-verified project-local target wheelhouse when present; wheelhouse generation is explicit and fails closed on incomplete download"

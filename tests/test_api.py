@@ -83,7 +83,15 @@ def test_api_health_and_builtin_demos(project_root: Path, monkeypatch) -> None:
 
 def test_artifact_route_rejects_noncanonical_run_ids(project_root: Path, monkeypatch) -> None:
     monkeypatch.setenv("DCM_HOME", str(project_root))
+    run_id = "a" * 32
+    artifact = project_root / "reports" / "runs" / run_id / "data_contract_report.json"
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    artifact.write_text('{"passed":true}\n', encoding="utf-8")
     with TestClient(create_app()) as client:
+        valid = client.get(f"/api/runs/{run_id}/artifacts/data_contract_report.json")
+        assert valid.status_code == 200
+        assert valid.json() == {"passed": True}
+
         response = client.get(
             "/api/runs/not-a-canonical-run-id/artifacts/data_contract_report.json"
         )

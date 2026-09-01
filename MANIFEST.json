@@ -1,6 +1,6 @@
 {
   "build_id": "DCM-0.3.4-B20260901-SECURITY1",
-  "created_at": "2026-09-01T08:44:00.306518+00:00",
+  "created_at": "2026-09-01T08:55:18.918272+00:00",
   "hash_algorithm": "SHA-256",
   "managed_file_count": 145,
   "managed_files": [
@@ -281,13 +281,13 @@
     },
     {
       "path": "PACKAGE_METADATA.json",
-      "sha256": "56f9110a718aaead09fbb898edc543665bdab8081bc63aa025971c8a13695d4e",
+      "sha256": "255ddddfb31e1cee66432c99ab905d262fbc2bab0ec378cced82aebc6958dd34",
       "size": 5988
     },
     {
       "path": "packages/data_contract_monitor-0.3.4-py3-none-any.whl",
-      "sha256": "0b9a93c63dd911d9ffc820bc64cae47ec5163cc99e2c67e460b67abe4a9d5e6b",
-      "size": 96644
+      "sha256": "b8370402573ec765eca6aace3c0410bc6ec974a15f6d61879c156a8027b644c2",
+      "size": 96756
     },
     {
       "path": "pyproject.toml",
@@ -336,7 +336,7 @@
     },
     {
       "path": "SBOM.spdx.json",
-      "sha256": "f41d6b5f437f887e6fffec5858ce09bb3b30dcdea68621bafe78e2c955abd5d4",
+      "sha256": "db7aabd19638d3064aa9bdc3487e43d408908bb31403828775dbda8b7e39d157",
       "size": 41574
     },
     {
@@ -361,8 +361,8 @@
     },
     {
       "path": "src/data_contract_monitor/api.py",
-      "sha256": "6184f116dcd370e18d5d45f2cd3370ea7d8af1466ab8c3e1c5bed332ca2bf022",
-      "size": 15666
+      "sha256": "6882922869fa2769f3db658e4a31a759b1ea2b53175ec9bf8103b9f6be7f1a92",
+      "size": 16313
     },
     {
       "path": "src/data_contract_monitor/artifacts.py",
@@ -546,8 +546,8 @@
     },
     {
       "path": "tests/test_api.py",
-      "sha256": "8fcdba9de07c7dfedcb2ef058a5333c2a5116d188b33617e9d96da5ac7118e51",
-      "size": 7704
+      "sha256": "1a69199f01e3424052550707f39dcc8301b95111849215d55c7baf551e1b3490",
+      "size": 8107
     },
     {
       "path": "tests/test_atomic.py",
