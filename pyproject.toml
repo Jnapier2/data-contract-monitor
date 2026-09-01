@@ -44,7 +44,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-parquet = ["pyarrow>=18,<25"]
+parquet = ["pyarrow>=18,<26"]
 dev = [
   "build>=1.2,<2",
   "mypy>=1.15,<2",
