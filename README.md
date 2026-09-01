@@ -10,7 +10,7 @@ The project is local-first and includes passing/failing demonstrations that requ
 
 ## Windows quick start
 
-Extract the complete ZIP first; do not run a BAT from Windows compressed-folder preview. Open the extracted `Data_Contract_Monitor_v0.3.3` folder and double-click:
+Extract the complete ZIP first; do not run a BAT from Windows compressed-folder preview. Open the extracted `Data_Contract_Monitor_v0.3.4` folder and double-click:
 
 ```text
 START_DATA_CONTRACT_MONITOR.bat
@@ -28,7 +28,11 @@ Linux/macOS source launch:
 ./tools/start.sh
 ```
 
-## What 0.3.3 repairs and preserves
+## What 0.3.4 hardens
+
+Version 0.3.4 is a focused security and reliability maintenance release. It validates artifact run identifiers before resolving report paths, enforces containment under the managed report directory, keeps internal database exception details out of the public health response, and retries bounded transient Windows file locks during atomic state updates. Validation semantics, state schema 3, resource limits, report formats, and Windows startup behavior are unchanged.
+
+## What 0.3.3 repaired and preserved
 
 Version 0.3.3 is the **Windows Freshness & Transport Noise** maintenance release. It preserves the v0.3.2 field-proven maintenance preflight, the v0.3.1 atomic-write repair, and the v0.3.0 Scalable Assurance capability set. The v0.3.2 Windows field run proved stale-wheel retirement, all 144 managed hashes, dependency/application installation, fallback-port launch, and HTTP health. v0.3.3 narrows the remaining field polish to browser freshness and the known benign Windows Proactor reset callback.
 
@@ -207,7 +211,7 @@ A local Linux qualification run processed a synthetic **1,000,000-row / 6-column
 After publishing a real repository, a consumer can use the included composite action, for example:
 
 ```yaml
-- uses: your-org/data-contract-monitor@v0.3.3
+- uses: your-org/data-contract-monitor@v0.3.4
   with:
     contract: contracts/customer_orders.yml
     data: data/customer_orders.csv
@@ -226,7 +230,7 @@ Normal Windows bootstrap can use a verified project-local wheelhouse when one ex
 python tools/build_windows_wheelhouse.py --root . --python-version 313
 ```
 
-The builder stages under project `temp/`, promotes only after download completion, and writes a SHA-256 inventory. This build environment could not reach the package index, so no Windows wheelhouse is falsely claimed as bundled or Windows-qualified in v0.3.3.
+The builder stages under project `temp/`, promotes only after download completion, and writes a SHA-256 inventory. No Windows wheelhouse is claimed as bundled or Windows-qualified in v0.3.4 without exact build evidence.
 
 ## Release integrity and project organization
 
@@ -234,13 +238,13 @@ Release mode fails closed when `VERSION.txt`, `PACKAGE_METADATA.json`, `MANIFEST
 
 `tools/project_index.py` inventories retained files and rejects an unexpected BAT/CMD or unapproved exact duplicate during release preparation. The active implementation map and intentional source/package resource boundary are documented in `docs/PROJECT_STRUCTURE.md`.
 
-v0.3.3 branches from the exact v0.3.2 maintenance-preflight candidate plus physical Windows evidence showing v0.3.2 reached healthy readiness. The exact v0.1.2 ZIP remains the earlier user-confirmed rollback authority until v0.3.3 receives visible Windows browser acceptance. Do not combine managed files from releases.
+v0.3.4 branches from exact v0.3.3 and preserves the physical Windows evidence showing v0.3.2 reached healthy readiness. v0.3.3 is the immediate rollback and the exact v0.1.2 ZIP remains the earlier physical-Windows-confirmed rollback authority. Do not combine managed files from releases.
 
 ## Verification and limits
 
-The v0.3.3 source suite contains **69 passing tests** with `ResourceWarning` promoted to an error before exact-artifact packaging. Release qualification also performs Python compilation, TypeScript compilation/equivalence, schema/SBOM regeneration, launcher/consolidation checks, wheel build/version checks, manifest verification, ZIP integrity/path checks, installed-wheel demos, Export20 checks, and deliberate tamper tests.
+The v0.3.4 source suite contains **71 passing tests** with `ResourceWarning` promoted to an error before exact-artifact packaging. Release qualification also performs Python compilation, TypeScript compilation/equivalence, schema/SBOM regeneration, launcher/consolidation checks, wheel build/version checks, manifest verification, ZIP integrity/path checks, installed-wheel demos, Export20 checks, and deliberate tamper tests.
 
-Windows `cmd.exe`, Norton, SmartScreen, Authenticode, hosted GitHub Actions/CodeQL, and the optional Windows wheelhouse cannot be truthfully executed in this Linux build environment and remain field/publication qualification steps for v0.3.3. See `VERIFICATION_REPORT.md`, `docs/KNOWN_LIMITATIONS.md`, and `docs/RELEASE_CHECKLIST.md`.
+Physical-Windows `cmd.exe`, Norton, SmartScreen, Authenticode, and the optional Windows wheelhouse remain separate native qualification steps for v0.3.4. GitHub Actions and CodeQL provide independent hosted verification. See `VERIFICATION_REPORT.md`, `docs/KNOWN_LIMITATIONS.md`, and `docs/RELEASE_CHECKLIST.md`.
 
 ## Documentation
 

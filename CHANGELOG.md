@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.4 — 2026-09-01
+
+- Validated artifact run identifiers before resolving report paths and retained an explicit containment check under the managed run directory.
+- Replaced database exception details in the public health response with a stable, non-sensitive failure message.
+- Added bounded retries for transient Windows file locks during atomic state replacement.
+- Added regression coverage for noncanonical artifact identifiers.
+- Preserved the v0.3.3 validation engine, Windows freshness controls, state schema, and release/rollback behavior.
+
 ## 0.3.3 — 2026-08-31
 
 - Preserved v0.3.2 maintenance-preflight behavior proven by physical Windows startup evidence.

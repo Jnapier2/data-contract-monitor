@@ -40,7 +40,7 @@
       "reason": "human-readable source example plus isolated installed-wheel resource"
     }
   ],
-  "build_id": "DCM-0.3.3-B20260831-WINDOWSFRESHNESS1",
+  "build_id": "DCM-0.3.4-B20260901-SECURITY1",
   "canonical_export_directory": "exports",
   "copyright": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
   "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
@@ -59,7 +59,7 @@
   "execution_namespace": "DataContractMonitor",
   "execution_qualified_environment": "win32; CPython 3.12.10",
   "field_windows_evidence": {
-    "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 preserves validation behavior and hardens only the browser freshness/transport presentation boundary: exact-build browser URL, no-store root/assets, version-qualified static assets, and a narrowly matched WinError 10054 Proactor disconnect filter; unrelated asyncio errors and stale /demo-data.json requests remain visible rather than being fabricated away.",
+    "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 hardened browser freshness and narrowly matched transport noise. v0.3.4 preserves those behaviors while validating artifact identifiers, enforcing report-root containment, and keeping database exception details out of the public health response.",
     "observed_python": "CPython 3.13.15 64-bit on Windows",
     "observed_recovery": "maintenance preflight retired recognized v0.3.0 and v0.3.1 application wheels to project-local backups; 144 managed-file release identity then passed",
     "observed_release": "0.3.2 / DCM-0.3.2-B20260831-MAINTENANCEPREFLIGHT1",
@@ -77,7 +77,7 @@
     "rollback_release_sha256": "16b53aaa47d406f61b8163faf6b1ea39be504fc8fc11fcec7b8becfbef62fe24",
     "source_authority": "exact v0.3.2 maintenance-preflight release plus 2026-08-31 physical Windows startup/support evidence; v0.1.2 remains the earlier confirmed rollback authority"
   },
-  "managed_file_count": 144,
+  "managed_file_count": 145,
   "maximum_python": "3.14",
   "minimum_python": "3.11",
   "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",
@@ -87,7 +87,7 @@
   "python_runtime_policy": "standard non-free-threaded 64-bit CPython; 3.13 preferred on Windows",
   "reader_plugin_entry_point": "data_contract_monitor.readers",
   "release_channel": "portfolio-alpha",
-  "release_date": "2026-08-31",
+  "release_date": "2026-09-01",
   "runtime_output_roots": [
     "config",
     "logs",
@@ -111,12 +111,12 @@
     "ndjson"
   ],
   "tested_windows_computers": [],
-  "version": "0.3.3",
+  "version": "0.3.4",
   "wheel": {
-    "path": "packages/data_contract_monitor-0.3.3-py3-none-any.whl",
-    "sha256": "6f918686627837b0da779216b605e5548415a57e98d5249bf2b158402c3a4b37",
-    "size": 96336
+    "path": "packages/data_contract_monitor-0.3.4-py3-none-any.whl",
+    "sha256": "0b9a93c63dd911d9ffc820bc64cae47ec5163cc99e2c67e460b67abe4a9d5e6b",
+    "size": 96644
   },
-  "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; exact v0.3.3 cmd.exe/browser rendering remains pending",
+  "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; v0.3.4 preserves that startup path while hardening artifact and health-response boundaries",
   "windows_offline_dependency_policy": "bootstrap uses a hash-verified project-local target wheelhouse when present; wheelhouse generation is explicit and fails closed on incomplete download"
 }

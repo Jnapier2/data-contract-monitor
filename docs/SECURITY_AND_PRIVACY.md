@@ -24,7 +24,7 @@ Diagnostic text redacts common credential assignments, the user-home path, IP ad
 
 Normal release startup is blocked unless `VERSION.txt`, `PACKAGE_METADATA.json`, `MANIFEST.json`, `MANIFEST.sha256`, the managed-file hashes, and installed package identity agree. Support export remains read-only recovery evidence after an identity failure.
 
-SHA-256 sidecars detect change only when obtained through a trusted channel; they do not provide publisher authentication. Authenticode signing is not claimed for 0.3.3.
+SHA-256 sidecars detect change only when obtained through a trusted channel; they do not provide publisher authentication. Authenticode signing is not claimed for 0.3.4.
 
 ## Deployment boundary
 

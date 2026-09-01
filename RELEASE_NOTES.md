@@ -1,31 +1,26 @@
-# Data Contract Monitor 0.3.3 — Windows Freshness & Transport Noise
+# Data Contract Monitor 0.3.4 — Artifact and Health Boundary Hardening
 
-**Build:** `DCM-0.3.3-B20260831-WINDOWSFRESHNESS1`  
-**Date:** 2026-08-31
+**Build:** `DCM-0.3.4-B20260901-SECURITY1`  
+**Date:** 2026-09-01
 
 ## Purpose
 
-Version 0.3.3 is a focused Windows field-maintenance release built from exact v0.3.2. It does not change validation semantics, data-contract behavior, state schema, or resource-limit policy. It preserves the field-proven v0.3.2 maintenance preflight and addresses the two non-terminal symptoms remaining in the physical Windows run.
+Version 0.3.4 is a focused security-maintenance release built from exact v0.3.3. It does not change validation semantics, data-contract behavior, state schema, resource limits, or Windows startup behavior.
 
-## Field evidence reconciled
+## Security improvements
 
-The v0.3.2 Windows run retired recognized v0.3.0 and v0.3.1 wheels, passed 144/144 managed release identity, installed locked dependencies and the exact v0.3.2 wheel under CPython 3.13.15, fell forward from occupied port 8765 to 8766, completed application startup, and returned `/api/health` HTTP 200. The server remained healthy after the observed warning/traceback.
+- Artifact downloads accept only canonical 32-character hexadecimal run identifiers.
+- Resolved artifact paths must remain under the managed `reports/runs` directory before any file check or response.
+- The public health endpoint returns a stable database-health failure message without exposing internal exception text.
+- Atomic state updates retry bounded transient Windows file locks before failing.
+- Regression coverage confirms noncanonical artifact identifiers fail closed.
 
-The remaining evidence was:
+## Preserved foundations
 
-1. a Windows asyncio Proactor `_call_connection_lost` `ConnectionResetError` / WinError 10054 after an invalid/reset loopback request;
-2. a browser request for `/demo-data.json` returning 404 even though the current Data Contract Monitor HTML and JavaScript do not reference that path.
-
-## Repair
-
-- Browser launch now uses a build-qualified URL after exact health identity.
-- Root HTML and `/assets/*` use `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`, `Pragma: no-cache`, and `Expires: 0`.
-- Current HTML references version-qualified CSS and JavaScript assets.
-- No fake `/demo-data.json` response was added; a stale request remains a 404 so stale external/browser state stays diagnosable.
-- On Windows only, the event loop suppresses exactly the known Proactor `_call_connection_lost` connection-reset callback with WinError/errno 10054. Other asyncio exceptions continue through the existing/default handler.
+The release retains the scalable v0.3.0 validation engine, v0.3.2 maintenance recovery, v0.3.3 browser-freshness controls, one active Windows launcher backend, exact manifest/wheel identity, bounded local runtime, and recovery diagnostics.
 
 ## Recovery and rollback
 
-v0.3.2 is the immediate field-started predecessor. v0.1.2 remains the earlier Windows-confirmed rollback authority until this exact v0.3.3 release receives visible Windows browser acceptance.
+v0.3.3 is the immediate rollback release. v0.1.2 remains the earlier physical-Windows-confirmed rollback authority. Do not mix managed files between versions; recover from a complete verified archive.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

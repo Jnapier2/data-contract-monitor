@@ -27,4 +27,4 @@ iter_batches() -> Iterator[DatasetBatch]
 
 Plugins are optional boundaries. A broken third-party plugin cannot disable built-in readers. Readers must obey the caller's resource limits, avoid network access unless their own explicit product contract authorizes it, and return pandas DataFrames with stable string column names.
 
-The public plugin surface is intentionally narrow in v0.3.3 and may gain compatibility guarantees after wider use.
+The public plugin surface is intentionally narrow in v0.3.4 and may gain compatibility guarantees after wider use.

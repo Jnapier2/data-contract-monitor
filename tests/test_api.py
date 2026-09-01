@@ -24,16 +24,16 @@ def _wait_for_job(client: TestClient, job_id: str) -> dict[str, object]:
 def test_current_ui_is_no_store_version_qualified_and_has_no_retired_demo_data_dependency(project_root: Path, monkeypatch) -> None:
     monkeypatch.setenv("DCM_HOME", str(project_root))
     with TestClient(create_app()) as client:
-        root_response = client.get("/?build=DCM-0.3.3-B20260831-WINDOWSFRESHNESS1")
+        root_response = client.get("/?build=DCM-0.3.4-B20260901-SECURITY1")
         assert root_response.status_code == 200
         assert root_response.headers["cache-control"] == "no-store, no-cache, must-revalidate, max-age=0"
         assert root_response.headers["pragma"] == "no-cache"
         html = root_response.text
-        assert "/assets/styles.css?v=0.3.3" in html
-        assert "/assets/app.js?v=0.3.3" in html
+        assert "/assets/styles.css?v=0.3.4" in html
+        assert "/assets/app.js?v=0.3.4" in html
         assert "demo-data.json" not in html
 
-        asset = client.get("/assets/app.js?v=0.3.3")
+        asset = client.get("/assets/app.js?v=0.3.4")
         assert asset.status_code == 200
         assert asset.headers["cache-control"] == "no-store, no-cache, must-revalidate, max-age=0"
         assert "demo-data.json" not in asset.text
@@ -70,8 +70,8 @@ def test_api_health_and_builtin_demos(project_root: Path, monkeypatch) -> None:
         assert payload["local_only_default"] is True
         assert payload["service_id"] == "data-contract-monitor"
         assert payload["name"] == "Data Contract Monitor"
-        assert payload["version"] == "0.3.3"
-        assert payload["build_id"] == "DCM-0.3.3-B20260831-WINDOWSFRESHNESS1"
+        assert payload["version"] == "0.3.4"
+        assert payload["build_id"] == "DCM-0.3.4-B20260901-SECURITY1"
         assert payload["launch_id"] == "test-launch-identity"
         assert payload["state"]["passed"] is True
         assert client.get("/").status_code == 200  # establishes the SameSite local session
@@ -79,6 +79,16 @@ def test_api_health_and_builtin_demos(project_root: Path, monkeypatch) -> None:
         bad = client.post("/api/demo/bad")
         assert good.status_code == 200 and good.json()["summary"]["passed"] is True
         assert bad.status_code == 200 and bad.json()["summary"]["passed"] is False
+
+
+def test_artifact_route_rejects_noncanonical_run_ids(project_root: Path, monkeypatch) -> None:
+    monkeypatch.setenv("DCM_HOME", str(project_root))
+    with TestClient(create_app()) as client:
+        response = client.get(
+            "/api/runs/not-a-canonical-run-id/artifacts/data_contract_report.json"
+        )
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Artifact not found"
 
 
 def test_api_modifying_requests_require_local_session(project_root: Path, monkeypatch) -> None:

@@ -348,9 +348,16 @@ def create_app() -> FastAPI:
             "data_contract_report.sarif",
             "artifact_manifest.json",
         }
-        if name not in allowed:
+        if name not in allowed or len(run_id) != 32 or any(
+            character not in "0123456789abcdef" for character in run_id
+        ):
             raise HTTPException(status_code=404, detail="Artifact not found")
-        path = root / "reports" / "runs" / run_id / name
+        runs_root = (root / "reports" / "runs").resolve()
+        path = (runs_root / run_id / name).resolve()
+        try:
+            path.relative_to(runs_root)
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Artifact not found") from None
         if not path.is_file():
             raise HTTPException(status_code=404, detail="Artifact not found")
         return FileResponse(path)

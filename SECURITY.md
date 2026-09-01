@@ -2,11 +2,11 @@
 
 ## Supported version
 
-Security fixes are applied to the latest published release. This pre-publication `0.3.3` package is an alpha portfolio release and has not yet established a long-term support window.
+Security fixes are applied to the latest published release. Version `0.3.4` is an early public release and has not yet established a long-term support window.
 
 ## Reporting a vulnerability
 
-Do not open a public issue containing exploit details, credentials, private data, or an unredacted diagnostic package. Contact Gateway Information Group LLC through the private contact method listed in the published repository or portfolio. Until that channel is published, retain the report locally rather than exposing sensitive material.
+Do not open a public issue containing exploit details, credentials, private data, or an unredacted diagnostic package. Use the repository's private security-advisory channel. If that channel is unavailable, retain the report locally rather than exposing sensitive material.
 
 Include:
 

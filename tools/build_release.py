@@ -175,7 +175,7 @@ def main() -> int:
     version = (root / "VERSION.txt").read_text(encoding="utf-8").strip()
     if not version:
         raise RuntimeError("VERSION.txt is empty")
-    build_id = args.build_id or f"DCM-{version}-B20260831-WINDOWSFRESHNESS1"
+    build_id = args.build_id or f"DCM-{version}-B20260901-SECURITY1"
 
     build_info = {"version": version, "build_id": build_id}
     atomic_text(
@@ -253,7 +253,7 @@ def main() -> int:
         "package_name": "data-contract-monitor",
         "version": version,
         "build_id": build_id,
-        "release_date": "2026-08-31",
+        "release_date": "2026-09-01",
         "release_channel": "portfolio-alpha",
         "license": "Apache-2.0",
         "publisher": "Gateway Information Group LLC",
@@ -270,7 +270,7 @@ def main() -> int:
         },
         "canonical_export_directory": "exports",
         "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
-        "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; exact v0.3.3 cmd.exe/browser rendering remains pending",
+        "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; v0.3.4 preserves that startup path while hardening artifact and health-response boundaries",
         "execution_qualified_environment": f"{sys.platform}; CPython {sys.version.split()[0]}",
         "tested_windows_computers": [],
         "field_windows_evidence": {
@@ -281,7 +281,7 @@ def main() -> int:
             "observed_recovery": "maintenance preflight retired recognized v0.3.0 and v0.3.1 application wheels to project-local backups; 144 managed-file release identity then passed",
             "observed_runtime": "locked dependencies installed successfully, exact data-contract-monitor 0.3.2 wheel installed, preferred port 8765 was occupied, port 8766 was reserved, application startup completed, and /api/health returned HTTP 200 twice",
             "remaining_field_noise": ["Windows Proactor _call_connection_lost ConnectionResetError WinError 10054 after a reset/invalid local HTTP connection", "GET /demo-data.json returned 404 even though the current v0.3.2 HTML/JavaScript contains no demo-data.json dependency"],
-            "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 preserves validation behavior and hardens only the browser freshness/transport presentation boundary: exact-build browser URL, no-store root/assets, version-qualified static assets, and a narrowly matched WinError 10054 Proactor disconnect filter; unrelated asyncio errors and stale /demo-data.json requests remain visible rather than being fabricated away.",
+            "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 hardened browser freshness and narrowly matched transport noise. v0.3.4 preserves those behaviors while validating artifact identifiers, enforcing report-root containment, and keeping database exception details out of the public health response.",
         },
         "state_schema_version": 3,
         "execution_modes": ["auto", "memory", "streaming"],

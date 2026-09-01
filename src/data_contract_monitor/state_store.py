@@ -448,5 +448,11 @@ class StateStore:
                 "runs": runs,
                 "artifacts": artifacts,
             }
-        except sqlite3.Error as exc:
-            return {"passed": False, "error": str(exc), "schema_version": None, "runs": None}
+        except sqlite3.Error:
+            return {
+                "passed": False,
+                "error": "Database health check failed.",
+                "schema_version": None,
+                "runs": None,
+                "artifacts": None,
+            }

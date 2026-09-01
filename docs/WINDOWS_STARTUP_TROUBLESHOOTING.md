@@ -1,12 +1,12 @@
 # Windows Startup Troubleshooting
 
-Use a fresh extraction of the complete `Data_Contract_Monitor_v0.3.3` ZIP. Do not run BAT files from Windows compressed-folder preview and do not overlay managed files onto an older extraction.
+Use a fresh extraction of the complete `Data_Contract_Monitor_v0.3.4` ZIP. Do not run BAT files from Windows compressed-folder preview and do not overlay managed files onto an older extraction.
 
 The normal entrypoint is `START_DATA_CONTRACT_MONITOR.bat`. Every root BAT remains a logic-free forwarder to the single backend `tools\launch.bat`. Review `LATEST_LAUNCH_STATUS.txt`, `logs\launcher.log`, `logs\bootstrap.log`, and `logs\python_detection.txt` after a failure. `CREATE_SUPPORT_EXPORT.bat` remains a read-only recovery action whose final ZIP belongs only in root `exports\`.
 
 ## Port and browser identity
 
-Port 8765 is a preference. The launcher reserves a socket before browser launch, falls forward through the bounded range, and can use an OS-assigned loopback port. The browser opens only after exact service/version/build/per-launch health identity. v0.3.3 then opens `/?build=DCM-0.3.3-B20260831-WINDOWSFRESHNESS1` and serves `/` plus `/assets/*` with no-store/no-cache headers. Current HTML uses version-qualified CSS/JavaScript assets.
+Port 8765 is a preference. The launcher reserves a socket before browser launch, falls forward through the bounded range, and can use an OS-assigned loopback port. The browser opens only after exact service/version/build/per-launch health identity. v0.3.4 opens `/?build=DCM-0.3.4-B20260901-SECURITY1` and serves `/` plus `/assets/*` with no-store/no-cache headers. Current HTML uses version-qualified CSS/JavaScript assets.
 
 The current Data Contract Monitor UI does **not** use `/demo-data.json`. If a browser still asks for it, the 404 is evidence of stale browser/external document state; v0.3.3 intentionally does not fabricate compatibility data. Close that stale tab and use the build-qualified URL recorded in `state\dashboard_endpoint.json` or `LATEST_LAUNCH_STATUS.txt`.
 

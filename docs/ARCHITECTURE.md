@@ -60,7 +60,7 @@ The dashboard is a trusted-local workstation surface rather than a multi-user we
 
 All user-facing BAT files are logic-free action forwarders. `tools/launch.bat` is the only BAT implementation backend. It derives the root from its own location, clears inherited Python path/home overrides, selects a supported standard 64-bit interpreter, verifies release identity before normal release startup, and routes to bootstrap/doctor/demo/test/repair/export actions.
 
-Bootstrap normally installs exact locked dependencies. If a matching `packages/wheelhouse/cpXY-win_amd64/WHEELHOUSE_MANIFEST.json` exists and every listed wheel hash verifies, bootstrap switches to `--no-index --find-links` offline installation. Incomplete or tampered wheelhouses are ignored rather than trusted. `tools/build_windows_wheelhouse.py` is the explicit builder; v0.3.3 does not claim a wheelhouse was built in the network-restricted Linux environment.
+Bootstrap normally installs exact locked dependencies. If a matching `packages/wheelhouse/cpXY-win_amd64/WHEELHOUSE_MANIFEST.json` exists and every listed wheel hash verifies, bootstrap switches to `--no-index --find-links` offline installation. Incomplete or tampered wheelhouses are ignored rather than trusted. `tools/build_windows_wheelhouse.py` is the explicit builder; v0.3.4 does not claim a wheelhouse without exact build evidence.
 
 ## Runtime folders
 
