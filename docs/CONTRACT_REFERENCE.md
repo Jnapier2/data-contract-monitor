@@ -6,7 +6,9 @@ Contracts are YAML documents validated strictly with Pydantic. Unknown keys are 
 
 | Field | Type | Default | Purpose |
 |---|---|---|---|
-| `contract_version` | string | `1.0` | Native contract format version |
+| `contract_version` | string | `1.0` | Stable contract revision recorded with each run |
+| `effective_date` | string | empty | Documentary effective date |
+| `compatibility_policy` | `strict`, `backward`, `advisory` | `strict` | Lifecycle policy carried by normalization/diff workflows |
 | `dataset` | object | required | Dataset identity and schema policy |
 | `rules` | mapping | empty | Per-column rules keyed by column name |
 | `dataset_rules` | list | empty | Rules spanning rows or columns |
@@ -17,6 +19,7 @@ Contracts are YAML documents validated strictly with Pydantic. Unknown keys are 
 ```yaml
 dataset:
   name: customer_orders
+  contract_id: customer-orders
   description: Order events used by operations reporting.
   owner: Data Operations
   required_columns: [order_id, customer_id]
@@ -84,6 +87,31 @@ Rows in findings are one-based data-row positions. SARIF adds one line for the h
   then_column: approval_reference
 ```
 
+### Aggregate reconciliation
+
+```yaml
+- name: total_matches_components
+  type: aggregate_reconciliation
+  left_column: total_amount
+  right_expression: subtotal + tax_amount - discount_amount
+  tolerance: 0.01
+```
+
+The expression evaluator accepts numeric column names and arithmetic only; function calls, attributes, imports, and arbitrary Python evaluation are rejected.
+
+### Cross-dataset reference existence
+
+```yaml
+- name: customer_fk
+  type: reference_exists
+  column: customer_id
+  reference_dataset: ../data/customers_reference.csv
+  reference_column: customer_id
+  severity: error
+```
+
+Reference paths must be relative and remain inside the allowed project or isolated API-upload workspace. Membership is exact and disk-backed in streaming mode.
+
 ## Privacy review
 
 ```yaml
@@ -112,6 +140,16 @@ The first release supports one schema object per validation run and maps:
 - team owner metadata
 
 Unmapped ODCS metadata remains documentary and is not silently enforced. The `adapter_notes` field records this boundary in the internal contract model. Select an object with `--object` when an ODCS document has multiple schema objects.
+
+## Contract lifecycle commands
+
+```bash
+data-contract-monitor contract lint --contract contract.yml
+data-contract-monitor contract normalize --contract contract.yml --output normalized.yml
+data-contract-monitor contract diff --older v1.yml --newer v2.yml
+```
+
+Semantic diff classifies changes as `breaking`, `potentially_breaking`, `nonbreaking`, or `documentation_only`. Stable `dataset.contract_id`, `contract_version`, source hash, and source format are recorded in durable SQLite history.
 
 ## JSON Schemas
 

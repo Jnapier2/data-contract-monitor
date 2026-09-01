@@ -8,7 +8,9 @@ const byId = (id) => {
 const form = byId("validate-form");
 const contractFile = byId("contract-file");
 const dataFile = byId("data-file");
+const referenceFiles = byId("reference-files");
 const failOn = byId("fail-on");
+const executionMode = byId("execution-mode");
 const statusNode = byId("status");
 const resultsNode = byId("results");
 const summaryCards = byId("summary-cards");
@@ -54,7 +56,7 @@ const summaryCard = (value, label, className = "") => {
     return card;
 };
 const renderSummary = (result) => {
-    summaryCards.replaceChildren(summaryCard(result.summary.status.toUpperCase(), "Validation status", `status-${result.summary.status}`), summaryCard(result.profile.row_count.toLocaleString(), "Rows evaluated"), summaryCard(String(result.summary.critical), "Critical"), summaryCard(String(result.summary.errors), "Errors"), summaryCard(String(result.summary.warnings), "Warnings"), summaryCard(`${result.duration_ms} ms`, "Runtime"));
+    summaryCards.replaceChildren(summaryCard(result.summary.status.toUpperCase(), "Validation status", `status-${result.summary.status}`), summaryCard(result.profile.row_count.toLocaleString(), "Rows evaluated"), summaryCard(String(result.summary.critical), "Critical"), summaryCard(String(result.summary.errors), "Errors"), summaryCard(String(result.summary.warnings), "Warnings"), summaryCard(`${result.duration_ms} ms`, "Runtime"), summaryCard(result.execution_mode.toUpperCase(), "Execution mode"));
 };
 const renderFindings = () => {
     if (!latestResult)
@@ -93,7 +95,7 @@ const renderProfile = (result) => {
     profileBody.replaceChildren();
     for (const column of result.profile.columns) {
         const row = document.createElement("tr");
-        row.append(textCell(column.name), textCell(column.observed_type), textCell(String(column.null_count)), textCell(String(column.distinct_count)));
+        row.append(textCell(column.name), textCell(column.observed_type), textCell(String(column.null_count)), textCell(`${column.distinct_count_exact === false ? "≥" : ""}${column.distinct_count}`));
         profileBody.append(row);
     }
 };
@@ -175,8 +177,10 @@ form.addEventListener("submit", async (event) => {
     const body = new FormData();
     body.append("contract", contractFile.files[0]);
     body.append("data", dataFile.files[0]);
+    for (const reference of Array.from(referenceFiles.files ?? []))
+        body.append("references", reference);
     try {
-        const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
+        const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}&execution_mode=${encodeURIComponent(executionMode.value)}`, { method: "POST", body });
         const submission = await parseJobSubmission(response);
         activeJobId = submission.job_id;
         setBusy("Queued locally…", true);

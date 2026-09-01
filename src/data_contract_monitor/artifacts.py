@@ -7,7 +7,9 @@ from pathlib import Path
 from typing import Iterable
 
 from .atomic import atomic_write_json, sha256_file
+from .limits import ResourceLimits
 from .models import ValidationResult
+from .state_store import StateStore
 from .reporters import write_reports
 
 DEFAULT_REPORT_FORMATS = ("html", "json", "junit", "sarif")
@@ -18,8 +20,10 @@ def publish_run_artifacts(
     *,
     root: Path,
     formats: Iterable[str] = DEFAULT_REPORT_FORMATS,
+    limits: ResourceLimits | None = None,
 ) -> Path:
     root = root.resolve()
+    effective_limits = limits or ResourceLimits()
     runs_root = root / "reports" / "runs"
     runs_root.mkdir(parents=True, exist_ok=True)
     destination = runs_root / result.run_id
@@ -36,6 +40,11 @@ def publish_run_artifacts(
             manifest_entries.append(
                 {"path": path.name, "size": path.stat().st_size, "sha256": sha256_file(path)}
             )
+        total_report_bytes = sum(path.stat().st_size for path in written)
+        if total_report_bytes > effective_limits.max_report_bytes:
+            raise RuntimeError(
+                f"Generated reports total {total_report_bytes} bytes; limit is {effective_limits.max_report_bytes}."
+            )
         atomic_write_json(
             staging / "artifact_manifest.json",
             {
@@ -51,6 +60,10 @@ def publish_run_artifacts(
             if path.stat().st_size != entry["size"] or sha256_file(path) != entry["sha256"]:
                 raise RuntimeError(f"Artifact verification failed for {path.name}")
         os.replace(staging, destination)
+        state_store = StateStore(root / "state" / "dcm_state.sqlite3")
+        if state_store.get_result(result.run_id) is None:
+            state_store.record_validation(result)
+        state_store.record_artifacts(result.run_id, manifest_entries)
         atomic_write_json(
             root / "state" / "latest_completed_run.json",
             {

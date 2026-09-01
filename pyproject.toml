@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "data-contract-monitor"
-version = "0.2.2"
+version = "0.3.3"
 description = "Local-first data contract validation, schema drift monitoring, privacy hints, and CI-ready reports."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -48,11 +48,9 @@ parquet = ["pyarrow>=18,<25"]
 dev = [
   "build>=1.2,<2",
   "mypy>=1.15,<2",
-  "pandas-stubs>=2.3,<3",
   "pytest>=8.3,<10",
   "pytest-cov>=6,<8",
   "ruff>=0.11,<1",
-  "types-PyYAML>=6,<7",
 ]
 
 [project.scripts]
@@ -73,6 +71,7 @@ data_contract_monitor = [
   "web/*.js",
   "resources/contracts/*.yml",
   "build_info.json",
+  "py.typed",
 ]
 
 [tool.pytest.ini_options]
@@ -86,9 +85,6 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
 ignore = ["E501"]
-
-[tool.ruff.lint.per-file-ignores]
-"src/data_contract_monitor/cli.py" = ["B008"]
 
 [tool.mypy]
 python_version = "3.11"

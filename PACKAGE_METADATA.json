@@ -40,30 +40,54 @@
       "reason": "human-readable source example plus isolated installed-wheel resource"
     }
   ],
-  "build_id": "DCM-0.2.2-B20260829-WINDOWS1",
+  "build_id": "DCM-0.3.3-B20260831-WINDOWSFRESHNESS1",
   "canonical_export_directory": "exports",
   "copyright": "Copyright \u00a9 2026 Gateway Information Group LLC. All rights reserved.",
   "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
   "dependency_install_policy": "locked binary wheels only for Windows bootstrap",
   "display_name": "Data Contract Monitor",
+  "exact_streaming_global_rules": [
+    "column_unique",
+    "unique_combination",
+    "reference_exists"
+  ],
+  "execution_modes": [
+    "auto",
+    "memory",
+    "streaming"
+  ],
   "execution_namespace": "DataContractMonitor",
   "execution_qualified_environment": "win32; CPython 3.12.10",
+  "field_windows_evidence": {
+    "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 preserves validation behavior and hardens only the browser freshness/transport presentation boundary: exact-build browser URL, no-store root/assets, version-qualified static assets, and a narrowly matched WinError 10054 Proactor disconnect filter; unrelated asyncio errors and stale /demo-data.json requests remain visible rather than being fabricated away.",
+    "observed_python": "CPython 3.13.15 64-bit on Windows",
+    "observed_recovery": "maintenance preflight retired recognized v0.3.0 and v0.3.1 application wheels to project-local backups; 144 managed-file release identity then passed",
+    "observed_release": "0.3.2 / DCM-0.3.2-B20260831-MAINTENANCEPREFLIGHT1",
+    "observed_runtime": "locked dependencies installed successfully, exact data-contract-monitor 0.3.2 wheel installed, preferred port 8765 was occupied, port 8766 was reserved, application startup completed, and /api/health returned HTTP 200 twice",
+    "remaining_field_noise": [
+      "Windows Proactor _call_connection_lost ConnectionResetError WinError 10054 after a reset/invalid local HTTP connection",
+      "GET /demo-data.json returned 404 even though the current v0.3.2 HTML/JavaScript contains no demo-data.json dependency"
+    ],
+    "support_export": "Data_Contract_Monitor_Support_20260831T234344Z_5de340090843bb3211c8.zip plus pasted 2026-08-31 Windows bootstrap/server log",
+    "support_export_sha256": "not independently computed in the build environment; uploaded field evidence is referenced by filename"
+  },
   "license": "Apache-2.0",
   "lineage": {
-    "blocked_intermediate": "v0.2.0 and v0.2.1 artifacts were not promoted; v0.2.2 repairs the Windows qualification failures",
-    "rollback_release_sha256": "1bc3294daca89911a5029c2bb0a49a1764463fe5d20c572d7261830115a2b1ee",
-    "source_authority": "v0.2.1 durable foundation merged with v0.1.5 public Action and Windows lifecycle safeguards"
+    "blocked_intermediate": "v0.2.0 delivery was RELEASE_BLOCKED and was not used as release authority",
+    "rollback_release_sha256": "16b53aaa47d406f61b8163faf6b1ea39be504fc8fc11fcec7b8becfbef62fe24",
+    "source_authority": "exact v0.3.2 maintenance-preflight release plus 2026-08-31 physical Windows startup/support evidence; v0.1.2 remains the earlier confirmed rollback authority"
   },
-  "managed_file_count": 132,
+  "managed_file_count": 144,
   "maximum_python": "3.14",
   "minimum_python": "3.11",
   "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",
   "package_name": "data-contract-monitor",
-  "project": "Data Contract Monitor",
+  "project": "Professional Portfolio \u2014 Data Contract Monitor",
   "publisher": "Gateway Information Group LLC",
   "python_runtime_policy": "standard non-free-threaded 64-bit CPython; 3.13 preferred on Windows",
+  "reader_plugin_entry_point": "data_contract_monitor.readers",
   "release_channel": "portfolio-alpha",
-  "release_date": "2026-08-29",
+  "release_date": "2026-08-31",
   "runtime_output_roots": [
     "config",
     "logs",
@@ -77,13 +101,22 @@
     "backups"
   ],
   "schema_version": "1.2",
+  "source_defaults_sha256": "63BDA0B5F61BA44F18F55C5B75512085ED3A2FE67C575E3406A5877ECD5F4566",
+  "source_defaults_version": "2.17.13",
   "stable_entrypoint": "START_DATA_CONTRACT_MONITOR.bat",
+  "state_schema_version": 3,
+  "streaming_formats": [
+    "csv",
+    "jsonl",
+    "ndjson"
+  ],
   "tested_windows_computers": [],
-  "version": "0.2.2",
+  "version": "0.3.3",
   "wheel": {
-    "path": "packages/data_contract_monitor-0.2.2-py3-none-any.whl",
-    "sha256": "916ec448206b450631d1cc441c68975c167b6d2edb99f8596e088d01697a9438",
-    "size": 75882
+    "path": "packages/data_contract_monitor-0.3.3-py3-none-any.whl",
+    "sha256": "6f918686627837b0da779216b605e5548415a57e98d5249bf2b158402c3a4b37",
+    "size": 96336
   },
-  "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending"
+  "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; exact v0.3.3 cmd.exe/browser rendering remains pending",
+  "windows_offline_dependency_policy": "bootstrap uses a hash-verified project-local target wheelhouse when present; wheelhouse generation is explicit and fails closed on incomplete download"
 }

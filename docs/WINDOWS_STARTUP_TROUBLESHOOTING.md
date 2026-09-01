@@ -1,17 +1,23 @@
 # Windows Startup Troubleshooting
 
-Use a fresh extraction of the complete `Data_Contract_Monitor_v0.2.2` ZIP. Do not run BAT files from Windows compressed-folder preview and do not overlay managed files onto an older extraction.
+Use a fresh extraction of the complete `Data_Contract_Monitor_v0.3.3` ZIP. Do not run BAT files from Windows compressed-folder preview and do not overlay managed files onto an older extraction.
 
-The normal entrypoint is `START_DATA_CONTRACT_MONITOR.bat`. Every root BAT is a three-line logic-free forwarder to the single backend `tools\launch.bat`, so a startup failure should be investigated through the shared evidence rather than by maintaining separate launcher implementations.
+The normal entrypoint is `START_DATA_CONTRACT_MONITOR.bat`. Every root BAT remains a logic-free forwarder to the single backend `tools\launch.bat`. Review `LATEST_LAUNCH_STATUS.txt`, `logs\launcher.log`, `logs\bootstrap.log`, and `logs\python_detection.txt` after a failure. `CREATE_SUPPORT_EXPORT.bat` remains a read-only recovery action whose final ZIP belongs only in root `exports\`.
 
-If startup fails, review `LATEST_LAUNCH_STATUS.txt`, `logs\launcher.log`, `logs\bootstrap.log`, and `logs\python_detection.txt`. `CREATE_SUPPORT_EXPORT.bat` remains a read-only recovery action and writes its final ZIP only to root `exports\`.
+## Port and browser identity
 
-The launcher supports standard non-free-threaded 64-bit CPython 3.11–3.14 and prefers 3.13. It clears inherited `PYTHONPATH` and `PYTHONHOME`, derives root from the launcher location, and creates/repairs the project-local environment. First environment creation can require access to the configured Python package index.
+Port 8765 is a preference. The launcher reserves a socket before browser launch, falls forward through the bounded range, and can use an OS-assigned loopback port. The browser opens only after exact service/version/build/per-launch health identity. v0.3.3 then opens `/?build=DCM-0.3.3-B20260831-WINDOWSFRESHNESS1` and serves `/` plus `/assets/*` with no-store/no-cache headers. Current HTML uses version-qualified CSS/JavaScript assets.
 
-Port 8765 is only a preference. The launcher reserves a socket before browser launch, tries the bounded fallback range through 8785, then can use an operating-system-assigned loopback port. The browser opens only after the endpoint returns the exact service ID, version, build, and per-launch identity. This preserves the v0.1.2 fix that prevented an unrelated local dashboard from appearing when it owned port 8765.
+The current Data Contract Monitor UI does **not** use `/demo-data.json`. If a browser still asks for it, the 404 is evidence of stale browser/external document state; v0.3.3 intentionally does not fabricate compatibility data. Close that stale tab and use the build-qualified URL recorded in `state\dashboard_endpoint.json` or `LATEST_LAUNCH_STATUS.txt`.
 
-An old v0.1.1 folder may still contain historical `diagnostics\exports`. v0.2.2 does not use or recreate that location and does not silently delete old evidence. Current support/Critical ZIPs belong only in root `exports\`; staging occurs under root `temp\`.
+## Windows Proactor reset noise
 
-If release identity fails, do not repair by mixing files. Re-extract the exact release ZIP. The immediate rollback authority remains v0.1.2 with SHA-256 `16b53aaa47d406f61b8163faf6b1ea39be504fc8fc11fcec7b8becfbef62fe24`.
+A reset loopback client can cause Python's Windows Proactor transport to surface `ConnectionResetError: [WinError 10054]` from `_ProactorBasePipeTransport._call_connection_lost` after the useful request already completed. v0.3.3 suppresses only that exact callback signature on Windows. Invalid HTTP warnings and unrelated asyncio exceptions are not broadly hidden.
+
+## Stale prior-version wheel recovery
+
+The v0.3.2 bounded maintenance preflight is preserved. After verifying its recovery authority, it may move only recognized old `packages\data_contract_monitor-*.whl` files to `backups\retired_packages\<timestamp>\` with SHA-256 evidence. It never deletes them or moves unrelated/unknown user files. The strict release gate then runs unchanged. Repair and Export use external Python so a stale project `.venv` cannot block recovery evidence.
+
+If release identity fails for anything outside that recognized stale-wheel case, re-extract the exact release rather than mixing files. The earlier confirmed rollback remains v0.1.2 SHA-256 `16b53aaa47d406f61b8163faf6b1ea39be504fc8fc11fcec7b8becfbef62fe24`.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

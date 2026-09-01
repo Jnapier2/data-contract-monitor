@@ -6,17 +6,19 @@ import secrets
 import sys
 import tempfile
 import threading
-from contextlib import suppress
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
 import uvicorn
+
+from . import __build_id__, __version__
 from rich.console import Console
 from rich.table import Table
 
-from . import __build_id__, __version__
 from .artifacts import publish_run_artifacts
 from .contract_loader import ContractLoadError, load_contract
+from .contract_tools import diff_contracts, lint_contract, normalized_contract_text
 from .demo import write_demo_dataset
 from .diagnostics import DiagnosticManager, install_exception_hooks
 from .drift import compare_profile, load_baseline, snapshot_from_profile, write_baseline
@@ -31,7 +33,7 @@ from .local_server import (
     record_endpoint,
     reserve_endpoint,
 )
-from .models import SEVERITY_ORDER, Severity, ValidationResult
+from .models import SEVERITY_ORDER, Severity
 from .profiler import profile_dataset
 from .reporters import ReportFormatError, write_reports
 from .runtime import bundled_demo_contract, ensure_runtime_directories, runtime_root
@@ -44,7 +46,11 @@ app = typer.Typer(
     add_completion=False,
 )
 baseline_app = typer.Typer(help="Create and compare schema baselines.", no_args_is_help=True)
+contract_app = typer.Typer(help="Lint, normalize, and compare data contracts.", no_args_is_help=True)
+history_app = typer.Typer(help="Compare validation runs and inspect quality trends.", no_args_is_help=True)
 app.add_typer(baseline_app, name="baseline")
+app.add_typer(contract_app, name="contract")
+app.add_typer(history_app, name="history")
 console = Console()
 
 
@@ -52,7 +58,7 @@ def _default_output_dir(contract_path: Path, run_id: str) -> Path:
     return contract_path.parent / ".dcm" / "reports" / run_id
 
 
-def _print_summary(result: ValidationResult) -> None:
+def _print_summary(result: object) -> None:
     summary = result.summary
     table = Table(title=f"Data Contract Monitor — {result.dataset_name}")
     table.add_column("Status")
@@ -92,6 +98,7 @@ def validate_command(
     object_name: str | None = typer.Option(None, "--object", help="ODCS schema object name or physicalName"),
     sheet: str = typer.Option("0", "--sheet", help="Excel sheet name or zero-based index"),
     no_history: bool = typer.Option(False, "--no-history"),
+    execution_mode: str = typer.Option("auto", "--execution-mode", help="auto, memory, or streaming"),
 ) -> None:
     """Validate one dataset and emit CI-friendly reports."""
     try:
@@ -100,6 +107,8 @@ def validate_command(
         history_path = None
         if root and not no_history:
             history_path = ensure_runtime_directories(root) / "state" / "dcm_state.sqlite3"
+        if execution_mode not in {"auto", "memory", "streaming"}:
+            raise ValidationExecutionError("execution-mode must be auto, memory, or streaming")
         result = validate_files(
             contract_path=contract.resolve(),
             data_path=data.resolve(),
@@ -109,6 +118,7 @@ def validate_command(
             sheet_name=sheet_value,
             record_history=not no_history,
             history_path=history_path,
+            execution_mode=execution_mode,
         )
         if root and output_dir is None:
             destination = publish_run_artifacts(result, root=root, formats=formats.split(","))
@@ -193,6 +203,97 @@ def baseline_compare(
     console.print(table)
     failed = any(SEVERITY_ORDER[item.severity] >= SEVERITY_ORDER[Severity.ERROR] for item in drift.changes)
     raise typer.Exit(code=2 if failed else 0)
+
+
+@contract_app.command("lint")
+def contract_lint_command(
+    contract: Path = typer.Option(..., "--contract", "-c", exists=True, file_okay=True, dir_okay=False),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Validate contract structure, execution planning, references, and maintainability hints."""
+    result = lint_contract(contract.resolve())
+    if json_output:
+        console.print_json(json.dumps(result))
+    else:
+        table = Table("Level", "Message")
+        for message in result.get("errors", []):
+            table.add_row("ERROR", str(message))
+        for message in result.get("warnings", []):
+            table.add_row("WARNING", str(message))
+        if not result.get("errors") and not result.get("warnings"):
+            table.add_row("PASS", "Contract is structurally and operationally clean.")
+        console.print(table)
+    raise typer.Exit(code=0 if result.get("passed") else 3)
+
+
+@contract_app.command("normalize")
+def contract_normalize_command(
+    contract: Path = typer.Option(..., "--contract", "-c", exists=True, file_okay=True, dir_okay=False),
+    output: Path | None = typer.Option(None, "--output", "-o"),
+) -> None:
+    """Emit a canonical, stable YAML representation suitable for review and hashing."""
+    try:
+        loaded = load_contract(contract.resolve())
+    except ContractLoadError as exc:
+        console.print(f"[red]Contract normalization failed:[/red] {exc}")
+        raise typer.Exit(code=3) from exc
+    text = normalized_contract_text(loaded)
+    if output:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8", newline="\n")
+        console.print(f"Normalized contract written to {output.resolve()}")
+    else:
+        console.print(text, markup=False)
+
+
+@contract_app.command("diff")
+def contract_diff_command(
+    older: Path = typer.Option(..., "--older", exists=True, file_okay=True, dir_okay=False),
+    newer: Path = typer.Option(..., "--newer", exists=True, file_okay=True, dir_okay=False),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Classify contract changes as breaking, potentially breaking, nonbreaking, or documentary."""
+    try:
+        comparison = diff_contracts(load_contract(older.resolve()), load_contract(newer.resolve()))
+    except ContractLoadError as exc:
+        console.print(f"[red]Contract diff failed:[/red] {exc}")
+        raise typer.Exit(code=3) from exc
+    if json_output:
+        console.print_json(json.dumps(comparison))
+    else:
+        console.print(f"Classification: {comparison['classification']}")
+        table = Table("Class", "Path", "Reason")
+        for change in comparison["changes"]:
+            table.add_row(change["classification"], change["path"], change["reason"])
+        console.print(table)
+    raise typer.Exit(code=2 if comparison["classification"] == "breaking" else 0)
+
+
+@history_app.command("compare")
+def history_compare_command(
+    older_run_id: str = typer.Argument(...),
+    newer_run_id: str = typer.Argument(...),
+) -> None:
+    """Compare findings and key metrics between two durable validation runs."""
+    root = ensure_runtime_directories(runtime_root())
+    store = StateStore(root / "state" / "dcm_state.sqlite3")
+    try:
+        comparison = store.compare_runs(older_run_id, newer_run_id)
+    except Exception as exc:
+        console.print(f"[red]Run comparison failed:[/red] {exc}")
+        raise typer.Exit(code=3) from exc
+    console.print_json(json.dumps(comparison))
+
+
+@history_app.command("trend")
+def history_trend_command(
+    dataset: str | None = typer.Option(None, "--dataset"),
+    limit: int = typer.Option(20, "--limit", min=2, max=500),
+) -> None:
+    """Show validation and drift history for one dataset or the local project."""
+    root = ensure_runtime_directories(runtime_root())
+    store = StateStore(root / "state" / "dcm_state.sqlite3")
+    console.print_json(json.dumps(store.trend(dataset_name=dataset, limit=limit)))
 
 
 @app.command("demo")
@@ -340,8 +441,10 @@ def serve_command(
         server.run(sockets=[endpoint.socket])
     finally:
         shutdown_event.set()
-        with suppress(OSError):
+        try:
             endpoint.socket.close()
+        except OSError:
+            pass
         record_endpoint(
             root,
             endpoint,
@@ -426,11 +529,11 @@ def main() -> None:
         raise
     except KeyboardInterrupt:
         console.print("\nCancelled.")
-        raise SystemExit(130) from None
+        raise typer.Exit(code=130) from None
     except Exception as exc:
         manager.capture_critical("terminal-cli-crash", exc)
         console.print(f"[red]Unexpected failure:[/red] {exc}")
-        raise SystemExit(4) from None
+        raise typer.Exit(code=4) from exc
 
 
 if __name__ == "__main__":

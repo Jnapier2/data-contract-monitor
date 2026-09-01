@@ -23,41 +23,36 @@ def compile_contract(contract: Contract) -> CompiledContractPlan:
     rule_ids: list[str] = []
     dataset_rule_names: set[str] = set()
 
-    for column, column_rule in contract.rules.items():
+    for column, rule in contract.rules.items():
         for suffix, active in (
-            ("nullable", not column_rule.nullable),
-            ("type", column_rule.data_type != "any"),
-            ("unique", column_rule.unique),
-            ("minimum", column_rule.minimum is not None),
-            ("maximum", column_rule.maximum is not None),
-            ("min_length", column_rule.min_length is not None),
-            ("max_length", column_rule.max_length is not None),
-            ("pattern", column_rule.pattern is not None),
-            ("allowed_values", column_rule.allowed_values is not None),
-            ("maximum_age_hours", column_rule.maximum_age_hours is not None),
+            ("nullable", not rule.nullable),
+            ("type", rule.data_type != "any"),
+            ("unique", rule.unique),
+            ("minimum", rule.minimum is not None),
+            ("maximum", rule.maximum is not None),
+            ("min_length", rule.min_length is not None),
+            ("max_length", rule.max_length is not None),
+            ("pattern", rule.pattern is not None),
+            ("allowed_values", rule.allowed_values is not None),
+            ("maximum_age_hours", rule.maximum_age_hours is not None),
         ):
             if active:
                 rule_ids.append(f"column.{suffix}:{column}")
 
-    for index, dataset_rule in enumerate(contract.dataset_rules, start=1):
-        name = dataset_rule.name or f"dataset_rule_{index}"
+    for index, rule in enumerate(contract.dataset_rules, start=1):
+        name = rule.name or f"dataset_rule_{index}"
         if name in dataset_rule_names:
             raise ContractPlanError(f"Duplicate dataset rule name '{name}'.")
         dataset_rule_names.add(name)
-        rule_ids.append(f"dataset.{dataset_rule.type}:{name}")
-        for referenced_column in dataset_rule.columns or []:
-            referenced.add(referenced_column)
-        for optional_column in (
-            dataset_rule.column,
-            dataset_rule.when_column,
-            dataset_rule.then_column,
-            dataset_rule.left_column,
-        ):
-            if optional_column:
-                referenced.add(optional_column)
-        if dataset_rule.type == "aggregate_reconciliation" and dataset_rule.right_expression:
+        rule_ids.append(f"dataset.{rule.type}:{name}")
+        for column in rule.columns or []:
+            referenced.add(column)
+        for column in (rule.column, rule.when_column, rule.then_column, rule.left_column):
+            if column:
+                referenced.add(column)
+        if rule.type == "aggregate_reconciliation" and rule.right_expression:
             try:
-                referenced.update(referenced_names(dataset_rule.right_expression))
+                referenced.update(referenced_names(rule.right_expression))
             except ExpressionError as exc:
                 raise ContractPlanError(str(exc)) from exc
 

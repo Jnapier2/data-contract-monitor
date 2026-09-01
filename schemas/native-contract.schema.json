@@ -258,6 +258,30 @@
           "default": null,
           "title": "Name"
         },
+        "reference_column": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Column"
+        },
+        "reference_dataset": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference Dataset"
+        },
         "right_expression": {
           "anyOf": [
             {
@@ -298,7 +322,8 @@
             "unique_combination",
             "null_ratio",
             "conditional_not_null",
-            "aggregate_reconciliation"
+            "aggregate_reconciliation",
+            "reference_exists"
           ],
           "title": "Type",
           "type": "string"
@@ -339,6 +364,18 @@
           "default": true,
           "title": "Allow Extra Columns",
           "type": "boolean"
+        },
+        "contract_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contract Id"
         },
         "description": {
           "anyOf": [
@@ -436,6 +473,16 @@
       "title": "Adapter Notes",
       "type": "array"
     },
+    "compatibility_policy": {
+      "default": "strict",
+      "enum": [
+        "strict",
+        "backward",
+        "advisory"
+      ],
+      "title": "Compatibility Policy",
+      "type": "string"
+    },
     "contract_version": {
       "default": "1.0",
       "title": "Contract Version",
@@ -450,6 +497,18 @@
       },
       "title": "Dataset Rules",
       "type": "array"
+    },
+    "effective_date": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Effective Date"
     },
     "privacy": {
       "$ref": "#/$defs/PrivacySpec"

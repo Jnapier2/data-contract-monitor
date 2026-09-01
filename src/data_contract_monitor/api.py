@@ -1,23 +1,23 @@
 from __future__ import annotations
 
+import asyncio
 import os
-import re
 import secrets
 import shutil
 import tempfile
-from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Annotated
 from urllib.parse import urlparse
+from typing import Annotated, Any
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import __build_id__, __version__
 from .artifacts import publish_run_artifacts
+from .contract_loader import ContractLoadError, load_contract
 from .demo import write_demo_dataset
 from .engine import validate_files
 from .identity import verify_release_integrity
@@ -31,14 +31,27 @@ from .state_store import StateStore
 SESSION_COOKIE = "dcm_session"
 MODIFYING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 SAFE_ORIGIN_HOSTS = {"127.0.0.1", "localhost", "::1"}
-RUN_ID_PATTERN = re.compile(r"^[0-9a-f]{32}$")
-ARTIFACT_FILENAMES = {
-    "data_contract_report.json": "data_contract_report.json",
-    "data_contract_report.html": "data_contract_report.html",
-    "data_contract_report.xml": "data_contract_report.xml",
-    "data_contract_report.sarif": "data_contract_report.sarif",
-    "artifact_manifest.json": "artifact_manifest.json",
-}
+
+
+def _is_known_windows_proactor_reset(context: dict[str, Any]) -> bool:
+    """Match only the benign Windows Proactor disconnect observed in field evidence.
+
+    A browser or local client can reset a loopback connection after Uvicorn has
+    already completed the useful request. Windows' Proactor transport may then
+    surface WinError 10054 from ``_call_connection_lost`` as an event-loop
+    callback exception even though the server remains healthy. Other asyncio
+    exceptions are deliberately not suppressed.
+    """
+
+    exc = context.get("exception")
+    if not isinstance(exc, ConnectionResetError):
+        return False
+    winerror = getattr(exc, "winerror", None)
+    errno_value = getattr(exc, "errno", None)
+    if winerror != 10054 and errno_value != 10054:
+        return False
+    signature = "_ProactorBasePipeTransport._call_connection_lost"
+    return signature in str(context.get("message", "")) or signature in str(context.get("handle", ""))
 
 
 def _safe_local_origin(value: str) -> bool:
@@ -59,39 +72,6 @@ def _web_root() -> Path:
     if (release_web / "index.html").is_file():
         return release_web
     return Path(__file__).resolve().parent / "web"
-
-
-def _run_artifact_path(root: Path, run_id: str, name: str) -> Path | None:
-    """Resolve a published artifact without using request data in a path expression."""
-    artifact_name = ARTIFACT_FILENAMES.get(name)
-    if artifact_name is None or RUN_ID_PATTERN.fullmatch(run_id) is None:
-        return None
-
-    runs_root = (root / "reports" / "runs").resolve()
-    if not runs_root.is_dir():
-        return None
-
-    try:
-        entries = os.scandir(runs_root)
-    except OSError:
-        return None
-    with entries:
-        for entry in entries:
-            if entry.name != run_id or entry.is_symlink():
-                continue
-            try:
-                if not entry.is_dir(follow_symlinks=False):
-                    return None
-                run_directory = Path(entry.path).resolve(strict=True)
-            except OSError:
-                return None
-            if run_directory.parent != runs_root:
-                return None
-            path = run_directory / artifact_name
-            if path.is_symlink() or not path.is_file():
-                return None
-            return path
-    return None
 
 
 async def _save_upload(upload: UploadFile, destination: Path, maximum: int) -> None:
@@ -123,9 +103,27 @@ def create_app() -> FastAPI:
     api_token = os.environ.get("DCM_API_TOKEN") or secrets.token_hex(32)
 
     @asynccontextmanager
-    async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        yield
-        manager.shutdown()
+    async def lifespan(_: FastAPI):
+        loop = asyncio.get_running_loop()
+        previous_handler = loop.get_exception_handler()
+        installed_handler = None
+        if os.name == "nt":
+            def windows_loop_handler(active_loop: asyncio.AbstractEventLoop, context: dict[str, Any]) -> None:
+                if _is_known_windows_proactor_reset(context):
+                    return
+                if previous_handler is not None:
+                    previous_handler(active_loop, context)
+                else:
+                    active_loop.default_exception_handler(context)
+
+            installed_handler = windows_loop_handler
+            loop.set_exception_handler(installed_handler)
+        try:
+            yield
+        finally:
+            manager.shutdown()
+            if installed_handler is not None and loop.get_exception_handler() is installed_handler:
+                loop.set_exception_handler(previous_handler)
 
     app = FastAPI(
         title="Data Contract Monitor API",
@@ -142,16 +140,19 @@ def create_app() -> FastAPI:
     )
 
     @app.middleware("http")
-    async def local_write_guard(
-        request: Request, call_next: Callable[[Request], Awaitable[Response]]
-    ) -> Response:
+    async def local_write_guard(request: Request, call_next):
         if request.method in MODIFYING_METHODS and request.url.path.startswith("/api/"):
             origin = request.headers.get("origin")
             if origin and not _safe_local_origin(origin):
                 return JSONResponse(status_code=403, content={"detail": "Cross-origin modifying requests are blocked."})
             if request.cookies.get(SESSION_COOKIE) != api_token:
                 return JSONResponse(status_code=403, content={"detail": "Local session token is missing or invalid."})
-        return await call_next(request)
+        response = await call_next(request)
+        if request.url.path == "/" or request.url.path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            response.headers["Pragma"] = "no-cache"
+            response.headers["Expires"] = "0"
+        return response
 
     if web_root.exists():
         app.mount("/assets", StaticFiles(directory=web_root), name="assets")
@@ -191,6 +192,8 @@ def create_app() -> FastAPI:
             "name": "Data Contract Monitor",
             "version": __version__,
             "supported_data": ["csv", "xlsx", "xlsm", "json", "jsonl", "parquet-optional"],
+            "execution_modes": ["auto", "memory", "streaming"],
+            "streaming_data": ["csv", "jsonl"],
             "report_formats": ["json", "html", "junit", "sarif"],
             "privacy": "Raw cell values are not included in validation results.",
             "limits": limits.public_dict(),
@@ -200,22 +203,71 @@ def create_app() -> FastAPI:
     async def queue_validation(
         contract: Annotated[UploadFile, File(description="YAML data contract")],
         data: Annotated[UploadFile, File(description="Dataset")],
+        references: Annotated[list[UploadFile] | None, File(description="Optional reference datasets named as used by the contract")] = None,
         fail_on: Severity = Severity.ERROR,
+        execution_mode: str = "auto",
     ) -> dict[str, object]:
+        if execution_mode not in {"auto", "memory", "streaming"}:
+            raise HTTPException(status_code=422, detail="execution_mode must be auto, memory, or streaming")
         temp_parent = root / "temp"
         work = Path(tempfile.mkdtemp(prefix="dcm_job_", dir=temp_parent))
         contract_suffix = Path(contract.filename or "contract.yml").suffix or ".yml"
         data_suffix = Path(data.filename or "data.csv").suffix or ".csv"
-        contract_path = work / f"contract{contract_suffix}"
-        data_path = work / f"dataset{data_suffix}"
+        contract_path = work / "contracts" / f"contract{contract_suffix}"
+        data_path = work / "data" / f"dataset{data_suffix}"
         try:
             await _save_upload(contract, contract_path, limits.max_contract_bytes)
             await _save_upload(data, data_path, limits.max_data_bytes)
+            try:
+                loaded_contract = load_contract(contract_path)
+            except ContractLoadError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            expected_references: dict[str, Path] = {}
+            for rule in loaded_contract.dataset_rules:
+                if rule.type != "reference_exists" or not rule.reference_dataset:
+                    continue
+                relative = Path(rule.reference_dataset)
+                if relative.is_absolute():
+                    raise HTTPException(status_code=422, detail="reference_dataset must be relative")
+                destination = (contract_path.parent / relative).resolve()
+                if work.resolve() != destination and work.resolve() not in destination.parents:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"reference_dataset escapes the isolated upload workspace: {rule.reference_dataset}",
+                    )
+                basename = relative.name
+                prior = expected_references.get(basename)
+                if prior is not None and prior != destination:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Ambiguous reference basename in contract: {basename}",
+                    )
+                expected_references[basename] = destination
+            seen_reference_names: set[str] = set()
+            for reference in references or []:
+                name = Path(reference.filename or "reference.csv").name
+                if name in seen_reference_names:
+                    raise HTTPException(status_code=422, detail=f"Duplicate reference filename: {name}")
+                destination = expected_references.get(name)
+                if destination is None:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Uploaded reference '{name}' is not declared by the contract.",
+                    )
+                seen_reference_names.add(name)
+                await _save_upload(reference, destination, limits.max_data_bytes)
+            missing_reference_uploads = sorted(set(expected_references) - seen_reference_names)
+            if missing_reference_uploads:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Missing uploaded reference dataset(s): " + ", ".join(missing_reference_uploads),
+                )
             job_id = manager.submit(
                 contract_path=contract_path,
                 data_path=data_path,
                 fail_on=fail_on,
                 cleanup_dir=work,
+                execution_mode=execution_mode,
             )
         except JobQueueFull as exc:
             shutil.rmtree(work, ignore_errors=True)
@@ -262,17 +314,26 @@ def create_app() -> FastAPI:
                 history_path=store.path,
                 limits=limits,
             )
-            publish_run_artifacts(result, root=root)
+            publish_run_artifacts(result, root=root, limits=limits)
             return result.model_dump(mode="json")
 
     @app.get("/api/history")
     def history(limit: int = 20) -> list[dict[str, object]]:
         return store.read_history(limit=min(max(limit, 1), 100))
 
+    @app.get("/api/history/trend")
+    def history_trend(dataset: str | None = None, limit: int = 20) -> dict[str, object]:
+        return store.trend(dataset_name=dataset, limit=min(max(limit, 2), 500))
+
+    @app.get("/api/runs/compare/{older_run_id}/{newer_run_id}")
+    def compare_runs(older_run_id: str, newer_run_id: str) -> dict[str, object]:
+        try:
+            return store.compare_runs(older_run_id, newer_run_id)
+        except Exception as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     @app.get("/api/runs/{run_id}")
     def run_result(run_id: str) -> dict[str, object]:
-        if RUN_ID_PATTERN.fullmatch(run_id) is None:
-            raise HTTPException(status_code=404, detail="Run not found")
         result = store.get_result(run_id)
         if result is None:
             raise HTTPException(status_code=404, detail="Run not found")
@@ -280,8 +341,17 @@ def create_app() -> FastAPI:
 
     @app.get("/api/runs/{run_id}/artifacts/{name}")
     def run_artifact(run_id: str, name: str) -> FileResponse:
-        path = _run_artifact_path(root, run_id, name)
-        if path is None:
+        allowed = {
+            "data_contract_report.json",
+            "data_contract_report.html",
+            "data_contract_report.xml",
+            "data_contract_report.sarif",
+            "artifact_manifest.json",
+        }
+        if name not in allowed:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+        path = root / "reports" / "runs" / run_id / name
+        if not path.is_file():
             raise HTTPException(status_code=404, detail="Artifact not found")
         return FileResponse(path)
 

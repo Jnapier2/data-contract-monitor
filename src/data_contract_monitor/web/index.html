@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Validate datasets against executable data contracts without uploading them to a remote service.">
   <title>Data Contract Monitor</title>
-  <link rel="stylesheet" href="/assets/styles.css">
-  <script type="module" src="/assets/app.js"></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=0.3.3">
+  <script type="module" src="/assets/app.js?v=0.3.3"></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to main content</a>
@@ -44,6 +44,11 @@
             <input id="data-file" name="data" type="file" accept=".csv,.xlsx,.xlsm,.json,.jsonl,.ndjson,.parquet" required>
             <small>CSV, Excel, JSON/JSONL, or optional Parquet</small>
           </label>
+          <label class="file-field">
+            <span>Reference datasets (optional)</span>
+            <input id="reference-files" name="references" type="file" accept=".csv,.xlsx,.xlsm,.json,.jsonl,.ndjson,.parquet" multiple>
+            <small>For reference_exists rules; filenames must match the relative contract references.</small>
+          </label>
           <label>
             <span>Fail the run at</span>
             <select id="fail-on" name="fail_on">
@@ -51,6 +56,15 @@
               <option value="error" selected>Error</option>
               <option value="critical">Critical</option>
             </select>
+          </label>
+          <label>
+            <span>Execution mode</span>
+            <select id="execution-mode" name="execution_mode">
+              <option value="auto" selected>Auto</option>
+              <option value="memory">Memory</option>
+              <option value="streaming">Streaming (CSV/JSONL)</option>
+            </select>
+            <small>Auto streams larger CSV/JSONL files and keeps smaller inputs in memory.</small>
           </label>
         </div>
         <div class="actions">
@@ -133,7 +147,7 @@
   </main>
 
   <footer>
-    <p>Data Contract Monitor 0.2.2 · Apache-2.0 · Copyright © 2026 Gateway Information Group LLC. All rights reserved.</p>
+    <p>Data Contract Monitor 0.3.3 · Apache-2.0 · Copyright © 2026 Gateway Information Group LLC. All rights reserved.</p>
   </footer>
 </body>
 </html>

@@ -73,6 +73,7 @@ def verify_release(root: Path) -> dict[str, Any]:
 
     checked = 0
     seen: set[str] = set()
+    seen_casefold: set[str] = set()
     for entry in manifest.get("managed_files", []):
         relative = entry.get("path")
         expected = str(entry.get("sha256", "")).lower()
@@ -80,10 +81,12 @@ def verify_release(root: Path) -> dict[str, Any]:
             errors.append("Manifest contains an empty path")
             continue
         normalized = Path(relative)
-        if normalized.is_absolute() or ".." in normalized.parts or relative in seen:
-            errors.append(f"Unsafe or duplicate manifest path: {relative!r}")
+        folded = relative.casefold()
+        if normalized.is_absolute() or ".." in normalized.parts or relative in seen or folded in seen_casefold:
+            errors.append(f"Unsafe, duplicate, or case-colliding manifest path: {relative!r}")
             continue
         seen.add(relative)
+        seen_casefold.add(folded)
         path = root / normalized
         if not path.is_file():
             errors.append(f"Managed file missing: {relative}")
@@ -94,6 +97,33 @@ def verify_release(root: Path) -> dict[str, Any]:
             errors.append(f"Managed file size mismatch: {relative}")
         if sha256_file(path) != expected:
             errors.append(f"Managed file hash mismatch: {relative}")
+
+    # Reject unlisted files only inside protected execution namespaces. Unknown/user files
+    # elsewhere remain untouched and do not block release verification.
+    protected_candidates: set[Path] = set()
+    for suffix in ("*.bat", "*.cmd", "*.ps1"):
+        protected_candidates.update(root.glob(suffix))
+        tools = root / "tools"
+        if tools.is_dir():
+            protected_candidates.update(tools.rglob(suffix))
+    package_root = root / "src" / "data_contract_monitor"
+    if package_root.is_dir():
+        protected_candidates.update(
+            path for path in package_root.rglob("*")
+            if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}
+        )
+    packages_root = root / "packages"
+    if packages_root.is_dir():
+        protected_candidates.update(packages_root.glob("data_contract_monitor-*.whl"))
+
+    for path in sorted(protected_candidates, key=lambda item: item.as_posix().casefold()):
+        try:
+            relative = path.relative_to(root).as_posix()
+        except ValueError:
+            continue
+        if relative not in seen:
+            errors.append(f"Unlisted protected execution file: {relative}")
+
     return {
         "mode": "release",
         "passed": not errors,

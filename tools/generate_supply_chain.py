@@ -5,11 +5,6 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
-try:
-    from tooling_common import atomic_text
-except ModuleNotFoundError:  # imported as tools.* during tests
-    from tools.tooling_common import atomic_text
-
 
 LICENSES = {
     "annotated-doc": "MIT",
@@ -175,7 +170,9 @@ def main() -> int:
         "packages": packages,
         "relationships": relationships,
     }
-    atomic_text(root / "SBOM.spdx.json", json.dumps(sbom, indent=2, sort_keys=True) + "\n")
+    (root / "SBOM.spdx.json").write_text(
+        json.dumps(sbom, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
     lines = [
         "# Third-Party Notices",
@@ -199,7 +196,7 @@ def main() -> int:
             "Copyright © 2026 Gateway Information Group LLC. All rights reserved.",
         ]
     )
-    atomic_text(root / "THIRD_PARTY_NOTICES.md", "\n".join(lines) + "\n")
+    (root / "THIRD_PARTY_NOTICES.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Wrote SBOM and notices for {len(dependencies)} dependency entries")
     return 0
 

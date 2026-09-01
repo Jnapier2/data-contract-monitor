@@ -20,17 +20,21 @@ inputs:
     required: false
     default: ""
   fail-on:
-    description: "Lowest severity that fails the action: warning, error, or critical."
+    description: Lowest severity that fails the action: warning, error, or critical.
     required: false
     default: error
   formats:
-    description: "Comma-separated report formats: html,json,junit,sarif."
+    description: Comma-separated report formats: html,json,junit,sarif.
     required: false
     default: html,json,junit,sarif
   output-dir:
     description: Directory for generated evidence.
     required: false
     default: .dcm/reports/github-action
+  execution-mode:
+    description: Execution strategy: auto, memory, or streaming.
+    required: false
+    default: auto
   python-version:
     description: Python version used by the action.
     required: false
@@ -45,26 +49,25 @@ runs:
   using: composite
   steps:
     - name: Set up Python
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ inputs.python-version }}
+        cache: pip
 
     - name: Install Data Contract Monitor
       shell: bash
-      run: |
-        python -m pip install -r "${GITHUB_ACTION_PATH}/requirements.lock"
-        python -m pip install --no-deps "${GITHUB_ACTION_PATH}"
+      run: python -m pip install "${GITHUB_ACTION_PATH}"
 
     - name: Validate dataset
       shell: bash
       env:
-        DCM_HOME: ${{ github.workspace }}/.dcm/runtime
         DCM_CONTRACT: ${{ inputs.contract }}
         DCM_DATA: ${{ inputs.data }}
         DCM_BASELINE: ${{ inputs.baseline }}
         DCM_FAIL_ON: ${{ inputs.fail-on }}
         DCM_FORMATS: ${{ inputs.formats }}
         DCM_OUTPUT_DIR: ${{ inputs.output-dir }}
+        DCM_EXECUTION_MODE: ${{ inputs.execution-mode }}
       run: |
         args=(
           validate
@@ -73,6 +76,7 @@ runs:
           --fail-on "$DCM_FAIL_ON"
           --formats "$DCM_FORMATS"
           --output-dir "$DCM_OUTPUT_DIR"
+          --execution-mode "$DCM_EXECUTION_MODE"
           --no-history
         )
         if [[ -n "$DCM_BASELINE" ]]; then

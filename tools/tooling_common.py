@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import tempfile
-import time
 from pathlib import Path
 from typing import Any
 
@@ -18,27 +17,21 @@ def sha256_file(path: Path) -> str:
 
 
 def atomic_text(path: Path, text: str) -> None:
+    """Durably publish UTF-8 text with same-directory atomic replacement.
+
+    The temporary descriptor remains writable through flush/fsync. Reopening a
+    completed temporary file read-only before fsync is not portable to Windows:
+    the Windows CRT may reject _commit/fsync on that descriptor with EBADF.
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temp_name = tempfile.mkstemp(
-        dir=path.parent, prefix=f".{path.name}.", suffix=".tmp"
-    )
+    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     temporary = Path(temp_name)
-    retry_delays = (0.05, 0.1, 0.2, 0.4, 0.8)
     try:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
-            handle.write(text)
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(text.encode("utf-8"))
             handle.flush()
             os.fsync(handle.fileno())
-        for attempt in range(len(retry_delays) + 1):
-            try:
-                os.replace(temporary, path)
-                return
-            except OSError as exc:
-                if getattr(exc, "winerror", None) not in {5, 32, 33}:
-                    raise
-                if attempt == len(retry_delays):
-                    raise
-                time.sleep(retry_delays[attempt])
+        os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
 

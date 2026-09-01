@@ -174,7 +174,7 @@ def build_index(root: Path) -> dict[str, Any]:
                 "consumers": [],
                 "references": [],
                 "status": "managed" if rel in managed else ("identity" if rel in {"MANIFEST.json", "MANIFEST.sha256"} else "source"),
-                "lineage": "v0.2.2 qualified successor; v0.1.5 is the public rollback release",
+                "lineage": "v0.3.3 Windows-freshness successor; v0.3.2 is Windows field-started predecessor and v0.1.2 remains the confirmed rollback authority",
                 "ownership": "Gateway Information Group LLC first-party project file",
             }
         )

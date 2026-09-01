@@ -27,6 +27,7 @@ class DatasetSpec(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1)
+    contract_id: str | None = None
     description: str | None = None
     owner: str | None = None
     required_columns: list[str] = Field(default_factory=list)
@@ -78,6 +79,7 @@ class DatasetRule(BaseModel):
         "null_ratio",
         "conditional_not_null",
         "aggregate_reconciliation",
+        "reference_exists",
     ]
     severity: Severity = Severity.ERROR
     description: str | None = None
@@ -92,6 +94,8 @@ class DatasetRule(BaseModel):
     left_column: str | None = None
     right_expression: str | None = None
     tolerance: float = Field(default=0.0, ge=0)
+    reference_dataset: str | None = None
+    reference_column: str | None = None
 
     @model_validator(mode="after")
     def validate_rule_shape(self) -> DatasetRule:
@@ -113,6 +117,12 @@ class DatasetRule(BaseModel):
             raise ValueError(
                 "aggregate_reconciliation requires left_column and right_expression"
             )
+        if self.type == "reference_exists" and (
+            not self.column or not self.reference_dataset or not self.reference_column
+        ):
+            raise ValueError(
+                "reference_exists requires column, reference_dataset, and reference_column"
+            )
         return self
 
 
@@ -129,6 +139,8 @@ class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     contract_version: str = "1.0"
+    effective_date: str | None = None
+    compatibility_policy: Literal["strict", "backward", "advisory"] = "strict"
     dataset: DatasetSpec
     rules: dict[str, ColumnRule] = Field(default_factory=dict)
     dataset_rules: list[DatasetRule] = Field(default_factory=list)
@@ -187,6 +199,8 @@ class ColumnProfile(BaseModel):
     null_ratio: float
     distinct_count: int
     duplicate_count: int
+    distinct_count_exact: bool = True
+    duplicate_count_exact: bool = True
     minimum: float | str | None = None
     maximum: float | str | None = None
     mean: float | None = None
@@ -199,6 +213,8 @@ class DatasetProfile(BaseModel):
     column_count: int
     columns: list[ColumnProfile]
     pii_signals: list[PiiSignal] = Field(default_factory=list)
+    profiling_mode: Literal["exact", "bounded"] = "exact"
+    sampled_rows: int = 0
 
 
 class DriftChange(BaseModel):
@@ -235,10 +251,12 @@ class ValidationSummary(BaseModel):
 class ValidationResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: str = "1.1"
+    schema_version: str = "1.3"
     tool_version: str
     run_id: str
     dataset_name: str
+    contract_id: str | None = None
+    contract_version: str
     contract_label: str
     data_label: str
     started_at: datetime
@@ -255,6 +273,10 @@ class ValidationResult(BaseModel):
     completeness: Literal["complete", "partial"] = "complete"
     findings_truncated: bool = False
     limits_applied: dict[str, int | float] = Field(default_factory=dict)
+    execution_mode: Literal["memory", "streaming"] = "memory"
+    batches: int = 1
+    rows_scanned: int = 0
+    exactness: dict[str, str] = Field(default_factory=dict)
     privacy_note: str = (
         "Reports contain aggregate statistics and row numbers, not raw cell values."
     )

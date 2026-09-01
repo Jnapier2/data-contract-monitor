@@ -14,12 +14,12 @@ import socket
 import time
 import urllib.error
 import urllib.request
+from urllib.parse import urlencode
 import webbrowser
-from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .atomic import atomic_write_json, atomic_write_text
 
@@ -118,10 +118,8 @@ def reserve_endpoint(
     try:
         sock = _bind(host, 0)
     except OSError as exc:
-        error_detail = last_error or exc
-        raise PortReservationError(
-            f"No local dashboard port could be reserved: {error_detail}"
-        ) from exc
+        detail = last_error or exc
+        raise PortReservationError(f"No local dashboard port could be reserved: {detail}") from exc
     selected = int(sock.getsockname()[1])
     return ReservedEndpoint(host=host, preferred_port=preferred_port, port=selected, socket=sock)
 
@@ -179,6 +177,12 @@ def read_health(url: str, *, timeout: float = 2.0) -> dict[str, Any] | None:
         return None
 
 
+def build_qualified_browser_url(url: str, *, build_id: str) -> str:
+    """Return a cache-busting reviewer URL tied to the exact build identity."""
+
+    return f"{url.rstrip('/')}/?{urlencode({'build': build_id})}"
+
+
 def open_browser_when_ready(
     url: str,
     *,
@@ -189,7 +193,6 @@ def open_browser_when_ready(
     poll_seconds: float = 0.2,
     health_reader: Callable[[str], dict[str, Any] | None] | None = None,
     browser_opener: Callable[[str], Any] | None = None,
-    cancelled: Callable[[], bool] | None = None,
 ) -> bool:
     """Open the browser only after the endpoint proves the expected identity."""
 
@@ -197,8 +200,6 @@ def open_browser_when_ready(
     opener = browser_opener or webbrowser.open_new_tab
     deadline = time.monotonic() + max(0.0, timeout_seconds)
     while time.monotonic() <= deadline:
-        if cancelled is not None and cancelled():
-            return False
         payload = reader(url)
         if health_matches(
             payload,
@@ -206,9 +207,7 @@ def open_browser_when_ready(
             expected_build_id=expected_build_id,
             expected_launch_id=expected_launch_id,
         ):
-            if cancelled is not None and cancelled():
-                return False
-            result = opener(url)
+            result = opener(build_qualified_browser_url(url, build_id=expected_build_id))
             return result is not False
         time.sleep(max(0.01, poll_seconds))
     return False
@@ -241,6 +240,7 @@ def record_endpoint(
         "selected_port": endpoint.port,
         "fallback_used": endpoint.fallback_used,
         "url": endpoint.url,
+        "browser_url": build_qualified_browser_url(endpoint.url, build_id=build_id),
         "browser_status": browser_status,
         "process_id": os.getpid(),
         "updated_at": datetime.now(UTC).isoformat(),
@@ -258,6 +258,7 @@ def record_endpoint(
     prefixes = (
         "Dashboard state:",
         "Dashboard URL:",
+        "Browser URL:",
         "Preferred port:",
         "Selected port:",
         "Port fallback:",
@@ -269,6 +270,7 @@ def record_endpoint(
         [
             f"Dashboard state: {state}",
             f"Dashboard URL: {endpoint.url}",
+            f"Browser URL: {build_qualified_browser_url(endpoint.url, build_id=build_id)}",
             f"Preferred port: {endpoint.preferred_port}",
             f"Selected port: {endpoint.port}",
             f"Port fallback: {'yes' if endpoint.fallback_used else 'no'}",

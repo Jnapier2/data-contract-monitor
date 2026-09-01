@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from .atomic import atomic_write_json
+from .deployment_state import deployment_coherence
 from .runtime import ensure_runtime_directories, runtime_root
 
 
@@ -198,6 +199,7 @@ class DiagnosticManager:
                 "traceback": redact("".join(traceback.format_exception(exc))[-20000:]) if exc else None,
                 "log_tail": list(_RING.records)[-100:],
                 "runtime_identity": _cached_runtime_identity(self.root),
+                "deployment_coherence": deployment_coherence(self.root),
                 "export_result": "capsule-written",
             }
             atomic_write_json(capsule_path, payload)
@@ -240,6 +242,8 @@ class DiagnosticManager:
                     "trigger": "manual-support-export",
                     "severity": "support",
                     "runtime_identity": _cached_runtime_identity(self.root),
+                    "deployment_coherence": deployment_coherence(self.root),
+                    "capture_note": "LATEST_LAUNCH_STATUS.txt is captured while the export action is still running; deployment_coherence is the authoritative current-vs-cached identity summary.",
                     "log_tail": list(_RING.records)[-100:],
                 },
             )
@@ -345,7 +349,7 @@ class DiagnosticManager:
                 (self.root / "PACKAGE_METADATA.json", "raw"),
                 (self.root / "MANIFEST.json", "raw"),
                 (self.root / "MANIFEST.sha256", "raw"),
-                (self.root / "docs" / "RELEASE_RECOVERY.md", "raw"),
+                (self.root / "KNOWN_GOOD_STATE.md", "raw"),
                 (self.root / "CHANGELOG.md", "raw"),
                 (environment_path, "json"),
             ]

@@ -1,8 +1,0 @@
-dataset:
-  name: action_smoke
-  required_columns: [record_id]
-rules:
-  record_id:
-    type: string
-    nullable: false
-    unique: true

@@ -7,12 +7,10 @@ import os
 import platform
 import re
 import shutil
-import signal
 import struct
 import subprocess
 import sys
 import sysconfig
-import threading
 import traceback
 import venv
 from datetime import UTC, datetime
@@ -41,6 +39,7 @@ RUNTIME_DIRS = (
     "diagnostics",
     "reports",
     "downloads",
+    "backups",
 )
 
 
@@ -66,20 +65,9 @@ def redact_value(value: Any) -> Any:
     return value
 
 
-def console_print(value: str, *, end: str = "\n", stream: Any = None) -> None:
-    """Keep legacy Windows output encodings from aborting a healthy command."""
-    target = sys.stdout if stream is None else stream
-    try:
-        print(value, end=end, flush=True, file=target)
-    except UnicodeEncodeError:
-        encoding = getattr(target, "encoding", None) or "ascii"
-        compatible = value.encode(encoding, errors="backslashreplace").decode(encoding)
-        print(compatible, end=end, flush=True, file=target)
-
-
 def log(message: str, path: Path) -> None:
     line = f"{datetime.now(UTC).isoformat(timespec='seconds')} {redact(message)}"
-    console_print(line)
+    print(line, flush=True)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
@@ -178,50 +166,6 @@ def remove_tree(path: Path, log_path: Path) -> None:
     shutil.rmtree(path, onerror=onerror)
 
 
-class CommandCancelled(KeyboardInterrupt):
-    """A user cancellation after the specific launched process has stopped."""
-
-    def __init__(self, process_id: int, *, forced: bool) -> None:
-        super().__init__("Command stopped by user")
-        self.process_id = process_id
-        self.forced = forced
-
-
-def stop_owned_process(process: subprocess.Popen[str], log_path: Path) -> bool:
-    """Request a graceful stop, then bound cleanup of this child only."""
-    forced = False
-    if process.poll() is None:
-        try:
-            process.send_signal(signal.CTRL_BREAK_EVENT if os.name == "nt" else signal.SIGINT)
-        except OSError:
-            forced = True
-            process.terminate()
-    try:
-        process.wait(timeout=5)
-    except (subprocess.TimeoutExpired, KeyboardInterrupt):
-        forced = True
-        process.kill()
-        process.wait(timeout=3)
-    if process.poll() is None:
-        raise RuntimeError("The launched process did not stop within the cleanup budget")
-    return forced
-
-
-def finalize_cancelled_endpoint(root: Path, process_id: int) -> None:
-    """Do not leave the stopped child's endpoint active or alter another run."""
-    path = root / "state" / "dashboard_endpoint.json"
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeError, json.JSONDecodeError):
-        return
-    if not isinstance(payload, dict) or payload.get("service_id") != "data-contract-monitor":
-        return
-    if payload.get("process_id") != process_id or payload.get("build_id") != read_build_id(root):
-        return
-    payload.update(state="stopped", browser_status="closed", updated_at=datetime.now(UTC).isoformat())
-    atomic_json(path, payload)
-
-
 def stream_command(
     command: list[str],
     *,
@@ -242,53 +186,14 @@ def stream_command(
         encoding="utf-8",
         errors="replace",
         bufsize=1,
-        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name == "nt" else 0,
-        start_new_session=os.name != "nt",
     )
     assert process.stdout is not None
-    output_errors: list[BaseException] = []
-
-    def relay_output() -> None:
-        try:
-            with log_path.open("a", encoding="utf-8") as output:
-                for line in process.stdout:
-                    safe_line = redact(line)
-                    output.write(safe_line)
-                    output.flush()
-                    console_print(safe_line, end="")
-        except BaseException as exc:
-            output_errors.append(exc)
-
-    # A blocking Windows pipe read can defer the main thread's Ctrl+C handler.
-    # Drain output in one worker; keep the main thread on short, bounded waits.
-    reader = threading.Thread(target=relay_output, name="dcm-command-output", daemon=True)
-    reader.start()
-    try:
-        while True:
-            if output_errors:
-                raise output_errors[0]
-            try:
-                return_code = process.wait(timeout=0.2)
-                break
-            except subprocess.TimeoutExpired:
-                continue
-        reader.join(timeout=2)
-        if reader.is_alive():
-            raise RuntimeError("Command output did not close within the cleanup budget")
-        if output_errors:
-            raise output_errors[0]
-    except KeyboardInterrupt:
-        log("Cancellation requested; stopping the launched command", log_path)
-        forced = stop_owned_process(process, log_path)
-        reader.join(timeout=2)
-        raise CommandCancelled(process.pid, forced=forced) from None
-    except Exception:
-        stop_owned_process(process, log_path)
-        reader.join(timeout=2)
-        raise
-    finally:
-        if not reader.is_alive():
-            process.stdout.close()
+    with log_path.open("a", encoding="utf-8") as output:
+        for line in process.stdout:
+            safe_line = redact(line)
+            print(safe_line, end="", flush=True)
+            output.write(safe_line)
+    return_code = process.wait()
     if check and return_code:
         raise RuntimeError(f"Command failed with exit code {return_code}; see {log_path}")
     return return_code
@@ -316,6 +221,34 @@ def resolve_release_wheel(root: Path) -> Path:
     if len(wheels) != 1:
         raise RuntimeError(f"Expected one local application wheel, found {len(wheels)}")
     return wheels[0]
+
+
+def local_wheelhouse(root: Path) -> Path | None:
+    """Return a complete project-local Windows wheelhouse for this interpreter when present."""
+    if os.name != "nt":
+        return None
+    tag = f"cp{sys.version_info.major}{sys.version_info.minor}-win_amd64"
+    candidate = root / "packages" / "wheelhouse" / tag
+    inventory = candidate / "WHEELHOUSE_MANIFEST.json"
+    if not candidate.is_dir() or not inventory.is_file():
+        return None
+    try:
+        payload = json.loads(inventory.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if payload.get("target") != tag or payload.get("complete") is not True:
+        return None
+    entries = payload.get("files")
+    if not isinstance(entries, list) or not entries:
+        return None
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("name"), str):
+            return None
+        wheel = candidate / entry["name"]
+        expected = str(entry.get("sha256") or "").lower()
+        if not wheel.is_file() or not expected or sha256_file(wheel) != expected:
+            return None
+    return candidate
 
 
 def environment_valid(python: Path, *, version: str, build_id: str | None) -> bool:
@@ -409,9 +342,6 @@ def ensure_environment(root: Path, *, include_tests: bool, force: bool, log_path
             "PIP_DISABLE_PIP_VERSION_CHECK": "1",
             "PIP_CACHE_DIR": str(root / "cache" / "pip"),
             "PIP_DEFAULT_TIMEOUT": "45",
-            "TEMP": str(root / "temp"),
-            "TMP": str(root / "temp"),
-            "TMPDIR": str(root / "temp"),
             "DCM_HOME": str(root),
             "DCM_PROJECT_ROOT": str(root),
         }
@@ -437,6 +367,12 @@ def ensure_environment(root: Path, *, include_tests: bool, force: bool, log_path
         "--progress-bar",
         "off",
     ]
+    wheelhouse = local_wheelhouse(root)
+    if wheelhouse is not None:
+        pip_base.extend(["--no-index", "--find-links", str(wheelhouse)])
+        log(f"Using verified project-local offline wheelhouse: {wheelhouse.name}", log_path)
+    else:
+        log("No verified project-local wheelhouse is present; package-index access may be required", log_path)
     stream_command(
         [*pip_base, "--requirement", str(root / "requirements.lock")],
         root=root,
@@ -480,6 +416,7 @@ def ensure_environment(root: Path, *, include_tests: bool, force: bool, log_path
         "dependency_signature": expected,
         "tests_included": include_tests,
         "wheel": wheel.relative_to(root).as_posix(),
+        "offline_wheelhouse": wheelhouse.relative_to(root).as_posix() if wheelhouse is not None else None,
     }
     atomic_json(root / "state" / "runtime_environment.json", runtime_state)
     log("Dependency and application installation verified", log_path)
@@ -559,6 +496,14 @@ def main() -> int:
         compatible, reason = supported_interpreter()
         if not compatible:
             raise RuntimeError(reason)
+        last_progress = "deployment-state-reconciliation"
+        sys.path.insert(0, str(root / "src"))
+        from data_contract_monitor.deployment_state import retire_stale_generated_identity
+
+        retirement = retire_stale_generated_identity(root)
+        retired = retirement.get("retired", [])
+        if retired:
+            log("Retired stale generated runtime identity: " + ", ".join(str(item) for item in retired), log_path)
         last_progress = "environment-preparation"
         python = ensure_environment(
             root,
@@ -573,9 +518,6 @@ def main() -> int:
             {
                 "PYTHONUTF8": "1",
                 "PYTHONDONTWRITEBYTECODE": "1",
-                "TEMP": str(root / "temp"),
-                "TMP": str(root / "temp"),
-                "TMPDIR": str(root / "temp"),
                 "DCM_HOME": str(root),
                 "DCM_PROJECT_ROOT": str(root),
             }
@@ -585,7 +527,7 @@ def main() -> int:
         elif args.action == "doctor":
             command = [str(python), "-m", "data_contract_monitor.cli", "doctor"]
         elif args.action == "test":
-            command = [str(python), "-m", "pytest", str(root / "tests"), "--basetemp", str(root / "temp" / "pytest")]
+            command = [str(python), "-m", "pytest", str(root / "tests")]
         elif args.action == "demo":
             command = [str(python), "-m", "data_contract_monitor.cli", "demo", "--scenario", "bad"]
         else:
@@ -609,15 +551,6 @@ def main() -> int:
         else:
             write_status(root, state="failed", action=args.action, details={"exit_code": return_code, "log": redact(str(log_path))})
         return return_code
-    except KeyboardInterrupt as exc:
-        details: dict[str, Any] = {"exit_code": 130, "reason": "user cancellation"}
-        if isinstance(exc, CommandCancelled):
-            details["forced_stop"] = exc.forced
-            if args.action == "serve":
-                finalize_cancelled_endpoint(root, exc.process_id)
-        write_status(root, state="stopped-by-user", action=args.action, details=details)
-        log("Stopped by user", log_path)
-        return 130
     except Exception as exc:
         message = redact(str(exc))
         log("ERROR " + message, log_path)
@@ -635,9 +568,9 @@ def main() -> int:
                 "support_export": export_result or "not created",
             },
         )
-        console_print(f"[ERROR] {message}", stream=sys.stderr)
-        console_print(f"[ERROR] Review {root / 'LATEST_LAUNCH_STATUS.txt'}", stream=sys.stderr)
-        console_print(f"[ERROR] Review {log_path}", stream=sys.stderr)
+        print(f"[ERROR] {message}", file=sys.stderr)
+        print(f"[ERROR] Review {root / 'LATEST_LAUNCH_STATUS.txt'}", file=sys.stderr)
+        print(f"[ERROR] Review {log_path}", file=sys.stderr)
         return 4
 
 

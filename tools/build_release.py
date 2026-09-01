@@ -33,7 +33,6 @@ EXCLUDED_ROOTS = {
     "exports",
     "logs",
     "node_modules",
-    "pnpm-store",
     "reports",
     "state",
     "temp",
@@ -85,14 +84,13 @@ def run(command: list[str], root: Path, *, extra_env: dict[str, str] | None = No
         raise RuntimeError(f"Command failed with exit code {completed.returncode}: {' '.join(command)}")
 
 
-def create_zip(root: Path, files: Iterable[Path], output: Path, *, prefix: str) -> None:
+def create_zip(root: Path, files: Iterable[Path], output: Path, *, prefix: str | None = None) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = output.with_suffix(output.suffix + ".tmp")
-    if not prefix or "/" in prefix or "\\" in prefix or prefix in {".", ".."}:
-        raise RuntimeError(f"Unsafe release ZIP root: {prefix!r}")
+    archive_prefix = prefix or root.name
     with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for path in files:
-            archive.write(path, arcname=f"{prefix}/{path.relative_to(root).as_posix()}")
+            archive.write(path, arcname=f"{archive_prefix}/{path.relative_to(root).as_posix()}")
     with zipfile.ZipFile(temporary, "r") as archive:
         bad = archive.testzip()
         if bad:
@@ -114,7 +112,7 @@ def _assert_crlf(path: Path) -> None:
 
 
 def validate_windows_launchers(root: Path) -> None:
-    batch_files = sorted(path for path in collect_files(root) if path.suffix.casefold() == ".bat")
+    batch_files = sorted(root.rglob("*.bat"))
     expected_names = {*ROOT_BATCH_ACTIONS, "launch.bat"}
     found_names = {path.name for path in batch_files}
     if found_names != expected_names or len(batch_files) != len(expected_names):
@@ -141,6 +139,7 @@ def validate_windows_launchers(root: Path) -> None:
         'for %%I in ("%~dp0..") do set "ROOT=%%~fI"',
         "tools\\bootstrap.py",
         "tools\\release_gate.py",
+        "tools\\maintenance_preflight.py",
         "tools\\support_export.py",
         "LATEST_LAUNCH_STATUS.txt",
         "logs\\launcher.log",
@@ -176,31 +175,32 @@ def main() -> int:
     version = (root / "VERSION.txt").read_text(encoding="utf-8").strip()
     if not version:
         raise RuntimeError("VERSION.txt is empty")
-    if args.build_id:
-        build_id = args.build_id
-    else:
-        try:
-            current_build = json.loads(
-                (root / "src" / "data_contract_monitor" / "build_info.json").read_text(
-                    encoding="utf-8"
-                )
-            )
-        except (OSError, UnicodeError, json.JSONDecodeError):
-            current_build = {}
-        build_id = (
-            str(current_build.get("build_id"))
-            if current_build.get("version") == version and current_build.get("build_id")
-            else f"DCM-{version}-B20260829-RELEASE1"
-        )
+    build_id = args.build_id or f"DCM-{version}-B20260831-WINDOWSFRESHNESS1"
 
     build_info = {"version": version, "build_id": build_id}
     atomic_text(
         root / "src" / "data_contract_monitor" / "build_info.json",
         json.dumps(build_info, indent=2, sort_keys=True) + "\n",
     )
-    atomic_text(root / "RELEASE_MODE", "release\n")
+    # Development/source qualification must not evaluate a stale prior-release manifest.
+    # RELEASE_MODE is restored only after the exact application wheel and generated source evidence are final.
+    (root / "RELEASE_MODE").unlink(missing_ok=True)
 
     validate_windows_launchers(root)
+    frontend_package = json.loads((root / "frontend" / "package.json").read_text(encoding="utf-8"))
+    frontend_lock = json.loads((root / "frontend" / "package-lock.json").read_text(encoding="utf-8"))
+    if frontend_package.get("version") != version or frontend_lock.get("version") != version:
+        raise RuntimeError("Frontend package/lock version does not match VERSION.txt")
+    tsc_js = os.environ.get("DCM_TSC_JS", "").strip()
+    if tsc_js:
+        node_executable = os.environ.get("DCM_NODE_EXE", "node").strip() or "node"
+        run([node_executable, tsc_js, "-p", "frontend/tsconfig.json"], root)
+    else:
+        run(["npx", "--no-install", "tsc", "-p", "frontend/tsconfig.json"], root)
+    compiled_dashboard = root / "frontend" / "dist" / "app.js"
+    packaged_dashboard = root / "src" / "data_contract_monitor" / "web" / "app.js"
+    if not compiled_dashboard.is_file() or compiled_dashboard.read_bytes() != packaged_dashboard.read_bytes():
+        raise RuntimeError("Compiled TypeScript dashboard does not match packaged web/app.js")
     run([sys.executable, "tools/project_index.py", "--root", str(root), "--check-only"], root)
     run([sys.executable, "tools/generate_schemas.py"], root)
     run([sys.executable, "tools/generate_supply_chain.py"], root)
@@ -211,16 +211,9 @@ def main() -> int:
         if existing_pythonpath:
             source_pythonpath += os.pathsep + existing_pythonpath
         run(
-            [
-                sys.executable,
-                "-m",
-                "pytest",
-                "-q",
-                "--basetemp",
-                str(root / "temp" / "pytest-release"),
-            ],
+            [sys.executable, "-m", "pytest", "-q"],
             root,
-            extra_env={"PYTHONPATH": source_pythonpath},
+            extra_env={"PYTHONPATH": source_pythonpath, "PYTHONWARNINGS": "error::ResourceWarning"},
         )
 
     packages = root / "packages"
@@ -250,14 +243,17 @@ def main() -> int:
     if not wheel.name.startswith(expected_wheel_prefix):
         raise RuntimeError(f"Wheel filename does not match version {version}: {wheel.name}")
 
+    atomic_text(root / "RELEASE_MODE", "release\n")
+    run([sys.executable, "tools/project_index.py", "--root", str(root), "--check-only"], root)
+
     metadata = {
         "schema_version": "1.2",
-        "project": "Data Contract Monitor",
+        "project": "Professional Portfolio — Data Contract Monitor",
         "display_name": "Data Contract Monitor",
         "package_name": "data-contract-monitor",
         "version": version,
         "build_id": build_id,
-        "release_date": "2026-08-29",
+        "release_date": "2026-08-31",
         "release_channel": "portfolio-alpha",
         "license": "Apache-2.0",
         "publisher": "Gateway Information Group LLC",
@@ -268,15 +264,33 @@ def main() -> int:
         "python_runtime_policy": "standard non-free-threaded 64-bit CPython; 3.13 preferred on Windows",
         "dependency_install_policy": "locked binary wheels only for Windows bootstrap",
         "lineage": {
-            "source_authority": "v0.2.1 durable foundation merged with v0.1.5 public Action and Windows lifecycle safeguards",
-            "rollback_release_sha256": "1bc3294daca89911a5029c2bb0a49a1764463fe5d20c572d7261830115a2b1ee",
-            "blocked_intermediate": "v0.2.0 and v0.2.1 artifacts were not promoted; v0.2.2 repairs the Windows qualification failures",
+            "source_authority": "exact v0.3.2 maintenance-preflight release plus 2026-08-31 physical Windows startup/support evidence; v0.1.2 remains the earlier confirmed rollback authority",
+            "rollback_release_sha256": "16b53aaa47d406f61b8163faf6b1ea39be504fc8fc11fcec7b8becfbef62fe24",
+            "blocked_intermediate": "v0.2.0 delivery was RELEASE_BLOCKED and was not used as release authority",
         },
         "canonical_export_directory": "exports",
         "dashboard_port_policy": "reserve preferred port 8765; bounded fallback through 8785; OS-assigned loopback fallback if the bounded range is full; browser opens only after exact service/version/build/per-launch health identity",
-        "windows_launcher_verification": "CRLF, automated static launch-contract verification, local port-collision isolation, and exact-service browser-readiness tests; cmd.exe execution pending",
+        "windows_launcher_verification": "CRLF/static launch-contract verification plus 2026-08-31 physical Windows v0.3.2 startup: maintenance preflight retired two stale wheels, 144/144 release identity passed, CPython 3.13.15 dependencies/application installed, occupied 8765 fell forward to 8766, and /api/health returned HTTP 200; exact v0.3.3 cmd.exe/browser rendering remains pending",
         "execution_qualified_environment": f"{sys.platform}; CPython {sys.version.split()[0]}",
         "tested_windows_computers": [],
+        "field_windows_evidence": {
+            "support_export": "Data_Contract_Monitor_Support_20260831T234344Z_5de340090843bb3211c8.zip plus pasted 2026-08-31 Windows bootstrap/server log",
+            "support_export_sha256": "not independently computed in the build environment; uploaded field evidence is referenced by filename",
+            "observed_python": "CPython 3.13.15 64-bit on Windows",
+            "observed_release": "0.3.2 / DCM-0.3.2-B20260831-MAINTENANCEPREFLIGHT1",
+            "observed_recovery": "maintenance preflight retired recognized v0.3.0 and v0.3.1 application wheels to project-local backups; 144 managed-file release identity then passed",
+            "observed_runtime": "locked dependencies installed successfully, exact data-contract-monitor 0.3.2 wheel installed, preferred port 8765 was occupied, port 8766 was reserved, application startup completed, and /api/health returned HTTP 200 twice",
+            "remaining_field_noise": ["Windows Proactor _call_connection_lost ConnectionResetError WinError 10054 after a reset/invalid local HTTP connection", "GET /demo-data.json returned 404 even though the current v0.3.2 HTML/JavaScript contains no demo-data.json dependency"],
+            "interpretation": "v0.3.2 proved the maintenance-preflight/startup path on physical Windows. v0.3.3 preserves validation behavior and hardens only the browser freshness/transport presentation boundary: exact-build browser URL, no-store root/assets, version-qualified static assets, and a narrowly matched WinError 10054 Proactor disconnect filter; unrelated asyncio errors and stale /demo-data.json requests remain visible rather than being fabricated away.",
+        },
+        "state_schema_version": 3,
+        "execution_modes": ["auto", "memory", "streaming"],
+        "streaming_formats": ["csv", "jsonl", "ndjson"],
+        "exact_streaming_global_rules": ["column_unique", "unique_combination", "reference_exists"],
+        "reader_plugin_entry_point": "data_contract_monitor.readers",
+        "windows_offline_dependency_policy": "bootstrap uses a hash-verified project-local target wheelhouse when present; wheelhouse generation is explicit and fails closed on incomplete download",
+        "source_defaults_version": "2.17.13",
+        "source_defaults_sha256": "63BDA0B5F61BA44F18F55C5B75512085ED3A2FE67C575E3406A5877ECD5F4566",
         "execution_namespace": "DataContractMonitor",
         "runtime_output_roots": ["config", "logs", "state", "temp", "cache", "exports", "diagnostics", "reports", "downloads", "backups"],
         "one_active_launcher_policy": "six stable logic-free action BATs -> one active BAT backend tools/launch.bat; unexpected BAT/CMD return fails release preparation",
@@ -338,12 +352,7 @@ def main() -> int:
     release_name = f"Data_Contract_Monitor_v{version}_Portfolio_Release.zip"
     output = output_dir / release_name
     archive_files = [*managed_paths, manifest_path, root / "MANIFEST.sha256"]
-    create_zip(
-        root,
-        archive_files,
-        output,
-        prefix=f"Data_Contract_Monitor_v{version}",
-    )
+    create_zip(root, archive_files, output, prefix=f"Data_Contract_Monitor_v{version}")
     zip_hash = sha256_file(output)
     atomic_text(output.with_suffix(output.suffix + ".sha256.txt"), f"{zip_hash}  {output.name}\n")
     receipt = {
@@ -363,7 +372,7 @@ def main() -> int:
         "windows_batch_contract": "passed-static",
         "local_port_collision_isolation": "passed",
         "canonical_export_directory": "exports",
-        "windows_cmd_execution": "pending exact-artifact qualification after finalization",
+        "windows_cmd_execution": "not available in build environment",
     }
     receipt_name = f"Data_Contract_Monitor_v{version}_Verification_Receipt.json"
     atomic_text(output_dir / receipt_name, json.dumps(receipt, indent=2, sort_keys=True) + "\n")

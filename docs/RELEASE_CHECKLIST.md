@@ -4,9 +4,12 @@
 
 - [ ] Version is identical in package, `VERSION.txt`, dashboard, API, and metadata.
 - [ ] Native and ODCS example contracts load.
+- [ ] Contract lint/normalize/diff commands pass and stable contract ID/version are recorded in history.
+- [ ] Forced streaming CSV/JSONL tests preserve exact uniqueness/reference semantics across batch boundaries.
+- [ ] SQLite state migrations create an integrity-checked backup and land on schema v3.
 - [ ] Passing demo returns exit code `0`.
 - [ ] Failing demo returns exit code `2` and the expected finding counts.
-- [ ] API health, upload, demo, and history endpoints pass.
+- [ ] API health, bounded upload/reference, demo, history, trend, run-comparison, and artifact endpoints pass.
 - [ ] HTML, JSON, JUnit, and SARIF outputs parse successfully.
 - [ ] Reports contain no raw demo values.
 - [ ] Schema baseline create and compare pass.
@@ -28,7 +31,8 @@
 ## Packaging
 
 - [ ] Tests pass from source.
-- [ ] Wheel builds and installs into a clean virtual environment.
+- [ ] Wheel builds and installs into an isolated environment with source checkout excluded.
+- [ ] If a Windows wheelhouse is distributed, every wheel hash matches `WHEELHOUSE_MANIFEST.json` and bootstrap uses `--no-index`.
 - [ ] Installed CLI runs its bundled demo.
 - [ ] Source release ZIP passes integrity test.
 - [ ] `SBOM.spdx.json` and third-party notices are current.
@@ -36,6 +40,7 @@
 - [ ] Every managed-file SHA-256 verifies in release mode.
 - [ ] Exact release ZIP is scanned with normal endpoint protection before public distribution.
 - [ ] Real repository URLs replace documentation placeholders only after publication.
+- [ ] Hosted CI matrix and CodeQL complete on the published repository; local workflow presence is not treated as execution evidence.
 
 ## Publication
 

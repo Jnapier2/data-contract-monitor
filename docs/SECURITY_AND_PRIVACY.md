@@ -24,7 +24,7 @@ Diagnostic text redacts common credential assignments, the user-home path, IP ad
 
 Normal release startup is blocked unless `VERSION.txt`, `PACKAGE_METADATA.json`, `MANIFEST.json`, `MANIFEST.sha256`, the managed-file hashes, and installed package identity agree. Support export remains read-only recovery evidence after an identity failure.
 
-SHA-256 sidecars detect change only when obtained through a trusted channel; they do not provide publisher authentication. Authenticode signing is not claimed for 0.2.2.
+SHA-256 sidecars detect change only when obtained through a trusted channel; they do not provide publisher authentication. Authenticode signing is not claimed for 0.3.3.
 
 ## Deployment boundary
 
@@ -33,3 +33,8 @@ This release is intended for a trusted local workstation or controlled CI runner
 The first Windows environment build can contact the configured Python package index. Organizations should use a trusted index/mirror and their normal dependency-review controls.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.
+
+
+## Reference uploads and plugins
+
+Dashboard/API reference files are accepted only when the uploaded contract declares a matching relative reference path. The resolved target must remain inside the isolated job workspace. Reader plugins are local Python extension points; plugin installation is an explicit trust decision and does not grant network access by itself.

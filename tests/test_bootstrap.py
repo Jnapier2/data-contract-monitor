@@ -37,7 +37,7 @@ def test_status_and_startup_capsule_are_project_local_and_redacted(tmp_path: Pat
     (tmp_path / "VERSION.txt").write_text("0.2.2\n", encoding="utf-8")
     (tmp_path / "src" / "data_contract_monitor").mkdir(parents=True)
     (tmp_path / "src" / "data_contract_monitor" / "build_info.json").write_text(
-        json.dumps({"version": "0.2.2", "build_id": "DCM-0.2.2-B20260829-WINDOWS1"}), encoding="utf-8"
+        json.dumps({"version": "0.2.2", "build_id": "DCM-0.2.2-B20260831-FIELDCOHERENCE1"}), encoding="utf-8"
     )
     bootstrap.write_status(tmp_path, state="test", action="doctor", details={"token": "secret-value"})
     status = (tmp_path / "LATEST_LAUNCH_STATUS.txt").read_text(encoding="utf-8")
@@ -57,3 +57,26 @@ def test_status_and_startup_capsule_are_project_local_and_redacted(tmp_path: Pat
     payload = capsule.read_text(encoding="utf-8")
     assert "secret-value" not in payload
     assert "startup_abort_" in capsule.name
+
+
+def test_verified_windows_wheelhouse_requires_complete_hash_inventory(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setattr(bootstrap.os, "name", "nt")
+    monkeypatch.setattr(bootstrap.sys, "version_info", type("V", (), {"major": 3, "minor": 13})())
+    wheelhouse = tmp_path / "packages" / "wheelhouse" / "cp313-win_amd64"
+    wheelhouse.mkdir(parents=True)
+    wheel = wheelhouse / "example-1.0-py3-none-any.whl"
+    wheel.write_bytes(b"wheel-bytes")
+    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+    (wheelhouse / "WHEELHOUSE_MANIFEST.json").write_text(
+        json.dumps(
+            {
+                "target": "cp313-win_amd64",
+                "complete": True,
+                "files": [{"name": wheel.name, "sha256": digest, "size": wheel.stat().st_size}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert bootstrap.local_wheelhouse(tmp_path) == wheelhouse
+    wheel.write_bytes(b"tampered")
+    assert bootstrap.local_wheelhouse(tmp_path) is None

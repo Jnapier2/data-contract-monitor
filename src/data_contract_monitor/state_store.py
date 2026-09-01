@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -9,7 +10,7 @@ from typing import Any
 from .atomic import atomic_write_text, sha256_file
 from .models import ValidationResult
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 3
 
 
 class StateStoreError(RuntimeError):
@@ -31,10 +32,19 @@ class StateStore:
         connection.execute("PRAGMA synchronous=NORMAL")
         return connection
 
+    @contextmanager
+    def _connection(self):
+        connection = self._connect()
+        try:
+            with connection:
+                yield connection
+        finally:
+            connection.close()
+
     def _initialize(self) -> None:
         existed = self.path.exists()
         try:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 current = int(connection.execute("PRAGMA user_version").fetchone()[0])
                 if current > SCHEMA_VERSION:
                     raise StateStoreError(
@@ -89,6 +99,54 @@ class StateStore:
                         PRAGMA user_version=1;
                         """
                     )
+                    current = 1
+                if current < 2:
+                    connection.executescript(
+                        """
+                        CREATE TABLE IF NOT EXISTS contract_versions (
+                            contract_sha256 TEXT PRIMARY KEY,
+                            dataset_name TEXT NOT NULL,
+                            contract_version TEXT,
+                            source_format TEXT NOT NULL,
+                            first_seen_at TEXT NOT NULL,
+                            last_seen_at TEXT NOT NULL
+                        );
+                        CREATE TABLE IF NOT EXISTS dataset_profiles (
+                            run_id TEXT PRIMARY KEY REFERENCES validation_runs(run_id) ON DELETE CASCADE,
+                            profile_json TEXT NOT NULL
+                        );
+                        CREATE TABLE IF NOT EXISTS drift_events (
+                            run_id TEXT NOT NULL REFERENCES validation_runs(run_id) ON DELETE CASCADE,
+                            change_index INTEGER NOT NULL,
+                            change_type TEXT NOT NULL,
+                            column_name TEXT NOT NULL,
+                            severity TEXT NOT NULL,
+                            before_value TEXT,
+                            after_value TEXT,
+                            PRIMARY KEY (run_id, change_index)
+                        );
+                        CREATE TABLE IF NOT EXISTS run_artifacts (
+                            run_id TEXT NOT NULL REFERENCES validation_runs(run_id) ON DELETE CASCADE,
+                            path TEXT NOT NULL,
+                            sha256 TEXT NOT NULL,
+                            size INTEGER NOT NULL,
+                            PRIMARY KEY (run_id, path)
+                        );
+                        CREATE INDEX IF NOT EXISTS idx_contract_dataset ON contract_versions(dataset_name,last_seen_at DESC);
+                        CREATE INDEX IF NOT EXISTS idx_drift_run ON drift_events(run_id,change_index);
+                        PRAGMA user_version=2;
+                        """
+                    )
+                    current = 2
+                if current < 3:
+                    columns = {
+                        str(row[1])
+                        for row in connection.execute("PRAGMA table_info(contract_versions)").fetchall()
+                    }
+                    if "contract_id" not in columns:
+                        connection.execute("ALTER TABLE contract_versions ADD COLUMN contract_id TEXT")
+                    connection.execute("PRAGMA user_version=3")
+                    current = 3
         except sqlite3.Error as exc:
             raise StateStoreError(f"Unable to initialize state database: {exc}") from exc
 
@@ -121,7 +179,8 @@ class StateStore:
 
     def record_validation(self, result: ValidationResult) -> None:
         payload = result.model_dump_json()
-        with self._connect() as connection:
+        now = datetime.now(UTC).isoformat()
+        with self._connection() as connection:
             connection.execute(
                 """
                 INSERT OR REPLACE INTO validation_runs
@@ -165,10 +224,63 @@ class StateStore:
                     for index, finding in enumerate(result.findings)
                 ],
             )
+            connection.execute(
+                """
+                INSERT INTO contract_versions(contract_sha256,dataset_name,contract_id,contract_version,source_format,first_seen_at,last_seen_at)
+                VALUES(?,?,?,?,?,?,?)
+                ON CONFLICT(contract_sha256) DO UPDATE SET
+                    contract_id=excluded.contract_id,
+                    contract_version=excluded.contract_version,
+                    last_seen_at=excluded.last_seen_at
+                """,
+                (
+                    result.contract_sha256,
+                    result.dataset_name,
+                    result.contract_id,
+                    result.contract_version,
+                    result.source_format,
+                    now,
+                    now,
+                ),
+            )
+            connection.execute(
+                "INSERT OR REPLACE INTO dataset_profiles(run_id,profile_json) VALUES(?,?)",
+                (result.run_id, result.profile.model_dump_json()),
+            )
+            connection.execute("DELETE FROM drift_events WHERE run_id=?", (result.run_id,))
+            connection.executemany(
+                """
+                INSERT INTO drift_events(run_id,change_index,change_type,column_name,severity,before_value,after_value)
+                VALUES(?,?,?,?,?,?,?)
+                """,
+                [
+                    (
+                        result.run_id,
+                        index,
+                        change.change_type,
+                        change.column,
+                        change.severity.value,
+                        None if change.before is None else str(change.before),
+                        None if change.after is None else str(change.after),
+                    )
+                    for index, change in enumerate(result.drift.changes)
+                ],
+            )
+
+    def record_artifacts(self, run_id: str, entries: list[dict[str, Any]]) -> None:
+        with self._connection() as connection:
+            connection.execute("DELETE FROM run_artifacts WHERE run_id=?", (run_id,))
+            connection.executemany(
+                "INSERT INTO run_artifacts(run_id,path,sha256,size) VALUES(?,?,?,?)",
+                [
+                    (run_id, str(entry["path"]), str(entry["sha256"]), int(entry["size"]))
+                    for entry in entries
+                ],
+            )
 
     def read_history(self, *, limit: int = 50) -> list[dict[str, Any]]:
         bounded = min(max(int(limit), 1), 500)
-        with self._connect() as connection:
+        with self._connection() as connection:
             rows = connection.execute(
                 """
                 SELECT run_id,dataset_name,started_at,duration_ms,status,findings_total,warnings,errors,critical,row_count,column_count,contract_sha256,data_sha256
@@ -179,15 +291,82 @@ class StateStore:
         return [dict(row) for row in rows]
 
     def get_result(self, run_id: str) -> dict[str, Any] | None:
-        with self._connect() as connection:
+        with self._connection() as connection:
             row = connection.execute(
                 "SELECT result_json FROM validation_runs WHERE run_id=?", (run_id,)
             ).fetchone()
         return json.loads(row[0]) if row else None
 
+    def compare_runs(self, older_run_id: str, newer_run_id: str) -> dict[str, Any]:
+        older = self.get_result(older_run_id)
+        newer = self.get_result(newer_run_id)
+        if older is None or newer is None:
+            missing = older_run_id if older is None else newer_run_id
+            raise StateStoreError(f"Unknown run '{missing}'.")
+        older_findings = {item["id"]: item for item in older.get("findings", [])}
+        newer_findings = {item["id"]: item for item in newer.get("findings", [])}
+        return {
+            "older_run_id": older_run_id,
+            "newer_run_id": newer_run_id,
+            "dataset_name": newer.get("dataset_name"),
+            "status": {"before": older.get("summary", {}).get("status"), "after": newer.get("summary", {}).get("status")},
+            "row_count_delta": int(newer.get("profile", {}).get("row_count", 0)) - int(older.get("profile", {}).get("row_count", 0)),
+            "finding_count_delta": int(newer.get("summary", {}).get("findings_total", 0)) - int(older.get("summary", {}).get("findings_total", 0)),
+            "new_findings": [newer_findings[key] for key in sorted(newer_findings.keys() - older_findings.keys())],
+            "resolved_findings": [older_findings[key] for key in sorted(older_findings.keys() - newer_findings.keys())],
+            "persistent_findings": sorted(older_findings.keys() & newer_findings.keys()),
+            "contract_changed": older.get("contract_sha256") != newer.get("contract_sha256"),
+            "data_changed": older.get("data_sha256") != newer.get("data_sha256"),
+        }
+
+    def trend(self, *, dataset_name: str | None = None, limit: int = 50) -> dict[str, Any]:
+        bounded = min(max(int(limit), 2), 500)
+        query = """
+            SELECT run_id,dataset_name,started_at,status,findings_total,warnings,errors,critical,row_count,duration_ms
+            FROM validation_runs
+        """
+        params: list[Any] = []
+        if dataset_name:
+            query += " WHERE dataset_name=?"
+            params.append(dataset_name)
+        query += " ORDER BY started_at DESC LIMIT ?"
+        params.append(bounded)
+        with self._connection() as connection:
+            rows = [dict(row) for row in connection.execute(query, params).fetchall()]
+            drift_rows = [
+                dict(row)
+                for row in connection.execute(
+                    """
+                    SELECT d.run_id,d.change_type,d.column_name,d.severity,r.started_at,r.dataset_name
+                    FROM drift_events d JOIN validation_runs r ON r.run_id=d.run_id
+                    ORDER BY r.started_at DESC LIMIT ?
+                    """,
+                    (bounded * 20,),
+                ).fetchall()
+                if dataset_name is None or str(row[5]) == dataset_name
+            ]
+        chronological = list(reversed(rows))
+        pass_count = sum(1 for row in rows if row["status"] == "passed")
+        return {
+            "dataset_name": dataset_name,
+            "runs": chronological,
+            "run_count": len(rows),
+            "pass_rate": round(pass_count / len(rows), 6) if rows else None,
+            "latest": rows[0] if rows else None,
+            "drift_events": list(reversed(drift_rows)),
+        }
+
+    def artifacts_for_run(self, run_id: str) -> list[dict[str, Any]]:
+        with self._connection() as connection:
+            rows = connection.execute(
+                "SELECT path,sha256,size FROM run_artifacts WHERE run_id=? ORDER BY path",
+                (run_id,),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def create_job(self, job_id: str) -> None:
         now = datetime.now(UTC).isoformat()
-        with self._connect() as connection:
+        with self._connection() as connection:
             connection.execute(
                 "INSERT INTO jobs(job_id,state,progress,message,created_at,updated_at) VALUES(?,?,?,?,?,?)",
                 (job_id, "queued", 0, "Queued", now, now),
@@ -218,7 +397,7 @@ class StateStore:
             "artifact_dir": artifact_dir if artifact_dir is not None else current.get("artifact_dir"),
             "error": error if error is not None else current.get("error"),
         }
-        with self._connect() as connection:
+        with self._connection() as connection:
             connection.execute(
                 """
                 UPDATE jobs SET state=?,progress=?,message=?,updated_at=?,run_id=?,result_json=?,artifact_dir=?,error=? WHERE job_id=?
@@ -230,7 +409,7 @@ class StateStore:
             )
 
     def get_job(self, job_id: str) -> dict[str, Any] | None:
-        with self._connect() as connection:
+        with self._connection() as connection:
             row = connection.execute("SELECT * FROM jobs WHERE job_id=?", (job_id,)).fetchone()
         if row is None:
             return None
@@ -242,7 +421,7 @@ class StateStore:
 
     def list_jobs(self, *, limit: int = 20) -> list[dict[str, Any]]:
         bounded = min(max(int(limit), 1), 100)
-        with self._connect() as connection:
+        with self._connection() as connection:
             rows = connection.execute(
                 "SELECT * FROM jobs ORDER BY created_at DESC LIMIT ?", (bounded,)
             ).fetchall()
@@ -257,15 +436,17 @@ class StateStore:
 
     def health_check(self) -> dict[str, Any]:
         try:
-            with self._connect() as connection:
+            with self._connection() as connection:
                 integrity = connection.execute("PRAGMA integrity_check").fetchone()[0]
                 version = int(connection.execute("PRAGMA user_version").fetchone()[0])
                 runs = int(connection.execute("SELECT COUNT(*) FROM validation_runs").fetchone()[0])
-            return {"passed": integrity == "ok" and version == SCHEMA_VERSION, "integrity": integrity, "schema_version": version, "runs": runs}
-        except sqlite3.Error:
+                artifacts = int(connection.execute("SELECT COUNT(*) FROM run_artifacts").fetchone()[0])
             return {
-                "passed": False,
-                "error": "state_database_unavailable",
-                "schema_version": None,
-                "runs": None,
+                "passed": integrity == "ok" and version == SCHEMA_VERSION,
+                "integrity": integrity,
+                "schema_version": version,
+                "runs": runs,
+                "artifacts": artifacts,
             }
+        except sqlite3.Error as exc:
+            return {"passed": False, "error": str(exc), "schema_version": None, "runs": None}

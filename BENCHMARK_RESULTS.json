@@ -1,19 +1,29 @@
 {
-  "captured_at": "2026-08-28T10:08:37.333008+00:00",
+  "batches": 1,
+  "captured_at": "2026-08-31T21:34:28.787202+00:00",
   "columns": 6,
-  "csv_bytes": 9388957,
+  "csv_bytes": 9588957,
   "durations_seconds": [
-    0.474686,
-    0.470189,
-    0.496843
+    0.589599,
+    0.553449,
+    0.549746
   ],
-  "median_seconds": 0.474686,
+  "median_peak_process_rss_kib": 198884,
+  "median_seconds": 0.553449,
+  "observed_execution_mode": "memory",
+  "peak_process_rss_kib": [
+    162032,
+    198884,
+    231780
+  ],
   "platform": "Linux-6.18.35-x86_64-with-glibc2.41",
   "processor": "not reported",
+  "profile_mode": "exact",
   "python": "3.13.5",
+  "requested_execution_mode": "memory",
   "rows": 100000,
-  "rows_per_second_median": 210665.54,
-  "schema_version": "1.0",
-  "scope": "CSV read, aggregate profile, privacy sample, contract checks, SHA-256 hashes, and result construction; report serialization excluded.",
+  "rows_per_second_median": 180684.98,
+  "schema_version": "2.0",
+  "scope": "CSV read/stream, aggregate profile, bounded privacy sampling, contract checks, exact disk-backed uniqueness when streaming, SHA-256 hashes, and result construction; report serialization excluded. Peak RSS is process-level on platforms that expose resource.getrusage.",
   "trials": 3
 }

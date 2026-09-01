@@ -1,22 +1,60 @@
 # Changelog
 
+## 0.3.3 — 2026-08-31
+
+- Preserved v0.3.2 maintenance-preflight behavior proven by physical Windows startup evidence.
+- Added exact-build browser launch URLs after health identity verification.
+- Added no-store/no-cache headers for current root UI and static assets plus version-qualified CSS/JavaScript references.
+- Confirmed current Data Contract Monitor UI has no `/demo-data.json` dependency; stale requests remain 404 for diagnosability.
+- Narrowly filters only Windows Proactor `_call_connection_lost` `ConnectionResetError` WinError/errno 10054 callbacks; unrelated asyncio errors remain visible.
+- Added regression coverage for browser freshness and narrow transport-noise matching.
+
+## 0.3.2 — 2026-08-31
+
+- Added bounded pre-release maintenance reconciliation for recognized stale prior-version application wheels.
+- Repair and normal launch can now recover from a stale `packages/data_contract_monitor-*.whl` overlay without weakening the strict release gate.
+- Stale wheels are moved to project-local `backups/retired_packages/` with SHA-256 receipts; no automatic deletion is performed.
+- Support export deliberately bypasses the strict gate and selects external Python so a broken project virtual environment cannot block diagnostics.
+- Preserved v0.3.1 Windows atomic-write durability repair and all v0.3.0 Scalable Assurance capabilities.
+
+## 0.3.1 — 2026-08-31
+
+- Fixed Windows startup failure in `tools/tooling_common.atomic_text`: temporary files are now opened writable, flushed, and `fsync`ed before close and atomic replacement.
+- Added a regression test that fails if the tooling helper attempts durability sync through a read-only descriptor.
+- Hardened `tools/release_gate.py` so receipt/capsule write failures fail closed with concise diagnostics instead of escaping as an unhandled traceback.
+- Preserved all v0.3.0 scalable-assurance validation, streaming, contract-governance, reporting, and Export20 behavior.
+
+## 0.3.0 — 2026-08-31
+
+### Added
+- Bounded CSV/JSONL/NDJSON streaming with exact disk-backed global uniqueness and referential-integrity checks.
+- Reader plugin registry, contract lint/normalize/diff, stable contract identity/version history, run comparison/trends, and artifact inventory.
+- SQLite state schema v3 with migration backup/integrity receipts.
+- Contract-declared reference uploads in the local dashboard/API.
+- Target-specific Windows wheelhouse builder and verified offline-bootstrap consumption when a wheelhouse is present.
+- Expanded CI matrix and CodeQL workflow definitions.
+
+### Changed
+- Total dataset budget increased to 250 MB while non-streamable/in-memory input remains capped at 50 MB.
+- Streaming high-cardinality profile counts are explicitly labeled as bounded lower bounds; enforcement remains exact.
+- Validation result schema is 1.3 and carries execution/exactness plus stable contract ID/version.
+
+### Fixed
+- Durable contract history now records the true contract version instead of the contract filename.
+- API reference-file staging preserves declared safe relative layouts inside the isolated job workspace.
+- Excel inspection and SQLite verification paths close file/database handles deterministically.
+
 All notable changes are documented here. The project follows semantic versioning after the first public release.
 
-## Unreleased maintenance
+## 0.2.2 — 2026-08-31
 
-- Constrain dashboard artifact retrieval to verified run directories and approved report names.
-- Keep database exception details out of the public health response while preserving a clear degraded status.
-- Make the strict source type check reproducible and clean across all 26 source files.
-- Generate supply-chain records atomically with deterministic line endings.
-
-## 0.2.2 — 2026-08-29
-
-- Repaired Windows atomic status writes and made temporary-file replacement resilient to brief antivirus and file-indexing locks.
-- Restored bounded Ctrl+C handling so cancellation stops only the launched child process, records a clean stopped state, and does not create a Critical export.
-- Restored legacy Windows console fallback so Unicode progress output remains visible without corrupting UTF-8 logs.
-- Restored the caller-independent composite Action installation path and pinned the setup action by commit.
-- Corrected cross-platform newline accounting and release-inventory exclusions discovered during native Windows qualification.
-- Expanded the merged regression suite from 49 to 72 tests, including public Action, shutdown, launcher, and release-inventory safeguards.
+- Reconciled the August 31 Windows support export: canonical v0.2.1 identity files matched exactly while cached runtime/endpoint state still identified v0.1.2.
+- Added standard-library deployment-coherence reporting to support and Critical diagnostics without managed-file rehashing during export.
+- Added project-local backup/retirement for known stale generated runtime identity before normal environment preparation.
+- Added protected execution namespace checks for unlisted BAT/CMD/PowerShell files, package files, and application wheels.
+- Added case-collision protection to release manifest validation.
+- Added `backups/` to launcher runtime directories and preserved unknown/user files outside protected namespaces.
+- Expanded automated coverage for stale-state reconciliation, overlay safety, support evidence semantics, and user-file preservation.
 
 ## 0.2.1 — 2026-08-29
 

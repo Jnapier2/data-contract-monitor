@@ -14,7 +14,7 @@ set "PYTHONHOME="
 if not exist "%ROOT%\VERSION.txt" goto :invalid_root
 if not exist "%ROOT%\tools\bootstrap.py" goto :invalid_root
 
-for %%D in (logs state temp cache exports diagnostics reports downloads config) do (
+for %%D in (logs state temp cache exports diagnostics reports downloads config backups) do (
   if not exist "%ROOT%\%%D" mkdir "%ROOT%\%%D" >nul 2>&1
 )
 
@@ -38,7 +38,13 @@ if errorlevel 1 goto :python_missing
 >>"%LAUNCH_LOG%" echo Python command: %PYTHON_CMD%
 %PYTHON_CMD% -c "import platform,sys; print('Selected Python:', sys.executable); print('Version:', platform.python_version()); print('Architecture:', platform.architecture()[0])" >>"%LAUNCH_LOG%" 2>&1
 
+rem Support export is deliberately available even when release integrity fails.
 if /I "%ACTION%"=="export" goto :run_export
+
+rem Reconcile only verified, recognized prior-version application wheels before the strict gate.
+%PYTHON_CMD% "%ROOT%\tools\maintenance_preflight.py" --root "%ROOT%"
+set "RC=%ERRORLEVEL%"
+if not "%RC%"=="0" goto :maintenance_failed
 
 %PYTHON_CMD% "%ROOT%\tools\release_gate.py" --root "%ROOT%"
 set "RC=%ERRORLEVEL%"
@@ -60,10 +66,17 @@ goto :finish
 set "RC=%ERRORLEVEL%"
 goto :finish
 
+:maintenance_failed
+>>"%STATUS_FILE%" echo State: maintenance-preflight-failed
+>>"%STATUS_FILE%" echo Exit code: %RC%
+>>"%STATUS_FILE%" echo Recovery: run CREATE_SUPPORT_EXPORT.bat, then use a fresh extracted release copy.
+>>"%LAUNCH_LOG%" echo Maintenance preflight failed with exit code %RC%.
+goto :show_failure
+
 :release_failed
 >>"%STATUS_FILE%" echo State: release-integrity-failed
 >>"%STATUS_FILE%" echo Exit code: %RC%
->>"%STATUS_FILE%" echo Recovery: run CREATE_SUPPORT_EXPORT.bat, then use a fresh extracted release copy.
+>>"%STATUS_FILE%" echo Recovery: run CREATE_SUPPORT_EXPORT.bat, then use REPAIR_INSTALLATION.bat or a fresh extracted release copy.
 >>"%LAUNCH_LOG%" echo Release gate failed with exit code %RC%.
 goto :show_failure
 
@@ -132,12 +145,14 @@ exit /b %RC%
 
 :select_python
 set "PYTHON_CMD="
-if /I not "%ACTION%"=="repair" (
-  if exist "%ROOT%\.venv\Scripts\python.exe" (
-    call :probe_python "%ROOT%\.venv\Scripts\python.exe"
-    if not errorlevel 1 exit /b 0
-  )
+rem Repair/export intentionally use an external runtime so a broken/stale project venv cannot block recovery.
+if /I "%ACTION%"=="repair" goto :external_python
+if /I "%ACTION%"=="export" goto :external_python
+if exist "%ROOT%\.venv\Scripts\python.exe" (
+  call :probe_python "%ROOT%\.venv\Scripts\python.exe"
+  if not errorlevel 1 exit /b 0
 )
+:external_python
 call :probe_python py -3.13
 if not errorlevel 1 exit /b 0
 call :probe_python py -3.14

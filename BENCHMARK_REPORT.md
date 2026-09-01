@@ -1,37 +1,41 @@
-# Benchmark Report
+# Data Contract Monitor Benchmark Report
 
-## Result
+These measurements are local engineering evidence, not universal performance guarantees. They include dataset read/streaming, contract evaluation, aggregate profiling, privacy sampling, exact uniqueness enforcement, SHA-256 hashing, and result construction. Report serialization is excluded.
 
-A repeatable synthetic run validated **100,000 rows across six columns** in a median of **0.474686 seconds**, equivalent to **210,665.54 rows per second** on the exercised environment.
+## 100,000-row in-memory benchmark
 
-| Measure | Verified value |
-|---|---:|
-| Rows | 100,000 |
-| Columns | 6 |
-| CSV size | 9,388,957 bytes |
-| Trials | 3 |
-| Trial durations | 0.474686 s, 0.470189 s, 0.496843 s |
-| Median | 0.474686 s |
-| Median throughput | 210,665.54 rows/s |
-| Python | 3.13.5 |
-| Operating system | Linux 6.18.35 x86_64, glibc 2.41 |
+- Rows: 100,000
+- Columns: 6
+- CSV size: 9,588,957 bytes
+- Execution mode: memory
+- Trials: 3
+- Median validation time: 0.553449 seconds
+- Median throughput: 180,684.98 rows/second
+- Profile mode: exact
+- Median observed process peak RSS: 198,884 KiB
 
-The benchmark scope includes CSV parsing, aggregate profiling, the bounded privacy sample, contract checks, SHA-256 calculation, and result construction. It excludes report serialization and dashboard rendering.
+See `BENCHMARK_RESULTS.json` for the exact machine-readable evidence.
 
-## Method
+## 1,000,000-row streaming benchmark
 
-The script `tools/benchmark.py` generates current, conforming customer-order data in a project-local temporary directory. Every trial invokes the same public `validate_files` engine used by the command line, API, dashboard, and GitHub Action. A trial is rejected if the generated dataset produces any finding.
+- Rows: 1,000,000
+- Columns: 6
+- CSV size: 96,888,957 bytes
+- Execution mode: streaming
+- Batches: 20 × up to 50,000 rows
+- Trial count: 1
+- Validation time: 29.694255 seconds
+- Throughput: 33,676.55 rows/second
+- Profile mode: bounded
+- Observed process peak RSS: 216,528 KiB
+- Rule uniqueness exactness: exact, disk-backed
 
-Reproduce it from a prepared environment:
+The bounded profile mode is intentional: validation rules remain exact, while high-cardinality profile distinct/duplicate counts may become lower bounds once the declared profile-cardinality memory budget is reached. This distinction is reported explicitly in validation output and is never silently represented as exact.
 
-```bash
-python tools/benchmark.py --rows 100000 --trials 3 --output BENCHMARK_RESULTS.json
-```
-
-The machine-readable evidence is [BENCHMARK_RESULTS.json](BENCHMARK_RESULTS.json).
+See `BENCHMARK_RESULTS_1M_STREAMING.json` for exact evidence.
 
 ## Interpretation
 
-This is one bounded local measurement, not a universal performance claim. Results will vary with storage, processor, Python and pandas versions, data types, rule complexity, privacy signals, and file format. The first release loads the full dataset into memory and is intended for file-oriented validation rather than distributed or streaming workloads.
+The in-memory path remains faster for modest datasets. The streaming path trades throughput for bounded working memory and exact disk-backed global rule enforcement, allowing substantially larger CSV/JSONL inputs without requiring the full dataset to reside in memory.
 
-Copyright © 2026 Gateway Information Group LLC. All rights reserved.
+Peak RSS is process-level evidence from `resource.getrusage` on the exercised Linux environment and can include allocator high-water marks from setup and prior operations. It should not be interpreted as a cross-platform service-level guarantee.

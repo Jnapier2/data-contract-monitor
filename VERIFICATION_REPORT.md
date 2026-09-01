@@ -1,20 +1,30 @@
-# Verification Report — Data Contract Monitor 0.2.2
+# Verification Report — Data Contract Monitor 0.3.3
 
-**Build:** `DCM-0.2.2-B20260829-WINDOWS1`  
-**Verification scope:** merged source, Windows regression suite, release pipeline, and fresh exact-artifact qualification.
+**Build:** `DCM-0.3.3-B20260831-WINDOWSFRESHNESS1`  
+**Status:** source qualification in progress; exact-artifact results are produced beside the final ZIP.
 
-The source regression suite contains 72 tests. Coverage includes contract loading, rule behavior, readers/profiling, drift/history, SQLite state, immutable run artifacts, resource limits, aggregate reconciliation, FastAPI local-session protection and asynchronous jobs, reporters, CLI behavior, release identity, diagnostics, occupied-port isolation, exact-service readiness, composite Action portability, bounded cancellation, legacy-console output, and Windows launcher structure.
+## Field basis
 
-Release preparation additionally enforces one expected BAT/CMD filename per action plus one shared BAT backend, strict CRLF on Windows BAT files, no unexpected exact source duplicates, Python byte-code compilation, schema regeneration, supply-chain regeneration, TypeScript compilation equivalence, wheel/version matching, managed-file hashing, release identity, ZIP path safety, uniqueness, and ZIP CRC integrity.
+Physical Windows v0.3.2 evidence proves the maintenance preflight and startup path: two recognized old wheels retired, 144/144 release identity PASS, CPython 3.13.15 dependency/application installation PASS, occupied-port fallback to 8766, application startup complete, and `/api/health` HTTP 200. The remaining observed issues were non-terminal Windows Proactor reset noise and a stale `/demo-data.json` 404.
 
-The exact final release receipt distributed beside the ZIP is the authority for the final ZIP SHA-256, ZIP size, manifest SHA-256, managed-file count, and wheel hash. Those values are intentionally not embedded here because changing this file would itself change the release hash.
+## v0.3.3 source qualification targets
 
-## Environment and publication boundary
+- full pytest suite with `ResourceWarning` promoted to an error;
+- Python compilation;
+- TypeScript compile and packaged JavaScript equivalence;
+- exact-build browser URL tests;
+- root/assets no-store cache-header tests;
+- proof that current HTML/JavaScript do not depend on `/demo-data.json`;
+- narrow Proactor WinError 10054 matching tests that reject unrelated asyncio exceptions;
+- maintenance-preflight/release-gate/export recovery regressions;
+- project consolidation/index checks.
 
-The release is built and regression-tested on Windows with CPython 3.12. The external release receipt records exact native launcher, integrity, demo, extracted-wheel, API, and test results. Norton, SmartScreen reputation, and Authenticode signing are separate checks; absence of a warning is not treated as publisher authentication. v0.1.5 remains the public rollback release, while v0.1.2 remains the user-confirmed deeper Windows launcher baseline.
+## Scalability evidence
 
-## Security/privacy boundary
+The scalable v0.3.0/v0.3.2 validation engine is unchanged. Existing benchmark evidence remains regression context rather than a new v0.3.3 throughput claim.
 
-The application is local-first. Report evidence does not intentionally include raw cell values. Diagnostic exports redact common credential assignments, user-home paths, IP addresses, and latest-result filenames. Export20 is bounded to at most 20 items and uses project-local staging/finalization. Privacy-field detection remains heuristic rather than a legal or data-loss-prevention determination.
+## Publication boundary
+
+The final ZIP must be requalified after construction. This Linux environment cannot execute this exact v0.3.3 BAT through Windows `cmd.exe`, Norton, SmartScreen, or Authenticode. The next physical Windows run should confirm visible current UI rendering and absence of the field-observed reset traceback under normal browser use.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

@@ -15,6 +15,7 @@ interface ColumnProfile {
   observed_type: string;
   null_count: number;
   distinct_count: number;
+  distinct_count_exact?: boolean;
 }
 
 interface PiiSignal {
@@ -40,6 +41,9 @@ interface ValidationResult {
     info: number;
   };
   findings: Finding[];
+  execution_mode: "memory" | "streaming";
+  batches: number;
+  exactness: Record<string, string>;
   profile: {
     row_count: number;
     column_count: number;
@@ -82,7 +86,9 @@ const byId = <T extends HTMLElement>(id: string): T => {
 const form = byId<HTMLFormElement>("validate-form");
 const contractFile = byId<HTMLInputElement>("contract-file");
 const dataFile = byId<HTMLInputElement>("data-file");
+const referenceFiles = byId<HTMLInputElement>("reference-files");
 const failOn = byId<HTMLSelectElement>("fail-on");
+const executionMode = byId<HTMLSelectElement>("execution-mode");
 const statusNode = byId<HTMLDivElement>("status");
 const resultsNode = byId<HTMLElement>("results");
 const summaryCards = byId<HTMLDivElement>("summary-cards");
@@ -140,6 +146,7 @@ const renderSummary = (result: ValidationResult): void => {
     summaryCard(String(result.summary.errors), "Errors"),
     summaryCard(String(result.summary.warnings), "Warnings"),
     summaryCard(`${result.duration_ms} ms`, "Runtime"),
+    summaryCard(result.execution_mode.toUpperCase(), "Execution mode"),
   );
 };
 
@@ -190,7 +197,7 @@ const renderProfile = (result: ValidationResult): void => {
       textCell(column.name),
       textCell(column.observed_type),
       textCell(String(column.null_count)),
-      textCell(String(column.distinct_count)),
+      textCell(`${column.distinct_count_exact === false ? "≥" : ""}${column.distinct_count}`),
     );
     profileBody.append(row);
   }
@@ -276,8 +283,9 @@ form.addEventListener("submit", async (event) => {
   const body = new FormData();
   body.append("contract", contractFile.files[0]);
   body.append("data", dataFile.files[0]);
+  for (const reference of Array.from(referenceFiles.files ?? [])) body.append("references", reference);
   try {
-    const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}`, { method: "POST", body });
+    const response = await fetch(`/api/jobs/validate?fail_on=${encodeURIComponent(failOn.value)}&execution_mode=${encodeURIComponent(executionMode.value)}`, { method: "POST", body });
     const submission = await parseJobSubmission(response);
     activeJobId = submission.job_id;
     setBusy("Queued locally…", true);

@@ -46,6 +46,7 @@ class ValidationJobManager:
         object_name: str | None = None,
         sheet_name: str | int = 0,
         cleanup_dir: Path | None = None,
+        execution_mode: str = "auto",
     ) -> str:
         if not self._slots.acquire(blocking=False):
             raise JobQueueFull("Validation queue is full. Try again after an active job finishes.")
@@ -65,6 +66,7 @@ class ValidationJobManager:
             sheet_name,
             event,
             cleanup_dir,
+            execution_mode,
         )
         with self._lock:
             self._futures[job_id] = future
@@ -81,6 +83,7 @@ class ValidationJobManager:
         sheet_name: str | int,
         cancel_event: threading.Event,
         cleanup_dir: Path | None,
+        execution_mode: str,
     ) -> None:
         try:
             self.store.update_job(job_id, state="preparing", progress=5, message="Preparing validation")
@@ -99,11 +102,12 @@ class ValidationJobManager:
                 limits=self.limits,
                 progress=progress,
                 cancelled=cancel_event.is_set,
+                execution_mode=execution_mode,
             )
             if cancel_event.is_set():
                 raise ValidationCancelled("Validation was cancelled before artifact publication.")
             self.store.update_job(job_id, state="reporting", progress=90, message="Publishing verified reports", run_id=result.run_id)
-            artifact_dir = publish_run_artifacts(result, root=self.root)
+            artifact_dir = publish_run_artifacts(result, root=self.root, limits=self.limits)
             self.store.update_job(
                 job_id,
                 state="completed",

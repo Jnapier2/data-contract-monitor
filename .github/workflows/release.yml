@@ -11,12 +11,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
@@ -25,12 +22,19 @@ jobs:
           python -m pip install -r requirements.lock
           python -m pip install -r requirements-test.lock
           python -m pip install --no-deps -e .
-      - name: Verify
+      - name: Verify source and generated contracts
         run: |
-          python -m pytest
+          python -c "from pathlib import Path; Path('RELEASE_MODE').unlink(missing_ok=True)"
+          python tools/project_index.py --root . --check-only
           python tools/generate_schemas.py
-          python tools/build_release.py --source-root . --output-dir dist
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+          python -m compileall -q src tools tests
+          PYTHONWARNINGS=error::ResourceWarning python -m pytest
+          data-contract-monitor contract lint --contract examples/contracts/customer_orders.yml
+      - name: Record release-scale benchmark
+        run: python tools/benchmark.py --rows 100000 --trials 1 --execution-mode streaming --output BENCHMARK_RESULTS_RELEASE_CI.json
+      - name: Build exact release ZIP
+        run: python tools/build_release.py --source-root . --output-dir dist
+      - uses: actions/upload-artifact@v6
         with:
           name: data-contract-monitor-release
           path: dist/

@@ -1,7 +1,7 @@
 {
   "name": "data-contract-monitor-dashboard",
   "private": true,
-  "version": "0.2.2",
+  "version": "0.3.3",
   "description": "Framework-free TypeScript reviewer dashboard for Data Contract Monitor.",
   "scripts": {
     "build": "tsc -p tsconfig.json",

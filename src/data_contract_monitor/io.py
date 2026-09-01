@@ -4,38 +4,27 @@ from pathlib import Path
 
 import pandas as pd
 
+from .atomic import sha256_file
+from .limits import ResourceLimits
+from .readers import ReaderError, open_dataset_reader
+
 
 class DataReadError(ValueError):
     """Raised when a dataset cannot be loaded."""
 
 
-
 def read_dataset(path: Path, *, sheet_name: str | int = 0) -> pd.DataFrame:
-    suffix = path.suffix.lower()
     try:
-        if suffix == ".csv":
-            frame = pd.read_csv(path, low_memory=False)
-        elif suffix in {".xlsx", ".xlsm"}:
-            frame = pd.read_excel(path, sheet_name=sheet_name, engine="openpyxl")
-        elif suffix in {".jsonl", ".ndjson"}:
-            frame = pd.read_json(path, lines=True)
-        elif suffix == ".json":
-            frame = pd.read_json(path)
-        elif suffix == ".parquet":
-            try:
-                frame = pd.read_parquet(path)
-            except ImportError as exc:
-                raise DataReadError(
-                    "Parquet support requires the optional 'parquet' dependency: "
-                    "pip install 'data-contract-monitor[parquet]'"
-                ) from exc
-        else:
-            raise DataReadError(
-                f"Unsupported dataset type '{suffix}'. Supported: CSV, XLSX, XLSM, JSON, JSONL, and optional Parquet."
-            )
-    except DataReadError:
-        raise
-    except Exception as exc:
-        raise DataReadError(f"Unable to read dataset '{path.name}': {exc}") from exc
-    frame.columns = [str(column) for column in frame.columns]
-    return frame
+        reader = open_dataset_reader(
+            path,
+            limits=ResourceLimits(),
+            sheet_name=sheet_name,
+            execution_mode="memory",
+        )
+        batch = next(reader.iter_batches())
+        return batch.frame
+    except (ReaderError, StopIteration) as exc:
+        raise DataReadError(str(exc)) from exc
+
+
+__all__ = ["DataReadError", "read_dataset", "sha256_file"]

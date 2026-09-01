@@ -57,16 +57,11 @@ def _choose_odcs_object(payload: dict[str, Any], object_name: str | None) -> dic
         raise ContractLoadError("ODCS contract does not contain a non-empty schema list")
     if object_name:
         for item in schema:
-            if not isinstance(item, dict):
-                continue
             candidates = {item.get("name"), item.get("physicalName"), item.get("businessName")}
             if object_name in candidates:
                 return item
         raise ContractLoadError(f"ODCS schema object not found: {object_name}")
-    selected = schema[0]
-    if not isinstance(selected, dict):
-        raise ContractLoadError("ODCS schema object must be a mapping")
-    return selected
+    return schema[0]
 
 
 def _adapt_odcs(payload: dict[str, Any], object_name: str | None) -> Contract:
@@ -103,7 +98,7 @@ def _adapt_odcs(payload: dict[str, Any], object_name: str | None) -> Contract:
                 unique = True
                 severity = _severity(quality.get("severity"), severity)
         rules[name] = ColumnRule(
-            data_type=_logical_type(prop.get("logicalType") or prop.get("physicalType")),
+            type=_logical_type(prop.get("logicalType") or prop.get("physicalType")),
             nullable=nullable,
             unique=unique,
             severity=severity,

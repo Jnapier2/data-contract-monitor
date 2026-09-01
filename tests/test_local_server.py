@@ -91,7 +91,7 @@ def test_exact_health_identity_is_required_before_browser_open() -> None:
         browser_opener=lambda url: calls.append(url),
     )
     assert opened is True
-    assert calls == ["http://127.0.0.1:8765"]
+    assert calls == ["http://127.0.0.1:8765/?build=expected"]
 
 
 def test_wrong_service_never_opens_browser() -> None:
@@ -166,6 +166,8 @@ def test_endpoint_record_contains_actual_fallback_url(tmp_path: Path) -> None:
     assert payload["service_id"] == SERVICE_ID
     assert payload["fallback_used"] is True
     assert payload["url"] == "http://127.0.0.1:8766"
+    assert payload["browser_url"] == "http://127.0.0.1:8766/?build=DCM-0.2.1-TEST"
     status = (tmp_path / "LATEST_LAUNCH_STATUS.txt").read_text(encoding="utf-8")
     assert "Dashboard URL: http://127.0.0.1:8766" in status
+    assert "Browser URL: http://127.0.0.1:8766/?build=DCM-0.2.1-TEST" in status
     assert "Port fallback: yes" in status

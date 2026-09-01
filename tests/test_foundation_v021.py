@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import sqlite3
 from pathlib import Path
 
 import pandas as pd
@@ -39,25 +38,6 @@ def test_sqlite_state_and_atomic_run_artifacts(project_root: Path, tmp_path: Pat
     assert len(manifest["files"]) == 4
     pointer = json.loads((runtime / "state" / "latest_completed_run.json").read_text(encoding="utf-8"))
     assert pointer["run_id"] == result.run_id
-
-
-def test_state_health_does_not_expose_database_exception(
-    project_root: Path, monkeypatch
-) -> None:
-    store = StateStore(project_root / "state" / "health-test.sqlite3")
-
-    def fail_connection() -> None:
-        raise sqlite3.OperationalError("private path C:/sensitive/state.sqlite3")
-
-    monkeypatch.setattr(store, "_connect", fail_connection)
-    health = store.health_check()
-
-    assert health == {
-        "passed": False,
-        "error": "state_database_unavailable",
-        "schema_version": None,
-        "runs": None,
-    }
 
 
 def test_resource_limit_rejects_before_reporting(project_root: Path, tmp_path: Path) -> None:

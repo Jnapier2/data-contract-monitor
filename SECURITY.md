@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes are applied to the latest published release. Version `0.2.2` is an alpha release and has not yet established a long-term support window.
+Security fixes are applied to the latest published release. This pre-publication `0.3.3` package is an alpha portfolio release and has not yet established a long-term support window.
 
 ## Reporting a vulnerability
 

@@ -45,15 +45,19 @@ def test_shared_windows_launcher_contract(project_root: Path) -> None:
     assert 'for %%I in ("%~dp0..") do set "ROOT=%%~fI"' in text
     assert 'tools\\bootstrap.py' in text
     assert 'tools\\release_gate.py' in text
+    assert 'tools\\maintenance_preflight.py' in text
     assert 'tools\\support_export.py' in text
     assert 'LATEST_LAUNCH_STATUS.txt' in text
     assert 'logs\\launcher.log' in text
     assert 'logs\\python_detection.txt' in text
     assert 'if /I "%ACTION%"=="export" goto :run_export' in text
+    assert text.index('if /I "%ACTION%"=="export" goto :run_export') < text.index('tools\\maintenance_preflight.py')
+    assert text.index('tools\\maintenance_preflight.py') < text.index('tools\\release_gate.py')
     assert 'set "PYTHONPATH="' in text
     assert 'set "PYTHONHOME="' in text
     assert ':probe_python' in text
-    assert 'if /I not "%ACTION%"=="repair" (' in text
+    assert 'if /I "%ACTION%"=="repair" goto :external_python' in text
+    assert 'if /I "%ACTION%"=="export" goto :external_python' in text
     assert text.index('call :probe_python py -3.13') < text.index('call :probe_python py -3.14')
     for version in ('3.11', '3.12', '3.13', '3.14'):
         assert f'py -{version}' in text
@@ -66,11 +70,7 @@ def test_shared_windows_launcher_contract(project_root: Path) -> None:
 
 
 def test_batch_files_have_one_backend_and_one_filename_per_action(project_root: Path) -> None:
-    excluded_roots = {".git", ".venv", "cache", "temp", "node_modules", "pnpm-store"}
-    batch_files = sorted(
-        path for path in project_root.rglob("*.bat")
-        if not excluded_roots.intersection(path.relative_to(project_root).parts)
-    )
+    batch_files = sorted(project_root.rglob("*.bat"))
     assert {path.name for path in batch_files} == {*ROOT_WRAPPERS, "launch.bat"}
     assert len(batch_files) == len(ROOT_WRAPPERS) + 1
     for path in batch_files:

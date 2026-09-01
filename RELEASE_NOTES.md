@@ -1,32 +1,31 @@
-# Data Contract Monitor 0.2.2 — Windows-Qualified Durable Foundation
+# Data Contract Monitor 0.3.3 — Windows Freshness & Transport Noise
 
-**Build:** `DCM-0.2.2-B20260829-WINDOWS1`  
-**Release date:** 2026-08-29
+**Build:** `DCM-0.3.3-B20260831-WINDOWSFRESHNESS1`  
+**Date:** 2026-08-31
 
-Version 0.2.2 combines the durable data-governance foundation with the proven public Action and Windows lifecycle safeguards from v0.1.5. The unqualified v0.2.0 and v0.2.1 artifacts were not promoted.
+## Purpose
 
-## Foundation changes
+Version 0.3.3 is a focused Windows field-maintenance release built from exact v0.3.2. It does not change validation semantics, data-contract behavior, state schema, or resource-limit policy. It preserves the field-proven v0.3.2 maintenance preflight and addresses the two non-terminal symptoms remaining in the physical Windows run.
 
-The release adds a transactional SQLite runtime state store, bounded validation jobs, cooperative cancellation and progress, immutable per-run evidence, atomic report publication, a compiled rule plan, declared resource budgets, and a safe aggregate-reconciliation rule. The local dashboard now submits validation jobs rather than executing long validation work directly in the request thread.
+## Field evidence reconciled
 
-Local modifying API requests require a random per-launch HttpOnly session cookie and pass trusted-host/origin checks. Loopback remains the default service boundary. The origin parser validates the actual hostname rather than using an unsafe string-prefix comparison.
+The v0.3.2 Windows run retired recognized v0.3.0 and v0.3.1 wheels, passed 144/144 managed release identity, installed locked dependencies and the exact v0.3.2 wheel under CPython 3.13.15, fell forward from occupied port 8765 to 8766, completed application startup, and returned `/api/health` HTTP 200. The server remained healthy after the observed warning/traceback.
 
-Support and Critical Export20 ZIPs have one final destination, root `exports/`. Temporary ZIPs stage under root `temp/`, pass ZIP integrity/uniqueness/count checks, and then finalize atomically. The obsolete `diagnostics/exports` path does not return.
+The remaining evidence was:
 
-## Consolidation changes
+1. a Windows asyncio Proactor `_call_connection_lost` `ConnectionResetError` / WinError 10054 after an invalid/reset loopback request;
+2. a browser request for `/demo-data.json` returning 404 even though the current Data Contract Monitor HTML and JavaScript do not reference that path.
 
-All six root BAT files are logic-free action forwarders to the sole Windows BAT backend, `tools/launch.bat`. Build/bootstrap atomic and hash helpers are centralized in `tools/tooling_common.py`; application-side atomic behavior remains centralized in `src/data_contract_monitor/atomic.py`. `tools/project_index.py` indexes every retained release file and fails release preparation if an unexpected BAT/CMD or unapproved exact duplicate appears.
+## Repair
 
-The only approved exact source-content duplicate is the customer-orders demo contract at the human-readable example boundary and installed-package resource boundary. It is retained deliberately so an isolated wheel can run its demo without relying on the source checkout.
+- Browser launch now uses a build-qualified URL after exact health identity.
+- Root HTML and `/assets/*` use `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`, `Pragma: no-cache`, and `Expires: 0`.
+- Current HTML references version-qualified CSS and JavaScript assets.
+- No fake `/demo-data.json` response was added; a stale request remains a 404 so stale external/browser state stays diagnosable.
+- On Windows only, the event loop suppresses exactly the known Proactor `_call_connection_lost` connection-reset callback with WinError/errno 10054. Other asyncio exceptions continue through the existing/default handler.
 
-## Windows qualification repairs
+## Recovery and rollback
 
-Native Windows testing identified and corrected two issues that were invisible in the Linux-generated v0.2.1 receipt: atomic status writes attempted to flush a read-only Windows descriptor, and one test assumed Linux newline byte counts. The merged pass also restored bounded child-process cancellation, legacy-console output fallback, caller-independent Action installation, and project-local test staging. The 72-test suite now exercises those behaviors directly.
-
-## Compatibility and recovery
-
-Use a fresh extraction for 0.2.2. Do not overlay it on an earlier release. Public rollback remains v0.1.5. The exact Windows-confirmed v0.1.2 package remains the deeper launcher-recovery baseline.
-
-The Windows launcher still supports standard non-free-threaded 64-bit CPython 3.11–3.14 and prefers Python 3.13. A self-contained offline Windows runtime remains a future publication enhancement; this release does not claim one.
+v0.3.2 is the immediate field-started predecessor. v0.1.2 remains the earlier Windows-confirmed rollback authority until this exact v0.3.3 release receives visible Windows browser acceptance.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.

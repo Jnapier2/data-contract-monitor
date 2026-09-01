@@ -52,11 +52,14 @@ def main() -> int:
         from data_contract_monitor.release_identity import verify_release
 
         result = verify_release(root)
+        _write_receipt(root, result)
     except Exception as exc:
-        _capsule(root, ["Release verifier crashed"], exc)
+        try:
+            _capsule(root, ["Release verifier or receipt publication crashed"], exc)
+        except Exception as capsule_exc:
+            print(f"[ERROR] Critical capsule could not be written: {capsule_exc}", file=sys.stderr)
         print(f"[ERROR] Release verification crashed: {exc}", file=sys.stderr)
         return 4
-    _write_receipt(root, result)
     if not result["passed"]:
         errors = [str(item) for item in result.get("errors", [])]
         _capsule(root, errors)

@@ -41,8 +41,8 @@ def write_html(result: ValidationResult, path: Path) -> None:
           <td>{html.escape(column.observed_type)}</td>
           <td>{column.null_count}</td>
           <td>{column.null_ratio:.2%}</td>
-          <td>{column.distinct_count}</td>
-          <td>{column.duplicate_count}</td>
+          <td>{"" if column.distinct_count_exact else "≥"}{column.distinct_count}</td>
+          <td>{"" if column.duplicate_count_exact else "≥"}{column.duplicate_count}</td>
         </tr>
         """
         for column in result.profile.columns
@@ -110,6 +110,7 @@ footer {{ margin-top: 36px; color:#66738a; font-size:.86rem; }}
   <div class="card"><div class="value">{result.summary.errors}</div><div class="label">Errors</div></div>
   <div class="card"><div class="value">{result.summary.warnings}</div><div class="label">Warnings</div></div>
   <div class="card"><div class="value">{result.duration_ms} ms</div><div class="label">Runtime</div></div>
+  <div class="card"><div class="value">{html.escape(result.execution_mode.upper())}</div><div class="label">Execution mode</div></div>
 </section>
 <h2>Findings</h2>
 <div class="table-wrap"><table><thead><tr><th>Severity</th><th>Category</th><th>Rule</th><th>Column</th><th>Finding</th><th>Sample rows</th></tr></thead><tbody>{finding_rows}</tbody></table></div>
@@ -118,7 +119,7 @@ footer {{ margin-top: 36px; color:#66738a; font-size:.86rem; }}
 <h2>Privacy-field hints</h2>
 <p class="note">Heuristic signals require human review. The report intentionally omits raw values.</p>
 <div class="table-wrap"><table><thead><tr><th>Column</th><th>Category</th><th>Confidence</th><th>Name signal</th><th>Pattern matches</th></tr></thead><tbody>{pii_rows}</tbody></table></div>
-<footer>{html.escape(result.privacy_note)} · Contract SHA-256 {html.escape(result.contract_sha256[:16])}… · Data SHA-256 {html.escape(result.data_sha256[:16])}…</footer>
+<footer>{html.escape(result.privacy_note)} · Profile mode {html.escape(result.profile.profiling_mode)} · Contract SHA-256 {html.escape(result.contract_sha256[:16])}… · Data SHA-256 {html.escape(result.data_sha256[:16])}…</footer>
 </main></body></html>
 """
     path.write_text(document, encoding="utf-8")

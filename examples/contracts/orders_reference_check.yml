@@ -1,0 +1,31 @@
+contract_version: "2.0"
+effective_date: "2026-08-31"
+compatibility_policy: strict
+dataset:
+  name: orders_reference_check
+  contract_id: orders-reference-integrity
+  description: Demonstrates exact cross-file referential-integrity validation.
+  owner: Data Operations
+  required_columns: [order_id, customer_id, total_amount]
+  allow_extra_columns: false
+rules:
+  order_id:
+    type: string
+    nullable: false
+    unique: true
+  customer_id:
+    type: string
+    nullable: false
+  total_amount:
+    type: number
+    nullable: false
+    minimum: 0
+dataset_rules:
+  - name: customer_foreign_key
+    type: reference_exists
+    column: customer_id
+    reference_dataset: ../data/customers_reference.csv
+    reference_column: customer_id
+    severity: error
+privacy:
+  detect_pii: false

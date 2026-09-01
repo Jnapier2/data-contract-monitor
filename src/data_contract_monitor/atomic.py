@@ -4,7 +4,6 @@ import hashlib
 import json
 import os
 import tempfile
-import time
 from pathlib import Path
 from typing import Any
 
@@ -26,17 +25,7 @@ def atomic_write_bytes(path: Path, data: bytes) -> None:
             handle.write(data)
             handle.flush()
             os.fsync(handle.fileno())
-        retry_delays = (0.05, 0.1, 0.2, 0.4, 0.8)
-        for attempt in range(len(retry_delays) + 1):
-            try:
-                os.replace(temp, path)
-                return
-            except OSError as exc:
-                if getattr(exc, "winerror", None) not in {5, 32, 33}:
-                    raise
-                if attempt == len(retry_delays):
-                    raise
-                time.sleep(retry_delays[attempt])
+        os.replace(temp, path)
     finally:
         temp.unlink(missing_ok=True)
 
