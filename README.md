@@ -248,6 +248,6 @@ Physical-Windows `cmd.exe`, Norton, SmartScreen, Authenticode, and the optional 
 
 ## Documentation
 
-Architecture: `docs/ARCHITECTURE.md` · scalable execution: `docs/SCALABLE_EXECUTION.md` · reader plugins: `docs/READER_PLUGINS.md` · contract reference: `docs/CONTRACT_REFERENCE.md` · guided review: `docs/RECRUITER_REVIEW.md` · security/privacy: `docs/SECURITY_AND_PRIVACY.md` · Windows troubleshooting: `docs/WINDOWS_STARTUP_TROUBLESHOOTING.md`.
+Architecture: `docs/ARCHITECTURE.md` · scalable execution: `docs/SCALABLE_EXECUTION.md` · reader plugins: `docs/READER_PLUGINS.md` · contract reference: `docs/CONTRACT_REFERENCE.md` · recruiter review: `docs/RECRUITER_REVIEW.md` · security/privacy: `docs/SECURITY_AND_PRIVACY.md` · Windows troubleshooting: `docs/WINDOWS_STARTUP_TROUBLESHOOTING.md`.
 
 Copyright © 2026 Gateway Information Group LLC. All rights reserved.
