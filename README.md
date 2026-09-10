@@ -211,7 +211,7 @@ A local Linux qualification run processed a synthetic **1,000,000-row / 6-column
 After publishing a real repository, a consumer can use the included composite action, for example:
 
 ```yaml
-- uses: your-org/data-contract-monitor@v0.3.4
+- uses: Jnapier2/data-contract-monitor@a7d3d37cfd39f7431d275c6ef0ad50e390f97899 # v0.3.4
   with:
     contract: contracts/customer_orders.yml
     data: data/customer_orders.csv
@@ -220,7 +220,7 @@ After publishing a real repository, a consumer can use the included composite ac
     formats: json,junit,sarif
 ```
 
-`your-org` remains a placeholder until an actual repository is published.
+The example pins the published v0.3.4 action to its exact commit. Review and update the commit deliberately when selecting another release.
 
 ## Offline Windows dependency preparation
 

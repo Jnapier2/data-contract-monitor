@@ -296,8 +296,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "1d05556b2dfe05675e665fdaceda845278ba386fbc93aa06c20686c538cd7dc7",
-      "size": 14010
+      "sha256": "97fc58c1ce6e1fe9e9f24b9421726bc56eea9bb29542ba13e331b833fcf7d041",
+      "size": 14119
     },
     {
       "path": "RELEASE_MODE",
@@ -321,8 +321,8 @@
     },
     {
       "path": "requirements.lock",
-      "sha256": "ecbad763841d4188d20651a01dc63061d7764b3cc103411469adfd4586b5dccd",
-      "size": 849
+      "sha256": "437473be67bdcd71b157e340092bbfa3d9070d161b78341a2d8b55668b16c213",
+      "size": 865
     },
     {
       "path": "RUN_DEMO.bat",
@@ -336,8 +336,8 @@
     },
     {
       "path": "SBOM.spdx.json",
-      "sha256": "db7aabd19638d3064aa9bdc3487e43d408908bb31403828775dbda8b7e39d157",
-      "size": 41574
+      "sha256": "cd4ccc816a2468a69af8a83da961061ed97e9c363d13d5070074386ba095e950",
+      "size": 42545
     },
     {
       "path": "schemas/native-contract.schema.json",
@@ -646,8 +646,8 @@
     },
     {
       "path": "THIRD_PARTY_NOTICES.md",
-      "sha256": "a077c6dd4d2b45d4c8050e83583edadf6ebf7e9c4baabab40c092038e4424e5c",
-      "size": 3041
+      "sha256": "1ff7734180cb2db9758e33276a5033a42050b0a1560498748be416f12aad337e",
+      "size": 3101
     },
     {
       "path": "tools/benchmark.py",
@@ -676,8 +676,8 @@
     },
     {
       "path": "tools/generate_supply_chain.py",
-      "sha256": "aaecf8cf6f0dbd5874b4d7f7ecb3ac42d16d313e4fbb2eeecfd39f75ab9a936e",
-      "size": 7468
+      "sha256": "64b8f7ed8d3e928a853e295edd7b5648ef9bf4a4873fbe45d8af17f69158ef1e",
+      "size": 7500
     },
     {
       "path": "tools/launch.bat",
