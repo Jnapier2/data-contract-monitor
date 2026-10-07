@@ -5,7 +5,7 @@
 1. Use **Extract All** and open the complete extracted folder; do not launch from the compressed-folder preview.
 2. Double-click `START_DATA_CONTRACT_MONITOR.bat` on Windows, or run `./tools/start.sh` on Linux/macOS.
 3. Run the passing and failing demos.
-4. Open `docs/assets/sample-report.png` and `examples/reports/bad/data_contract_report.html` when a live launch is not convenient.
+4. Open the [sample report screenshot](assets/sample-report.png) when a live launch is not convenient.
 5. Review `VERIFICATION_REPORT.md` for the exact tests and environments exercised.
 
 ## What to evaluate
