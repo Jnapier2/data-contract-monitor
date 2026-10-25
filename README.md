@@ -10,6 +10,8 @@ The project is local-first and includes passing/failing demonstrations that requ
 
 ## Windows quick start
 
+Download the [v0.3.4 application ZIP and matching checksum](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.3.4). The [dated verification receipt](https://github.com/Jnapier2/data-contract-monitor/releases/download/v0.3.4/Data_Contract_Monitor_v0.3.4_Verification_Receipt.json) identifies the package and records its source/package checks; native Windows acceptance remains separate.
+
 Extract the complete ZIP first; do not run a BAT from Windows compressed-folder preview. Open the extracted `Data_Contract_Monitor_v0.3.4` folder and double-click:
 
 ```text
