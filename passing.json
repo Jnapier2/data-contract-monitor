@@ -1,0 +1,11 @@
+{
+  "project": "Data Contract Monitor",
+  "version": "0.4.1",
+  "captured_date": "2026-11-14",
+  "input": "Generated fictional customer orders",
+  "scenario": "good",
+  "rows": 3,
+  "status": "passed",
+  "exit_code": 0,
+  "findings": []
+}

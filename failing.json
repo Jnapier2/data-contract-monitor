@@ -1,0 +1,96 @@
+{
+  "project": "Data Contract Monitor",
+  "version": "0.4.1",
+  "captured_date": "2026-11-14",
+  "input": "Generated fictional customer orders",
+  "scenario": "bad",
+  "rows": 3,
+  "status": "failed",
+  "exit_code": 2,
+  "findings": [
+    {
+      "severity": "critical",
+      "rule_id": "column.nullable",
+      "title": "Null values are not allowed",
+      "column": "order_id",
+      "affected_rows": 1
+    },
+    {
+      "severity": "critical",
+      "rule_id": "column.unique",
+      "title": "Duplicate values violate uniqueness",
+      "column": "order_id",
+      "affected_rows": 2
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.nullable",
+      "title": "Null values are not allowed",
+      "column": "customer_id",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "dataset.null_ratio.customer_id_completeness",
+      "title": "Null ratio exceeds the permitted threshold",
+      "column": "customer_id",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.maximum_age_hours",
+      "title": "Data is older than the freshness requirement",
+      "column": "order_date",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.allowed_values",
+      "title": "Values fall outside the approved set",
+      "column": "status",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.minimum",
+      "title": "Values fall below the permitted minimum",
+      "column": "total_amount",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.type",
+      "title": "Values do not match the expected type",
+      "column": "customer_email",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.type",
+      "title": "Values do not match the expected type",
+      "column": "order_date",
+      "affected_rows": 1
+    },
+    {
+      "severity": "error",
+      "rule_id": "column.type",
+      "title": "Values do not match the expected type",
+      "column": "total_amount",
+      "affected_rows": 1
+    },
+    {
+      "severity": "warning",
+      "rule_id": "privacy.unapproved_pii_signal",
+      "title": "Potential sensitive field is not approved by the contract",
+      "column": "customer_ssn",
+      "affected_rows": 0
+    },
+    {
+      "severity": "warning",
+      "rule_id": "schema.extra_column",
+      "title": "Unexpected column is present",
+      "column": "customer_ssn",
+      "affected_rows": 0
+    }
+  ]
+}
