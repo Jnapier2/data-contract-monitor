@@ -6,7 +6,9 @@ Data Contract Monitor validates CSV, Excel, JSON, JSON Lines, and optional Parqu
 
 The project is local-first and includes passing/failing demonstrations that require no credentials or private data.
 
-![Data Contract Monitor dashboard](docs/assets/dashboard.png)
+![Data Contract Monitor dashboard showing a failed synthetic order validation](docs/assets/dashboard.png)
+
+*Historical dashboard capture from v0.1.0.*
 
 ## Inspect validation evidence
 
