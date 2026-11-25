@@ -12,7 +12,15 @@ The project is local-first and includes passing/failing demonstrations that requ
 
 Download and extract the ZIP from the [0.4.1 offline reviewer demo](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.4.1-reviewer-demo), then open `index.html`. Explore a passing dataset and schema drift side by side, with links to the captured HTML and JSON evidence.
 
-**For portfolio review, use the offline demo above.** A dependency security update is being verified for the 0.3.4 runnable edition. The launch instructions below remain available for reference.
+**For portfolio review, use the offline demo above.**
+
+**Check SQLite before starting the runnable edition.** Use the same Python interpreter that launches the app.
+
+```powershell
+python -c "import sqlite3; print(sqlite3.sqlite_version)"
+```
+
+Use SQLite **3.51.3 or later**, or a documented backport in **3.50.7** or **3.44.6**, to get the write-ahead log data-integrity fix. If your Python environment lacks the fix, use the offline reviewer demo above. [SQLite advisory](https://sqlite.org/wal.html#the_wal_reset_bug)
 
 ## Windows quick start
 

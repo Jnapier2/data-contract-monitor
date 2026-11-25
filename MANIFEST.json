@@ -176,8 +176,8 @@
     },
     {
       "path": "docs/RECRUITER_REVIEW.md",
-      "sha256": "14de781883ea2087812b12217a65016a39e740a439f04d9391d3a04c0642197b",
-      "size": 2294
+      "sha256": "dd6ca3df213677fb6ff07d0716389e6cf80b2678de1be72d2957bcd61ffc7e66",
+      "size": 2716
     },
     {
       "path": "docs/RELEASE_CHECKLIST.md",
@@ -296,8 +296,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "11fa3ac82f2e7d47b4f9ce0843066daefd117d05e9611ac5d62b68c9175e09df",
-      "size": 14522
+      "sha256": "da4f4b16c0c6c694084f6caa54c5288a29072baeb29550c730c058cbf02fc275",
+      "size": 15362
     },
     {
       "path": "RELEASE_MODE",
