@@ -12,7 +12,7 @@ The project is local-first and includes passing/failing demonstrations that requ
 
 Download and extract the ZIP from the [0.4.1 offline reviewer demo](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.4.1-reviewer-demo), then open `index.html`. Explore a passing dataset and schema drift side by side, with links to the captured HTML and JSON evidence.
 
-**For portfolio review, use the offline demo above.**
+**Use the offline demo for portfolio review.** The v0.3.4 source and application ZIP are kept for historical inspection. Their dependency locks include versions affected by published advisories. [AnyIO advisory](https://github.com/advisories/GHSA-82r6-8w77-94w6) · [certifi advisory](https://github.com/advisories/GHSA-6q48-6c7w-9gw2)
 
 **Check SQLite before starting the runnable edition.** Use the same Python interpreter that launches the app.
 
