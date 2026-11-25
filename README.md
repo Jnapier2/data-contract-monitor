@@ -12,6 +12,8 @@ The project is local-first and includes passing/failing demonstrations that requ
 
 Download and extract the ZIP from the [0.4.1 offline reviewer demo](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.4.1-reviewer-demo), then open `index.html`. Explore a passing dataset and schema drift side by side, with links to the captured HTML and JSON evidence.
 
+**For portfolio review, use the offline demo above.** A dependency security update is being verified for the 0.3.4 runnable edition. The launch instructions below remain available for reference.
+
 ## Windows quick start
 
 Download the [v0.3.4 application ZIP and matching checksum](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.3.4). The [dated verification receipt](https://github.com/Jnapier2/data-contract-monitor/releases/download/v0.3.4/Data_Contract_Monitor_v0.3.4_Verification_Receipt.json) identifies the package and records its source/package checks; native Windows acceptance remains separate.
