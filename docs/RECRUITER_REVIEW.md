@@ -2,6 +2,12 @@
 
 ## Fast path
 
+Download and extract the [0.4.1 offline reviewer demo](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.4.1-reviewer-demo), then open `index.html`. Compare the two sample datasets and follow the links to the captured reports.
+
+## Run the local edition
+
+Check the [SQLite runtime guidance](../README.md#inspect-validation-evidence) before launching the v0.3.4 application.
+
 1. Download the [v0.3.4 application ZIP](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.3.4), use **Extract All**, and open the complete extracted folder; do not launch from the compressed-folder preview.
 2. Double-click `START_DATA_CONTRACT_MONITOR.bat` on Windows, or run `./tools/start.sh` on Linux/macOS.
 3. Run the passing and failing demos.
