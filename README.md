@@ -6,7 +6,9 @@ Data Contract Monitor validates CSV, Excel, JSON, JSON Lines, and optional Parqu
 
 The project is local-first and includes passing/failing demonstrations that require no credentials or private data.
 
-![Data Contract Monitor dashboard](docs/assets/dashboard.png)
+![Data Contract Monitor dashboard showing a failed synthetic order validation](docs/assets/dashboard.png)
+
+*Historical dashboard capture from v0.1.0.*
 
 ## Inspect validation evidence
 
@@ -14,15 +16,18 @@ Download and extract the ZIP from the [0.4.1 offline reviewer demo](https://gith
 
 **Use the offline demo for portfolio review.** The v0.3.4 source and application ZIP are kept for historical inspection. Their dependency locks include versions affected by published advisories. [AnyIO advisory](https://github.com/advisories/GHSA-82r6-8w77-94w6) · [certifi advisory](https://github.com/advisories/GHSA-6q48-6c7w-9gw2)
 
-**Check SQLite before starting the runnable edition.** Use the same Python interpreter that launches the app.
+## Windows quick start
+
+<details>
+<summary>Historical v0.3.4 setup and launcher reference</summary>
+
+**SQLite check for the historical build.** Use the same Python interpreter that launches the app.
 
 ```powershell
 python -c "import sqlite3; print(sqlite3.sqlite_version)"
 ```
 
 Use SQLite **3.51.3 or later**, or a documented backport in **3.50.7** or **3.44.6**, to get the write-ahead log data-integrity fix. If your Python environment lacks the fix, use the offline reviewer demo above. [SQLite advisory](https://sqlite.org/wal.html#the_wal_reset_bug)
-
-## Windows quick start
 
 Download the [v0.3.4 application ZIP and matching checksum](https://github.com/Jnapier2/data-contract-monitor/releases/tag/v0.3.4). The [dated verification receipt](https://github.com/Jnapier2/data-contract-monitor/releases/download/v0.3.4/Data_Contract_Monitor_v0.3.4_Verification_Receipt.json) identifies the package and records its source/package checks; native Windows acceptance remains separate.
 
@@ -43,6 +48,8 @@ Linux/macOS source launch:
 ```bash
 ./tools/start.sh
 ```
+
+</details>
 
 ## What 0.3.4 hardens
 
@@ -170,7 +177,10 @@ The complete examples are under `examples/contracts/` and `examples/data/`. A do
 
 ## CLI
 
-Install from source:
+<details>
+<summary>Historical v0.3.4 command examples</summary>
+
+The documented source installation command was:
 
 ```bash
 python -m pip install .
@@ -206,11 +216,18 @@ Other commands include `demo`, `profile`, `baseline create`, `baseline compare`,
 
 Exit codes are `0` pass, `2` contract/data-quality failure at the selected threshold, `3` input/configuration failure, `4` internal/startup/release-integrity failure, and `130` cancellation.
 
+</details>
+
 ## Local API and dashboard
+
+<details>
+<summary>Historical v0.3.4 server command</summary>
 
 ```bash
 data-contract-monitor serve --host 127.0.0.1 --port 8765
 ```
+
+</details>
 
 The dashboard submits validation to a bounded job queue rather than performing the entire validation inside the HTTP request. It supports execution-mode selection, optional contract-declared reference datasets, job progress/cancellation, durable history, run comparison, and report downloads. The service is designed for a trusted local workstation; it is not a public multi-user service.
 
@@ -224,7 +241,7 @@ A local Linux qualification run processed a synthetic **1,000,000-row / 6-column
 
 ## GitHub Action
 
-After publishing a real repository, a consumer can use the included composite action, for example:
+The following example records how the historical v0.3.4 action was invoked.
 
 ```yaml
 - uses: Jnapier2/data-contract-monitor@a7d3d37cfd39f7431d275c6ef0ad50e390f97899 # v0.3.4
@@ -240,7 +257,7 @@ The example pins the published v0.3.4 action to its exact commit. Review and upd
 
 ## Offline Windows dependency preparation
 
-Normal Windows bootstrap can use a verified project-local wheelhouse when one exists at `packages/wheelhouse/cpXY-win_amd64/`. Create one on a networked build machine with:
+The historical Windows bootstrap can use a verified project-local wheelhouse when one exists at `packages/wheelhouse/cpXY-win_amd64/`. Create one on a networked build machine with:
 
 ```bash
 python tools/build_windows_wheelhouse.py --root . --python-version 313
